@@ -26,6 +26,8 @@ services:
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
       - data:/var/lib/mysql
+  wetty:
+    
 volumes:
   data:
     driver: local
