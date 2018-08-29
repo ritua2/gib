@@ -1,0 +1,33 @@
+version: "2"
+services:
+  web:
+    image: tomcat
+    container_name: tomcat_springipt
+    volumes:
+      - term:/home/term
+    links:
+      - mysql_springipt:mysql_springipt
+    ports: 
+      - "9090:8080"
+    volumes:
+      - ./target/springipt-0.0.1.war:/usr/local/tomcat/webapps/springipt.war
+      - myvol:/home/term
+
+  mysql_springipt:
+    image: mysql
+    container_name: mysql_springipt
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: iptweb
+      MYSQL_USER: anubhaw
+      MYSQL_PASSWORD: anubhaw
+    ports:
+      - "6603:3306"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - data:/var/lib/mysql
+volumes:
+  data:
+    driver: local
+  myvol:
+    external: true
