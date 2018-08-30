@@ -9,6 +9,8 @@ services:
       - mysql_springipt:mysql_springipt
     ports: 
       - "9090:8080"
+    environment:
+      WETTY_SERVER: 149.165.156.207
     volumes:
       - ./target/springipt-0.0.1.war:/usr/local/tomcat/webapps/springipt.war
       - myvol:/home/term
@@ -28,7 +30,7 @@ services:
       - data:/var/lib/mysql
   wetty:
     build: ./wetty
-    container_name: wetty
+    container_name: wetty_springipt
     ports:
       - "3000:3000"
     volumes:

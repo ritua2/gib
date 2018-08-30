@@ -19,7 +19,7 @@ opening and closing "headersum" blocks.  -->
   <div class="terminal">
     <!-- {% if url %} -->
     <%-- <c:if test="url"> --%>
-      <iframe id="webterm" src="http://149.165.156.207:3000/wetty/"  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+      <iframe id="webterm" src="http://<%= System.getenv("WETTY_SERVER") %>:3000/wetty/"  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
     <!-- {% else %} -->
 <%--     </c:if>
     <c:if test="url"> --%>
@@ -183,7 +183,7 @@ opening and closing "headersum" blocks.  -->
   	    $('#fileToDownload').append('<option value="">--Select--</option>');
   	    $.each( drpDwnValue, function( key, f ) {
                 $("#fileToDownload").append($('<option>', {
-      		value: f,
+      		value: f + '/',
       		text: f
   		}));
   	    });	
