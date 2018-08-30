@@ -105,7 +105,7 @@ opening and closing "headersum" blocks.  -->
   	    drpDwnValue=data;
   	    $.each( drpDwnValue, function( key, f ) {
                 $("#fileToDownload").append($('<option>', {
-      		value: f,
+      		value: f +'/',
       		text: f
   		}));
   	    });	
