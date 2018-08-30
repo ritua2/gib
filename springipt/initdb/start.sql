@@ -1,10 +1,10 @@
 
 
-CREATE USER IF NOT EXISTS 'anubhaw'@'149.165.156.207';
-ALTER USER 'anubhaw'@'149.165.156.207' IDENTIFIED WITH mysql_native_password BY 'anubhaw';
+CREATE USER IF NOT EXISTS 'anubhaw'@'localhost';
+ALTER USER 'anubhaw'@'localhost' IDENTIFIED WITH mysql_native_password BY 'anubhaw';
 
 CREATE DATABASE  IF NOT EXISTS `iptweb`;
-GRANT ALL PRIVILEGES ON iptweb.* to 'anubhaw'@'149.165.156.207';
+GRANT ALL PRIVILEGES ON iptweb.* to 'anubhaw'@'localhost';
 
 use iptweb;
 
