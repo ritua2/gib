@@ -65,6 +65,7 @@ public class UploadController {
 				byte[] bytes = file.getBytes();
 				Path path = Paths.get(UPLOADED_FOLDER + file.getOriginalFilename());
 				Files.write(path, bytes);
+				Process p1 = Runtime.getRuntime().exec("chown -R 1001:1001 /home/term");
 
 				redirectAttributes.addFlashAttribute("msg",
 						"You successfully uploaded '" + file.getOriginalFilename() + "'");
@@ -132,6 +133,14 @@ public class UploadController {
 			}
 
 		}
+		try {
+			
+			Process p1 = Runtime.getRuntime().exec("chown -R 1001:1001 /home/term");
+                }
+                catch (IOException e) {
+                        e.printStackTrace();
+                }
+
 		return objectToReturn;
 		// return "redirect:/terminal";
 	}

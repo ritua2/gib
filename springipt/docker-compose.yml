@@ -23,6 +23,7 @@ services:
       MYSQL_DATABASE: iptweb
       MYSQL_USER: anubhaw
       MYSQL_PASSWORD: anubhaw
+      MYSQL_SERVER: 149.165.156.207
     ports:
       - "6603:3306"
     volumes:
