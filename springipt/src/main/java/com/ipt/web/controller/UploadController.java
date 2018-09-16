@@ -2,6 +2,7 @@ package com.ipt.web.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -104,8 +105,7 @@ public class UploadController {
 
 				try {
 					byte[] bytes = f.getBytes();
-					System.out.println(
-							"File PATH GETNAME =" + f.getName() + " Original path Name" + f.getOriginalFilename());
+					System.out.println("File PATH GETNAME =" + f.getName() + " Original path Name" + f.getOriginalFilename());
 					Path path = Paths.get(UPLOADED_FOLDER + map.get(f.getOriginalFilename()));
 					Path parentDir = path.getParent();
 					if (!Files.exists(parentDir))
@@ -210,7 +210,55 @@ public class UploadController {
 
 	@GetMapping("/compile")
 	public String uploadStatus() {
+		logger.info("Rendering compile page");
 		return "compile";
+	}
+	
+	@RequestMapping(value = "/compilejob", method = RequestMethod.POST, produces = "application/json")
+	public String compilejob(@RequestParam("system") String system, @RequestParam("driver") MultipartFile driver,
+			@RequestParam("ccommand") String ccommand, @RequestParam("outfiles") String outFileName, RedirectAttributes redirectAttributes) {
+		System.out.println(system + ",  " + ccommand);
+
+		if (driver.isEmpty()) {
+			redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
+			// return "redirect:/compile";
+		}
+
+
+		try {
+			File f = new File("compile01.zip");
+			ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(f));
+			
+			String inputFileName=driver.getOriginalFilename();
+			ZipEntry e = new ZipEntry(inputFileName);
+			zipOutputStream.putNextEntry(e);
+			zipOutputStream.write(driver.getBytes(), 0, driver.getBytes().length);
+			zipOutputStream.closeEntry();
+            
+			
+			ZipEntry e1 = new ZipEntry("command.sh");
+			zipOutputStream.putNextEntry(e1);
+			StringBuilder sb = new StringBuilder();
+			sb.append("#!/bin/bash\r\n\n");
+			String cmdLine=ccommand+" -o "+outFileName+" "+inputFileName;
+			sb.append(cmdLine);
+			byte[] data = sb.toString().getBytes();
+			zipOutputStream.write(data, 0, data.length);
+			zipOutputStream.closeEntry();
+			
+			zipOutputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			Process p = Runtime.getRuntime().exec("scp -o \"StrictHostKeyChecking no\"-i /home/term/.ssh/PrivateKey.ppk /home/term/compile01.zip akn752@comet.sdsc.edu:/home/akn752");
+		}catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "compile";
+		
 	}
 
 	@GetMapping("/uploadMultiPage")
@@ -231,7 +279,7 @@ public class UploadController {
 				listofpath.put(f.getName(), f.getAbsoluteFile().getAbsolutePath() + File.separator);
 				walk(f.getAbsolutePath(), listofpath);
 			} else {
-				if(!f.getName().startsWith("."))
+				if (!f.getName().startsWith("."))
 					listofpath.put(f.getName(), f.getAbsoluteFile().getAbsolutePath());
 			}
 		}
@@ -242,14 +290,12 @@ public class UploadController {
 			// create a new File object based on the directory we have to zip
 			System.out.println("Dir to ZIP " + dir2zip);
 			File zipDir = new File(dir2zip);
-			
+
 			int bytesIn = 0;
 			byte[] readBuffer = new byte[2156];
 			if (zipDir.isDirectory()) {
 				// get a listing of the directory content
 				String[] dirList = zipDir.list();
-				
-				
 
 				// loop through dirList, and zip the files
 				for (int i = 0; i < dirList.length; i++) {
@@ -271,8 +317,7 @@ public class UploadController {
 					}
 					fis.close();
 				}
-			}
-			else {
+			} else {
 				FileInputStream fis = new FileInputStream(zipDir);
 				ZipEntry anEntry = new ZipEntry(zipDir.getPath());
 				System.out.println("THIS IS ENTRY**********" + anEntry);
