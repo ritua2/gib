@@ -3,6 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+
 <jsp:include page="base.jsp" />
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -18,14 +20,16 @@
 
 <div id="compile" class="tab-pane fade in active">
     <div class="container">
-        <form method="POST" action="/compile"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <form method="POST" action="${contextPath}/compilejob" enctype="multipart/form-data">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <div class="form-group">
-                <label for="system">System:</label>
+                <label for="system">*System:</label>
                 <select class="form-control" id="system" name="system">
-                <!-- {% for sys,val in systems.items %} -->
-                <c:forEach var="sys" items="${systems.items}">
+                <option value="Comet">Comet</option>
+                <option value="Stampede">Stampede</option>
+                <%-- <c:forEach var="sys" items="${systems.items}">
                   <option value=${sys} <c:if test="system == sys">selected</c:if>>{{val.display_name}}</option>
-                </c:forEach>
+                </c:forEach> --%>
                 </select>
                 
                 <c:if test="system_error">
@@ -35,7 +39,7 @@
                 </c:if>
             </div>
             <div class="form-group">
-                <label for="ccommand">Command:</label>
+                <label for="ccommand">*Command:</label>
                 <input type="ccommand" class="form-control" id="ccommand" placeholder="Enter $command"
                        name="ccommand" required>
                 <!-- Table to display command input options -->
@@ -93,8 +97,8 @@
                 </c:if>
             </div>
             <div class="form-group">
-                <label for="driver">Driver:</label>
-                <input type="driver" class="form-control" id="driver" name="driver" required>
+                <label for="driver">*Driver:</label>
+	        	<input type="file" class="form-control" id="driver" name="driver" required />
                 
                 <c:if test="driver_error">
                 <div class="error">
@@ -103,7 +107,7 @@
                 </c:if>
             </div>
             <div class="form-group">
-                <label for="outfiles">Output File(s):</label>
+                <label for="outfiles">*Output File(s):</label>
                 <input type="outfiles" class="form-control" id="outfiles" placeholder="a.out" name="outfiles"
                        required>
                 <c:if test="outfiles_error">
