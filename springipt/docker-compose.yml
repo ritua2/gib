@@ -14,8 +14,7 @@ services:
     volumes:
       - ./target/springipt-0.0.1.war:/usr/local/tomcat/webapps/springipt.war
       - myvol:/home/term
-      - ./compile01.zip:/home/term/compile01.zip
-      - ./ssh/id_rsa:/home/term/.ssh/PrivateKey.ppk
+      - ./ssh/id_rsa:/usr/local/tomcat/.ssh/PrivateKey.ppk
 
   mysql_springipt:
     image: mysql
