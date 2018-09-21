@@ -53,6 +53,7 @@ public class UploadController {
 			@RequestParam("fileToUpload") MultipartFile file, @RequestParam("folderToUpload") MultipartFile[] files,
 			@RequestParam("hiddenInput") String jsonfilepath, RedirectAttributes redirectAttributes) {
 
+		System.out.println("Inside the /terminal/upload");
 		String objectToReturn = "";
 		if (filefolderselection.equals("file")) {
 
@@ -134,13 +135,10 @@ public class UploadController {
 
 		}
 		try {
-			
 			Process p1 = Runtime.getRuntime().exec("chown -R 1001:1001 /home/term");
-                }
-                catch (IOException e) {
-                        e.printStackTrace();
-                }
-
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return objectToReturn;
 		// return "redirect:/terminal";
 	}
@@ -150,60 +148,57 @@ public class UploadController {
 		System.out.println("Uploaded folder path" + UPLOADED_FOLDER);
 		Map<String, String> listofpath = new HashMap<String, String>();
 		walk(UPLOADED_FOLDER, listofpath);
+		System.out.println(listofpath.keySet());
 		System.out.println(listofpath.values());
 		return listofpath;
 	}
 
-	@RequestMapping(value = "/terminal/download/{file_name}/**" , produces="application/zip")
+	@RequestMapping(value = "/terminal/download/{file_name}/**", produces = "application/zip")
 	@ResponseBody
-	public HttpServletResponse downloadFileFolder(@PathVariable("file_name") String moduleBaseName, HttpServletRequest request, HttpServletResponse response) {
+	public HttpServletResponse downloadFolder(@PathVariable("file_name") String moduleBaseName,
+			HttpServletRequest request, HttpServletResponse response) {
 		final String path = request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
 	    final String bestMatchingPattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
 
 	    moduleBaseName = "/" + moduleBaseName;
-	    String arguments = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
-	    
-	    System.out.println(moduleBaseName + " module base name and args:" +arguments);
+		String arguments = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
 
-	    String moduleName ;
-	    if (null != arguments && !arguments.isEmpty()) {
-	        moduleName = moduleBaseName + '/' + arguments;
-	    } else {
-	        moduleName = moduleBaseName;
-	    }
-	    System.out.println("ModuleName is " + moduleName);
-	    
-	//	if (moduleName.endsWith("\\")) {
-			
-			try {
-				String temparray[] = moduleName.split("/");
-				String filename = temparray[temparray.length-1];
-				// get your file as InputStream
-				File fileToDownload = new File(moduleName.replace("\\", "/"));
-/*				InputStream is = new FileInputStream(fileToDownload);
-				// copy it to response's OutputStream
-				org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());*/
-				
-				Map<String, String> filestozip = new HashMap<String, String>();
-				walk(moduleName, filestozip);
-				
-				
+		System.out.println(moduleBaseName + " module base name and args:" + arguments);
 
-				response.setStatus(HttpServletResponse.SC_OK);
-				response.setCharacterEncoding("UTF-8");
-				response.setContentType("application/zip; charset=UTF-8");
-				response.setHeader("Content-Disposition", "attachment;filename=" + filename +".zip");
-				
-				ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
-			 	
-				zipDir(moduleName, zipOutputStream);
-			    zipOutputStream.close();
+		String moduleName;
+		if (null != arguments && !arguments.isEmpty()) {
+			moduleName = moduleBaseName + '/' + arguments;
+		} else {
+			moduleName = moduleBaseName;
+		}
+		System.out.println("ModuleName is " + moduleName);
 
-			} catch (IOException ex) {
-				logger.info("Error writing file to output stream. Filename was '{}'", moduleName, ex);
-				throw new RuntimeException("IOError writing file to output stream");
-			}
-		
+
+
+		try {
+			String temparray[] = moduleName.split("/");
+			String filename = temparray[temparray.length - 1];
+			// get your file as InputStream
+			File fileToDownload = new File(moduleName.replace("\\", "/"));
+
+			Map<String, String> filestozip = new HashMap<String, String>();
+			walk(moduleName, filestozip);
+
+			response.setStatus(HttpServletResponse.SC_OK);
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("application/zip; charset=UTF-8");
+			response.setHeader("Content-Disposition", "attachment;filename=" + filename + ".zip");
+
+			ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
+
+			zipDir(moduleName, zipOutputStream);
+			zipOutputStream.close();
+
+		} catch (IOException ex) {
+			logger.info("Error writing file to output stream. Filename was '{}'", moduleName, ex);
+			throw new RuntimeException("IOError writing file to output stream");
+		}
+
 		return response;
 
 	}
@@ -258,6 +253,76 @@ public class UploadController {
 		}
 		
 		return "compile";
+		
+	}
+	
+	@GetMapping("/run")
+	public String runStatus() {
+		logger.info("Rendering run page");
+		return "run";
+	}
+	
+	@RequestMapping(value = "/runjob", method = RequestMethod.POST, produces = "application/json")
+	public String runjob(@RequestParam("system") String system,
+			@RequestParam("rcommand") String rcommand,
+			@RequestParam("jobq") String jobq,
+			
+			@RequestParam("numcores") String numcores, 
+			@RequestParam("numnodes") String numnodes, 
+			
+			@RequestParam("binary") MultipartFile binary,
+			RedirectAttributes redirectAttributes) {
+		System.out.println(system + ",  " + rcommand);
+
+		if (binary.isEmpty()) {
+			redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
+			// return "redirect:/compile";
+		}
+
+
+		try {
+			File f = new File("run01.zip");
+			ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(f));
+			
+			String inputFileName=binary.getOriginalFilename();
+			ZipEntry e = new ZipEntry(inputFileName);
+			zipOutputStream.putNextEntry(e);
+			zipOutputStream.write(binary.getBytes(), 0, binary.getBytes().length);
+			zipOutputStream.closeEntry();
+            
+			
+			ZipEntry e1 = new ZipEntry("run.sh");
+			zipOutputStream.putNextEntry(e1);
+			StringBuilder sb = new StringBuilder();
+			sb.append("#!/bin/bash\r\n\n");
+			String cmdLine=rcommand;
+			sb.append(cmdLine);
+			byte[] data = sb.toString().getBytes();
+			zipOutputStream.write(data, 0, data.length);
+			zipOutputStream.closeEntry();
+			
+			
+			ZipEntry e2 = new ZipEntry("username.txt");
+			zipOutputStream.putNextEntry(e2);
+			StringBuilder sb2 = new StringBuilder();
+			String cmdLine2="This run job is being submitted on behalf of user \"abc012\".";
+			sb2.append(cmdLine2);
+			byte[] data2 = sb2.toString().getBytes();
+			zipOutputStream.write(data2, 0, data2.length);
+			zipOutputStream.closeEntry();
+			
+			zipOutputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			Process p = Runtime.getRuntime().exec("scp -o \"StrictHostKeyChecking no\"-i /home/term/.ssh/PrivateKey.ppk /home/term/run01.zip akn752@comet.sdsc.edu:/home/akn752");
+		}catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "run";
 		
 	}
 

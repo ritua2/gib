@@ -71,7 +71,7 @@
 		<ul class="nav nav-tabs">
 			<li id='terminal-tab'><a href="${contextPath}/terminal">Terminal</a></li>
 			<li id='compile-tab'><a href="${contextPath}/compile">Compile</a></li>
-			<li id='run-tab'><a href="{% url 'run' %}">Run</a></li>
+			<li id='run-tab'><a href="${contextPath}/run">Run</a></li>
 			<li id='history-tab'><a href="{% url 'history' %}">Job
 					History</a></li>
 			<li id='help-tab'><a href="{% url 'help' %}">Help</a></li>

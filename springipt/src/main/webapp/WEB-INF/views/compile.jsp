@@ -27,6 +27,7 @@
                 <select class="form-control" id="system" name="system">
                 <option value="Comet">Comet</option>
                 <option value="Stampede">Stampede</option>
+                <option value="ls5">LoneStar</option>
                 <%-- <c:forEach var="sys" items="${systems.items}">
                   <option value=${sys} <c:if test="system == sys">selected</c:if>>{{val.display_name}}</option>
                 </c:forEach> --%>
