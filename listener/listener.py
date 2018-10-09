@@ -7,7 +7,7 @@ After receiving a ping request, calls a greyfish system for the output files
 """
 
 import os, sys, shutil
-from flask import Flask
+from flask import Flask, request
 import requests
 import tarfile
 import uuid
@@ -16,8 +16,7 @@ import uuid
 app = Flask(__name__)
 DOWNLOAD_PATH = os.environ['output_data_path']
 CURDIR = dir_path = os.path.dirname(os.path.realpath(__file__)) # Current director
-greyfish_url = os.environ['greyfish_url']
-greyfish_key = os.environ['greyfish_key']
+PSSWRD = os.environ['listener_password']
 
 
 # Provided a tar file path, it will untar all its contents into a second directory
@@ -37,12 +36,15 @@ def output_data():
 
     # Gets the entire output 
     INFO = request.get_json()
+    greyfish_url = os.environ['greyfish_url']
+    greyfish_key = os.environ['greyfish_key']
 
     """
     {
     # REQUIRED
     Job_ID:"str"
     User: "str"
+    password: "str"
     OUTPUT_DIRS : [...] # Empty if nothing, each directory must be done following greyfish convention
     EXTRA_FILES :[{path:'',filename;''}, ...] # Empty if nothing, each path must be written with greyfish syntax 
 
@@ -58,8 +60,15 @@ def output_data():
         User_ID = INFO['User']
         EXTRA_DIRS = INFO['OUTPUT_DIRS']
         EXTRA_FILES = INFO['OUTPUT_FILES']
+        psword = INFO["password"] 
     except:
         return "INVALID, mandatory fields not provided"
+
+
+    # Password check
+    if psword != PSSWRD:
+        return "INVALID password"
+
 
     # Deals with the optional parameters for greyfish
     if 'greyfish_url' in INFO:

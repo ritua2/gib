@@ -14,7 +14,7 @@ COPY listener.py /listener/listener.py
 
 # Installs the necessary packages
 # Bash for convenience
-RUN apk update && apk add bash curl && mkdir -p /output-data /listener/tmp/ && pip3 install gunicorn Flask requests &&\
+RUN apk update && apk add bash curl && mkdir -p $output_data_path /listener/tmp/ && pip3 install gunicorn Flask requests &&\
 	chmod +x /listener/listener.py
 
-WORKDIR /greyfish
+WORKDIR /listener
