@@ -98,7 +98,8 @@ def output_data():
         unpack_tar(fnam, JOB_FOLDER)
 
     except:
-        return "Could not read output data"
+        shutil.rmtree(JOB_FOLDER)
+        return "Could not read output data, greyfish key may be incorrect"
 
 
     # Downloads all the extra directories within the same folder but one folder down
@@ -117,7 +118,7 @@ def output_data():
     # Downloads all the extra files
     # Any files already present with the same name will be rewritten
     for F2 in EXTRA_FILES:
-        URL = "http://"+greyfish_url+":2000/grey/grey/"+greyfish_key+"/"+User_ID+"/"+F2['filename']+"/"+D2['path']
+        URL = "http://"+greyfish_url+":2000/grey/grey/"+greyfish_key+"/"+User_ID+"/"+F2['filename']+"/"+F2['path']
         r = requests.get(URL, stream=True)
         with open(JOB_FOLDER+'/'+F2['filename'], 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024): 

@@ -31,12 +31,16 @@ LID=$IPT_SERVER_IP
 
 # Download all files for a specific Job ID
 curl --header "Content-Type: application/json" --request POST \
-	--data '{"Job_ID":"example", "password":"abc123" "User":"carlos", "OUTPUT_DIRS":[], "OUTPUT_FILES":[]}' \
-   http://$IPT_SERVER_IP:5000/listener/api/users/output_data
+	--data '{"Job_ID":"example", "password":"abc123" "User":"i87u", "OUTPUT_DIRS":[], "OUTPUT_FILES":[]}' \
+   	http://$IPT_SERVER_IP:5000/listener/api/users/output_data
 
 # Adds extra directories (optional) and extra files (optional)
+# Extra files: [{path:file}, {}]
+# Both cases must follow greyfish standards
+curl --header "Content-Type: application/json" --request POST --data '{"Job_ID":"example", "User":"i87u", "OUTPUT_DIRS":["ool", "d34"], "OUTPUT_FILES":[{"path":d1++a3", "filename":"f1.txt"}], "password":"abc123"}'  http://$IPT_SERVER_IP:5000/listener/api/users/output_data
 
 
 # Change the URL of a URL server and/or the key (optional)
-
+curl --header "Content-Type: application/json" --request POST --data '{"Job_ID":"example", "User":"i87u", "OUTPUT_DIRS":["ool", "d34"], "OUTPUT_FILES":[{"path":d1++a3", "filename":"f1.txt"}], "password":"abc123", "greyfish_url":"$new_url", "greyfish_key":"$new_key"}' \
+     http://$IPT_SERVER_IP:5000/listener/api/users/output_data
 ```  
