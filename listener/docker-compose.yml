@@ -1,0 +1,25 @@
+version: '2'
+
+
+volumes:
+  listener:
+
+
+services:
+
+
+  listener:
+    build: .
+    image: "listener/standalone"
+
+    ports:
+      - "5000:5000"
+    volumes:
+      - "/host/directory:$output_data_path"
+
+    environment:
+      - greyfish_url=0.0.0.0
+      - greyfish_key=greyfish
+      - output_data_path=/output-data
+
+    command: "tail -F anything"
