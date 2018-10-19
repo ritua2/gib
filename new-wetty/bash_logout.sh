@@ -1,0 +1,1 @@
+# Executes when the user logs out

@@ -1,0 +1,3 @@
+Welcome to the online IPT gateway.
+
+Due to security reasons, please validate your identity:
