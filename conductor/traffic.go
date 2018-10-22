@@ -68,6 +68,10 @@ func main(){
     r.HandleFunc("/api/assign/users/{user_id}", Assigner).Methods("POST")
     r.HandleFunc("/api/redirect/users/{user_id}/{target_ip}", Redirect).Methods("GET")
     r.HandleFunc("/api/instance/attachme", Attachme).Methods("POST")
+    r.HandleFunc("/api/instance/removeme", Attachme).Methods("POST") // TODO
+    r.HandleFunc("/api/instance/freeme", Freeme).Methods("GET")
+    r.HandleFunc("/api/instance/whoami", Whoami).Methods("GET") // TODO
+    r.HandleFunc("/api/instance/usercalls", Usercalls).Methods("GET") // TODO
     http.Handle("/", r)
 
 
@@ -159,6 +163,9 @@ func Redirect (w http.ResponseWriter, r *http.Request){
             var b  bytes.Buffer
             b.WriteString("http://")
             b.WriteString(TIP)
+            // 20s to complete redirect
+            r_redirect_cache.Set(TIP, UID, 20*time.Second)
+            r_before_id.Set(TIP, UID, 20*time.Second)
 
             http.Redirect(w, r, b.String(), 301)
 
@@ -204,6 +211,31 @@ func Attachme (w http.ResponseWriter, r *http.Request){
         } else {
             fmt.Fprintf(w, "INVALID key")
         }
+    }
+}
+
+
+// Frees an instance
+func Freeme (w http.ResponseWriter, r *http.Request){
+
+    reqip := ip_only(r.RemoteAddr)
+    instances := redkeys(r_occupied)
+
+    if stringInSlice(reqip, instances) {
+
+        var available interface{} = "Yes"
+        var current_user interface{} = "Empty"
+        var whoami_count interface{} = "0"
+
+        // Resets instance
+        r_occupied.HSet(reqip, "Available", available)
+        r_occupied.HSet(reqip, "current_user", current_user)
+        r_occupied.HSet(reqip, "whoami_count", whoami_count)
+
+        fmt.Fprintf(w, "Correctly freed instance records.")
+
+    } else {
+        fmt.Fprintf(w, "INVALID: instance not attached")
     }
 }
 
