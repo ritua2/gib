@@ -68,10 +68,9 @@ func main(){
     r.HandleFunc("/api/assign/users/{user_id}", Assigner).Methods("POST")
     r.HandleFunc("/api/redirect/users/{user_id}/{target_ip}", Redirect).Methods("GET")
     r.HandleFunc("/api/instance/attachme", Attachme).Methods("POST")
-    r.HandleFunc("/api/instance/removeme", Attachme).Methods("POST") // TODO
+    r.HandleFunc("/api/instance/removeme", Removeme).Methods("POST")
     r.HandleFunc("/api/instance/freeme", Freeme).Methods("GET")
-    r.HandleFunc("/api/instance/whoami", Whoami).Methods("GET") // TODO
-    r.HandleFunc("/api/instance/usercalls", Usercalls).Methods("GET") // TODO
+    r.HandleFunc("/api/instance/whoami", Whoami).Methods("GET")
     http.Handle("/", r)
 
 
@@ -199,17 +198,51 @@ func Attachme (w http.ResponseWriter, r *http.Request){
             new_instance["Available"] = "Yes"
             new_instance["id"] = sender_ID
             new_instance["current_user"] = "Empty"
-            new_instance["whoami_count"] = "0"
             new_instance["address"] = reqip
 
             _, e2 := r_occupied.HMSet(reqip, new_instance).Result()
 
             if e2 != nil {
                 fmt.Fprintf(w, "Server error, Redis is not attached")
+            } else{
+                fmt.Fprintf(w, "Instance correctly attached")
             }
-            fmt.Fprintf(w, "Instance correctly attached")
         } else {
             fmt.Fprintf(w, "INVALID key")
+        }
+    }
+}
+
+
+// Removes the current IP as a wetty instance
+func Removeme (w http.ResponseWriter, r *http.Request) {
+
+    var ppr Provided_Parameters
+    err := json.NewDecoder(r.Body).Decode(&ppr)
+
+    if err != nil {
+        fmt.Fprintf(w, "POST parameters could not be parsed")
+    } else {
+
+        key := ppr.Key
+        reqip := ip_only(r.RemoteAddr)
+
+        if valid_adm_passwd(key){
+
+            if ! stringInSlice(reqip, redkeys(r_occupied)){
+               fmt.Fprintf(w, "INVALID, instance is not associated with the project")
+            } else {
+                    _, e2 := r_occupied.Del(reqip).Result()
+
+                    switch e2 {
+                    case nil:
+                        fmt.Fprintf(w, "Instance removed")
+                    default:
+                        fmt.Fprintf(w, "Server error, Redis is not attached")
+                    }
+                }
+        } else {
+                fmt.Fprintf(w, "INVALID key")
         }
     }
 }
@@ -225,20 +258,51 @@ func Freeme (w http.ResponseWriter, r *http.Request){
 
         var available interface{} = "Yes"
         var current_user interface{} = "Empty"
-        var whoami_count interface{} = "0"
 
         // Resets instance
         r_occupied.HSet(reqip, "Available", available)
         r_occupied.HSet(reqip, "current_user", current_user)
-        r_occupied.HSet(reqip, "whoami_count", whoami_count)
 
-        fmt.Fprintf(w, "Correctly freed instance records.")
+        fmt.Fprintf(w, "Correctly freed instance records")
 
     } else {
         fmt.Fprintf(w, "INVALID: instance not attached")
     }
 }
 
+
+// Returns the current user
+// Sets up the Redis table with the instance as occupied
+func Whoami (w http.ResponseWriter, r *http.Request) {
+
+    reqip := ip_only(r.RemoteAddr)
+    instances := redkeys(r_occupied)
+    if stringInSlice(reqip, instances) {
+
+        curuser, err := r_redirect_cache.Get(reqip).Result()
+
+        switch err {
+        case nil:
+
+            var current_user interface{} = curuser
+            var available interface{} = "No"
+            r_occupied.HSet(reqip, "Available", available)
+            r_occupied.HSet(reqip, "current_user", current_user)
+            // Deletes the temporary keys
+            r_redirect_cache.Del(reqip)
+            r_before_id.Del(reqip)
+            fmt.Fprintf(w, "%s", curuser)
+
+        case redis.Nil:
+            fmt.Fprintf(w, "Empty")
+        default:
+            fmt.Fprintf(w, "Server error, Redis is not attached")
+        }
+
+    } else {
+        fmt.Fprintf(w, "INVALID: instance not attached")
+    }
+}
 
 
 // Checks if an administrative credential is valid

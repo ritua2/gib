@@ -2,6 +2,22 @@ version: '2'
 
 
 services:
+
+
+    # Main node user orchestration
+    conductor:
+      build: .
+      image: "ipt/conductor"
+      container_name: conductor
+      ports:
+        - "5000:5000"
+      environment:
+        - REDIS_AUTH
+        - orchestra_key
+      command: go run traffic.go
+
+
+
     influxdb:
       image: "influxdb:latest"
       volumes:
@@ -15,6 +31,7 @@ services:
         service:
           db_creds
       command: "influxd"
+
 
 
     redis:
