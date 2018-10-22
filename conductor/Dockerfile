@@ -1,10 +1,10 @@
-FROM 1.10.4-alpine
+FROM golang:1.10.4-alpine
 
 
 COPY traffic.go /conductor/traffic.go
 
 # For cases where login in is needed
-RUN apk add --no-cache bash && go get github.com/gorilla/mux && go get github.com/go-redis/redis &&\
+RUN apk add --no-cache bash git && go get github.com/gorilla/mux && go get github.com/go-redis/redis &&\
     go get github.com/influxdata/influxdb/client/v2
 
 

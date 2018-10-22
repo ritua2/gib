@@ -32,12 +32,17 @@ type Provided_Parameters struct {
 
 var credential string = os.Getenv("orchestra_key")
 var redauth string = os.Getenv("REDIS_AUTH")
+var URL_BASE string = os.Getenv("URL_BASE")
+
+var rurl =[]string{URL_BASE, ":6379"}
+var rurl2 string = strings.Join(rurl, "")
+
 
 
 // Creates a redis client for keeping tracking of which user is on which 
 // Uses redis hashes 
 var r_occupied *redis.Client = redis.NewClient(&redis.Options{
-    Addr: "0.0.0.0:6379",
+    Addr: rurl2,
     Password: redauth,
     DB:0,
     })
@@ -45,7 +50,7 @@ var r_occupied *redis.Client = redis.NewClient(&redis.Options{
 
 // Creates a temporary cache until user redirects
 var r_redirect_cache *redis.Client = redis.NewClient(&redis.Options{
-    Addr: "0.0.0.0:6379",
+    Addr: rurl2,
     Password: redauth,
     DB:1,
     })
@@ -53,10 +58,11 @@ var r_redirect_cache *redis.Client = redis.NewClient(&redis.Options{
 
 // Stores user information before identifying with wetty
 var r_before_id *redis.Client = redis.NewClient(&redis.Options{
-    Addr: "0.0.0.0:6379",
+    Addr: rurl2,
     Password: redauth,
     DB:2,
     })
+
 
 
 func main(){

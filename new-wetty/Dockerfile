@@ -8,7 +8,7 @@ COPY introduction.txt /etc/motd
 RUN apk add --no-cache bash && adduser -D -h /home/ipt -s /bin/bash ipt  &&\
     echo "ipt:" | chpasswd  &&\
     # Adds sudo group
-    apk --no-cache  add shadow sudo && addgroup sudo && usermod -a -G sudo ipt && userdel -r term &&\
+    apk --no-cache  add shadow sudo curl && addgroup sudo && usermod -a -G sudo ipt && userdel -r term &&\
     # Enters the start command 
     cp -a /user_scripts/. /home/ipt  &&\
     # Users cannot modify startup scripts
