@@ -33,6 +33,7 @@ type Provided_Parameters struct {
 var credential string = os.Getenv("orchestra_key")
 var redauth string = os.Getenv("REDIS_AUTH")
 var URL_BASE string = os.Getenv("URL_BASE")
+var PROJECT string = os.Getenv("PROJECT")
 
 var rurl =[]string{URL_BASE, ":6379"}
 var rurl2 string = strings.Join(rurl, "")
@@ -70,6 +71,7 @@ func main(){
     r := mux.NewRouter()
 
     r.HandleFunc("/api/scripts/startup", Startup_supplier).Methods("GET")
+    r.HandleFunc("/api/project/name", Project_name).Methods("GET")
     r.HandleFunc("/api/active", Checker).Methods("GET")
     r.HandleFunc("/api/assign/users/{user_id}", Assigner).Methods("POST")
     r.HandleFunc("/api/redirect/users/{user_id}/{target_ip}", Redirect).Methods("GET")
@@ -88,6 +90,12 @@ func main(){
 // Returns the startup script
 func Startup_supplier(w http.ResponseWriter, r *http.Request) {
     http.ServeFile(w, r, "/scripts/startup.sh")
+}
+
+
+// Returns the project name
+func Project_name(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "%s", PROJECT)
 }
 
 
@@ -172,7 +180,7 @@ func Redirect (w http.ResponseWriter, r *http.Request){
             r_redirect_cache.Set(TIP, UID, 20*time.Second)
             r_before_id.Set(TIP, UID, 20*time.Second)
 
-            http.Redirect(w, r, b.String(), 301)
+            http.Redirect(w, r, b.String(), 302)
 
         } else {
             fmt.Fprintf(w, "INVALID, %s is not the expected user", UID)

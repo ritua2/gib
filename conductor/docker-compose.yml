@@ -15,6 +15,7 @@ services:
         - REDIS_AUTH
         - orchestra_key
         - URL_BASE=0.0.0.0
+        - PROJECT=non_assigned
       command: go run traffic.go
 
 
