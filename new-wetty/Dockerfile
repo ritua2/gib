@@ -5,19 +5,16 @@ COPY user_profile.sh /user_scripts/.profile
 COPY bash_logout.sh  /user_scripts/.bash_logout
 COPY introduction.txt /etc/motd
 
+
 RUN apk add --no-cache bash && adduser -D -h /home/ipt -s /bin/bash ipt  &&\
     echo "ipt:" | chpasswd  &&\
-    # Adds sudo group
-    apk --no-cache  add shadow sudo curl && addgroup sudo && usermod -a -G sudo ipt && userdel -r term &&\
+    # Add sudo group
+    apk --no-cache  add shadow curl inotify-tools  &&  userdel -r term &&\
     # Enters the start command 
-    cp -a /user_scripts/. /home/ipt  &&\
-    # Users cannot modify startup scripts
-    chown -R ipt /home/ipt/ &&\
-    chmod u=rx /home/ipt/.bash* /home/ipt/.profile &&\
+    cp  -r /user_scripts/. /home/ipt  &&\
+    # Startup scripts are immutable
+    chown -R ipt:ipt /home/ipt &&\
     # Disallows su
-    chmod 000 /bin/su &&\
-    # Cleanup
-    rm -rf /user_scripts
+    chmod 000 /bin/su
 
 CMD yarn start
-

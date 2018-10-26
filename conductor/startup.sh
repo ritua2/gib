@@ -2,11 +2,11 @@
 
 
 # Gets the username
-export USER=$(curl http://$MAIN_NODE:5000/api/instance/whoami)
+export USER=$(curl http://$MANAGER_NODE:5000/api/instance/whoami)
 
 
 # Gets the project
-export PROJECT=$(curl http://$MAIN_NODE:5000/api/project/name)
+export PROJECT=$(curl http://$MANAGER_NODE:5000/api/project/name)
 
 # Changes the terminal prompt to [/PROJECT/USERNAME: ~] $ 
 

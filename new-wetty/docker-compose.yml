@@ -9,6 +9,8 @@ services:
     image: "easy_wetty/standalone"
     container_name: wetty
     tty: true
+    environment:
+      - MANAGER_NODE
 
     ports:
       - "80:3000"
