@@ -1,6 +1,4 @@
 #!/bin/bash
-source /home/ipt/.bashrc
-
 export MANAGER_NODE="149.165.156.208"
 
 
@@ -11,10 +9,3 @@ unset HISTFILE # No history
 source startup
 
 rm startup
-
-
-# Start monitoring
-monitor &
-
-sleep 1
-printf "\n"

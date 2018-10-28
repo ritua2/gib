@@ -1,9 +1,12 @@
 FROM krishnasrinivas/wetty
 
-COPY user_bashrc.sh  /user_scripts/.bashrc
 COPY user_profile.sh /user_scripts/.profile
 COPY bash_logout.sh  /user_scripts/.bash_logout
 COPY introduction.txt /etc/motd
+# Adds the monitoring scripts
+COPY monitor_login.sh  /bin/monitor_login
+COPY monitor_logout.sh /bin/monitor_logout
+COPY main_daemon.sh    /bin/main_daemon
 
 
 RUN apk add --no-cache bash && adduser -D -h /home/ipt -s /bin/bash ipt  &&\
@@ -15,6 +18,7 @@ RUN apk add --no-cache bash && adduser -D -h /home/ipt -s /bin/bash ipt  &&\
     # Startup scripts are immutable
     chown -R ipt:ipt /home/ipt &&\
     # Disallows su
-    chmod 000 /bin/su
+    chmod 000 /bin/su &&\
+    chmod +x /bin/main_daemon && chmod +x /bin/monitor*
 
-CMD yarn start
+CMD main_daemon

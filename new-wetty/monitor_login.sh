@@ -7,6 +7,5 @@
 while true ; do
   inotifywait -e delete_self "/home/ipt/.profile" &&\
   cp /user_scripts/.profile  "/home/ipt/.profile"
-  printf "File cannot be deleted, this incident has been reported\n"
 done
 

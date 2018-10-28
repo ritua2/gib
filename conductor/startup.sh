@@ -5,6 +5,13 @@
 export USER=$(curl http://$MANAGER_NODE:5000/api/instance/whoami)
 
 
+# If the user is not what is expected, it exits
+if [ $USER = "Empty" ]; then
+   printf "Access not allowed\n"
+   exit
+fi
+
+
 # Gets the project
 export PROJECT=$(curl http://$MANAGER_NODE:5000/api/project/name)
 
