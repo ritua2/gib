@@ -12,4 +12,4 @@ services:
 
     ports:
       - "80:3000"
-    command: "yarn start"
+    command: "main_daemon"

@@ -14,8 +14,8 @@ services:
       environment:
         - REDIS_AUTH
         - orchestra_key
-        - URL_BASE=0.0.0.0
-        - PROJECT=non_assigned
+        - URL_BASE
+        - PROJECT
       command: go run traffic.go
 
 
@@ -43,3 +43,14 @@ services:
       command: redis-server --requirepass $REDIS_AUTH
       ports:
         - '6379:6379'
+
+
+    # Starts the automated registry to store local 
+    registry:
+      image: "registry:2"
+      ports:
+        - "4000:5000"
+      container_name: registry
+      restart: always
+      environment:
+        - REGISTRY_AUTH=simple
