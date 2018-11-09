@@ -31,16 +31,12 @@ for j in $new_jobs; do
 	cd $unzip_files_folder/$name
 	./compile.sh 2> ErrorMessages.out 
 	# sending back results
-<<<<<<< HEAD:Gate-way/gateway-backend.sh
 	tar -czf $unzip_files_folder/${name}_output.tar.gz $unzip_files_folder/$name/*
 	curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://149.165.156.207:2000/grey/upload/dev/akn752/${name}
-||||||| merged common ancestors
 	zip -r ${name}_output.zip  $unzip_files_folder/$name
 	curl -F file=@$unzip_files_folder/$name/${name}_output.zip http://129.114.17.116:2000/grey/upload/dev/commonuser/output
-=======
 	tar -czf $unzip_files_folder/${name}_output.tar.gz $unzip_files_folder/$name/*
 	curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://${greyfiship}:2000/grey/upload/dev/akn752/${name}
->>>>>>> 3f7025bc340b3acd532cdda911c600d26e791b01:Backend/gateway-backend.sh
 	
 	cd $currentdir
 done
@@ -65,18 +61,14 @@ if [[ $current_running_jobs_num < $MAXIMUM_RUNNING_JOBS ]]; then
 					| grep "^>" | cut -d" " -f2)
 	for j in $finished_jobs; do
 		name=$(echo $j | rev | cut -d'/' -f1 | rev | cut -d'.' -f1  )
-<<<<<<< HEAD:Gate-way/gateway-backend.sh
 		tar -czf $unzip_files_folder/${name}_output.tar.gz $unzip_files_folder/$name/*
 		curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://149.165.156.207:2000/grey/upload/dev/akn752/${name}
 		curl --header "Content-Type: application/json" --request POST --data "{\"Job_ID\":\"$name\", \"password\":\"abc123\",\"User\":\"akn752\", \"OUTPUT_DIRS\":[], \"OUTPUT_FILES\":[]}" http://149.165.156.207:5000/listener/api/users/output_data
-||||||| merged common ancestors
 		zip -r $unzip_files_folder/$name/${name}_output.zip $unzip_files_folder/$name
 		curl -F file=@$unzip_files_folder/$name/${name}_output.zip http://129.114.17.116:2000/grey/upload/dev/commonuser/output
-=======
 		tar -czf $unzip_files_folder/${name}_output.tar.gz $unzip_files_folder/$name/*
 		curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://${greyfiship}:2000/grey/upload/dev/akn752/${name}
 		curl --header "Content-Type: application/json" --request POST --data "{\"Job_ID\":\"$name\", \"password\":\"abc123\",\"User\":\"akn752\", \"OUTPUT_DIRS\":[], \"OUTPUT_FILES\":[]}" http://${serverip}:5000/listener/api/users/output_data
->>>>>>> 3f7025bc340b3acd532cdda911c600d26e791b01:Backend/gateway-backend.sh
 	done
 	#calucalte maximum number of new jobs to run
 	num_jobs_to_run=$(( $MAXIMUM_RUNNING_JOBS - $current_running_jobs_num ))
