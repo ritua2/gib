@@ -1,0 +1,15 @@
+version: '3'
+
+
+services:
+
+
+  easy_wetty:
+    build: .
+    image: "easy_wetty/standalone"
+    container_name: wetty
+    tty: true
+
+    ports:
+      - "80:3000"
+    command: "main_daemon"
