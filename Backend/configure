@@ -3,3 +3,5 @@ ShowAllJobIdsCommand=
 ControlFilesFolder=
 UnzipFilesFolder=
 ScheduleingSystem=
+MainServerIP=
+GreyFishIp=
