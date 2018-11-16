@@ -29,6 +29,17 @@ type Provided_Parameters struct {
 }
 
 
+// Attachment information for an instance
+type Attach_Info struct {
+    // Actor identifier
+    Sender string
+    // Key used
+    Key  string
+    // Port
+    Port string
+}
+
+
 
 var credential string = os.Getenv("orchestra_key")
 var redauth string = os.Getenv("REDIS_AUTH")
@@ -177,6 +188,12 @@ func Redirect (w http.ResponseWriter, r *http.Request){
             var b  bytes.Buffer
             b.WriteString("http://")
             b.WriteString(TIP)
+
+            // Instance is guaranteed to be attached
+            iport, _ :=  r_occupied.HGet(TIP, "port").Result()
+            b.WriteString(":")
+            b.WriteString(iport)
+
             // 20s to complete redirect
             r_redirect_cache.Set(TIP, UID, 20*time.Second)
             r_before_id.Set(TIP, UID, 20*time.Second)
@@ -192,7 +209,7 @@ func Redirect (w http.ResponseWriter, r *http.Request){
 
 // Adds the caller IP as a wetty instance
 func Attachme (w http.ResponseWriter, r *http.Request){
-    var ppr Provided_Parameters
+    var ppr Attach_Info
 
     err := json.NewDecoder(r.Body).Decode(&ppr)
 
@@ -203,6 +220,9 @@ func Attachme (w http.ResponseWriter, r *http.Request){
         key := ppr.Key
         // Each IP has to identify itself
         sender_ID := ppr.Sender
+        // There may be multiple containers per instance
+        iport := ppr.Port
+
         reqip := ip_only(r.RemoteAddr)
 
         if valid_adm_passwd(key){
@@ -214,6 +234,7 @@ func Attachme (w http.ResponseWriter, r *http.Request){
             new_instance["id"] = sender_ID
             new_instance["current_user"] = "Empty"
             new_instance["address"] = reqip
+            new_instance["port"] = iport
 
             _, e2 := r_occupied.HMSet(reqip, new_instance).Result()
 

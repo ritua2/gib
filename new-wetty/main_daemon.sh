@@ -10,7 +10,7 @@ printf "$NEW_UUID" > ./autokey
 { echo -ne "HTTP/1.0 200 OK\r\nContent-Length: $(wc -c <./autokey)\r\n\r\n"; cat ./autokey; } | nc -l 3000 &
 
 # Gets the IP of the current device
-machine_ip=$(curl "http://$conductor:5000//api/instance/whatsmyip")
+machine_ip=$(curl "http://$conductor:5000/api/instance/whatsmyip")
 
 
 # Listens to available ports in the current machine, to check which one has the current API
@@ -20,7 +20,7 @@ do
     echo $port
 
     # Stops when it finds itself
-    NK=$(curl "$machine_ip:$port")
+    NK=$(curl --max-time 10 "$machine_ip:$port")
 
     if [ "$NK" = "$NEW_UUID" ]; then
         current_port="$port"
@@ -41,7 +41,8 @@ fi
 
 
 # Calls the server to specify that a new instance is being created
-
+curl -X POST -H "Content-Type: application/json" -d '{"key":"swisspeakmontblanc", "sender":"'$NEW_UUID'", "port":"'$current_port'"}' \
+    http://$conductor:5000/api/instance/attachme
 
 
 rm ./autokey
