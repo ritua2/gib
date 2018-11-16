@@ -11,5 +11,5 @@ services:
     tty: true
 
     ports:
-      - "80:3000"
+      - "80-90:3000-3010"
     command: "main_daemon"

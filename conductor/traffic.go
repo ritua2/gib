@@ -79,6 +79,7 @@ func main(){
     r.HandleFunc("/api/instance/removeme", Removeme).Methods("POST")
     r.HandleFunc("/api/instance/freeme", Freeme).Methods("GET")
     r.HandleFunc("/api/instance/whoami", Whoami).Methods("GET")
+    r.HandleFunc("/api/instance/whatsmyip", Whatsmyip).Methods("GET")
     http.Handle("/", r)
 
 
@@ -316,6 +317,14 @@ func Whoami (w http.ResponseWriter, r *http.Request) {
     } else {
         fmt.Fprintf(w, "INVALID: instance not attached")
     }
+}
+
+
+// Returns the caller's IP address
+func Whatsmyip (w http.ResponseWriter, r *http.Request) {
+
+    reqip := ip_only(r.RemoteAddr)
+    fmt.Fprintf(w, "%s", reqip)
 }
 
 
