@@ -3,6 +3,7 @@ FROM krishnasrinivas/wetty
 
 # Container orchestrator IP
 ENV conductor
+ENV orchestra_key
 
 
 
