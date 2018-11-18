@@ -1,5 +1,6 @@
 /*
 BASICS
+
 Redirects a user, doing all the necessary actions
 Checks that a user is valid after login into wetty
 */
@@ -13,8 +14,10 @@ import (
     "github.com/gorilla/mux"
     "github.com/go-redis/redis"
     "encoding/json"
+    "math"
     "net/http"
     "os"
+    "strconv"
     "strings"
     "time"
 )
@@ -222,27 +225,51 @@ func Attachme (w http.ResponseWriter, r *http.Request){
         sender_ID := ppr.Sender
         // There may be multiple containers per instance
         iport := ppr.Port
-
         reqip := ip_only(r.RemoteAddr)
 
         if valid_adm_passwd(key){
 
-            // All IPs are stored in Redis with the following data:
-            // Available, id, current_user, whoami_count, address
-            var new_instance = make(map[string]interface{})
-            new_instance["Available"] = "Yes"
-            new_instance["id"] = sender_ID
-            new_instance["current_user"] = "Empty"
-            new_instance["address"] = reqip
-            new_instance["port"] = iport
+            // Checks all the current instances
+            instances := redkeys(r_occupied)
+            port_number, _ := strconv.Atoi(iport)
 
-            _, e2 := r_occupied.HMSet(reqip, new_instance).Result()
+            if stringInSlice(reqip, instances) {
 
-            if e2 != nil {
-                fmt.Fprintf(w, "Server error, Redis is not attached")
-            } else{
-                fmt.Fprintf(w, "Instance correctly attached")
+                // Append new port information
+                r_occupied.HIncrBy(reqip, "Ports", int64(math.Pow(2, float64(port_number)-7000)))
+
+                var available interface{} = "Yes"
+                var current_user interface{} = "Empty"
+                var id interface{} = sender_ID
+
+                // Resets instance
+                r_occupied.HSet(reqip, strings.Join([]string{"Available", iport}, "_"), available)
+                r_occupied.HSet(reqip, strings.Join([]string{"current_user", iport}, "_"), current_user)
+                r_occupied.HSet(reqip, strings.Join([]string{"id", iport}, "_"), id)
+                fmt.Fprintf(w, "Added port %s", iport)
+
+            } else {
+                // Create new instance hash
+                // All IPs are stored in Redis with the following data:
+                // Available, id, current_user, whoami_count, address
+                var new_instance = make(map[string]interface{})
+                new_instance["address"] = reqip
+                new_instance["Available"] = "Yes"
+                new_instance["Ports"] = strconv.Itoa(int(math.Pow(2, float64(port_number)-7000)))
+
+                // Varies per instance
+                new_instance[strings.Join([]string{"id", iport}, "_")] = sender_ID
+                new_instance[strings.Join([]string{"current_user", iport}, "_")] = "Empty"
+                new_instance[strings.Join([]string{"Available", iport}, "_")] = "Yes"
+                _, e2 := r_occupied.HMSet(reqip, new_instance).Result()
+
+                if e2 != nil {
+                    fmt.Fprintf(w, "Server error, Redis is not attached")
+                } else{
+                    fmt.Fprintf(w, "Instance correctly attached")
+                }
             }
+
         } else {
             fmt.Fprintf(w, "INVALID key")
         }

@@ -1,12 +1,6 @@
 FROM krishnasrinivas/wetty
 
 
-# Container orchestrator IP
-ENV conductor
-ENV orchestra_key
-
-
-
 COPY user_profile.sh /user_scripts/.profile
 COPY bash_logout.sh  /user_scripts/.bash_logout
 COPY introduction.txt /etc/motd
