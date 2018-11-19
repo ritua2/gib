@@ -235,8 +235,11 @@ func Attachme (w http.ResponseWriter, r *http.Request){
 
             if stringInSlice(reqip, instances) {
 
-                // Append new port information
-                r_occupied.HIncrBy(reqip, "Ports", int64(math.Pow(2, float64(port_number)-7000)))
+                // Avoids adding already added ports
+                occports := ports_occupied(reqip)
+                if ! stringInSlice(iport, occports){
+                                    // Append new port information
+                r_occupied.HIncrBy(reqip, "Ports", int64(math.Pow(2, float64((port_number-7000)%10))))
 
                 var available interface{} = "Yes"
                 var current_user interface{} = "Empty"
@@ -247,6 +250,9 @@ func Attachme (w http.ResponseWriter, r *http.Request){
                 r_occupied.HSet(reqip, strings.Join([]string{"current_user", iport}, "_"), current_user)
                 r_occupied.HSet(reqip, strings.Join([]string{"id", iport}, "_"), id)
                 fmt.Fprintf(w, "Added port %s", iport)
+                } else {
+                    fmt.Fprintf(w, "Port has already been added")
+                }
 
             } else {
                 // Create new instance hash
@@ -255,7 +261,7 @@ func Attachme (w http.ResponseWriter, r *http.Request){
                 var new_instance = make(map[string]interface{})
                 new_instance["address"] = reqip
                 new_instance["Available"] = "Yes"
-                new_instance["Ports"] = strconv.Itoa(int(math.Pow(2, float64(port_number)-7000)))
+                new_instance["Ports"] = strconv.Itoa(int(math.Pow(2, float64((port_number-7000)%10))))
 
                 // Varies per instance
                 new_instance[strings.Join([]string{"id", iport}, "_")] = sender_ID
@@ -409,4 +415,33 @@ func stringInSlice(a string, list []string) bool {
         }
     }
     return false
+}
+
+
+// Finds the list of occupied ports for certain instance
+func ports_occupied(instance string) []string{
+
+    redports, _ := r_occupied.HGet(instance, "Ports").Result()
+    lhj, _ := strconv.Atoi(redports)
+    portsn := strconv.FormatInt(int64(lhj), 2)
+
+    var pav []string
+
+    for loc, port_used := range Reverse(portsn) {
+
+        if string(port_used) == "1"{
+            pav = append(pav, strconv.Itoa(7000+loc))
+        }
+    }
+
+    return pav
+}
+
+
+func Reverse(s string) string {
+    runes := []rune(s)
+    for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+        runes[i], runes[j] = runes[j], runes[i]
+    }
+    return string(runes)
 }
