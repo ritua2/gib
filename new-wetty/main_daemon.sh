@@ -9,6 +9,14 @@ printf "$NEW_UUID" > ./autokey
 conductor=
 orchestra_key=
 
+# Changes the user profile to update the line
+sed -i '2s/.*/export MANAGER_NODE='"\"$conductor\""'/' /home/ipt/.profile
+
+
+# Adds the first 12 characters of the UUID key to the profile as a check
+# However, the full key is still required in order to remove individual ports
+UUID_f10="${NEW_UUID:0:12}"
+printf "export UUID_f10=\"$UUID_f10\"\n" >> /home/ipt/.profile
 
 # Sets up a listener API to check which port this is
 { echo -ne "HTTP/1.0 200 OK\r\nContent-Length: $(wc -c <./autokey)\r\n\r\n"; cat ./autokey; } | nc -l 3000 &
@@ -30,7 +38,6 @@ do
     fi
 done
 
-rm ./autokey
 
 # Kill all listener APIs
 if [ "$current_port" = "NA" ]; then
@@ -46,7 +53,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"key":"'$orchestra_key'", 
     http://$conductor:5000/api/instance/attachme
 
 
-rm ./autokey
+mv ./autokey /root/autokey
 
 # Kill all listener APIs
 pkill nc

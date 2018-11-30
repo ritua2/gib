@@ -91,6 +91,7 @@ func main(){
     r.HandleFunc("/api/redirect/users/{user_id}/{target_ip}", Redirect).Methods("GET")
     r.HandleFunc("/api/instance/attachme", Attachme).Methods("POST")
     r.HandleFunc("/api/instance/removeme", Removeme).Methods("POST")
+    r.HandleFunc("/api/instance/remove_my_port", Remove_my_port).Methods("POST")
     r.HandleFunc("/api/instance/freeme", Freeme).Methods("GET")
     r.HandleFunc("/api/instance/whoami", Whoami).Methods("GET")
     r.HandleFunc("/api/instance/whatsmyip", Whatsmyip).Methods("GET")
@@ -238,18 +239,18 @@ func Attachme (w http.ResponseWriter, r *http.Request){
                 // Avoids adding already added ports
                 occports := ports_occupied(reqip)
                 if ! stringInSlice(iport, occports){
-                                    // Append new port information
-                r_occupied.HIncrBy(reqip, "Ports", int64(math.Pow(2, float64((port_number-7000)%10))))
+                    // Append new port information
+                    r_occupied.HIncrBy(reqip, "Ports", int64(math.Pow(2, float64((port_number-7000)%10))))
 
-                var available interface{} = "Yes"
-                var current_user interface{} = "Empty"
-                var id interface{} = sender_ID
+                    var available interface{} = "Yes"
+                    var current_user interface{} = "Empty"
+                    var id interface{} = sender_ID
 
-                // Resets instance
-                r_occupied.HSet(reqip, strings.Join([]string{"Available", iport}, "_"), available)
-                r_occupied.HSet(reqip, strings.Join([]string{"current_user", iport}, "_"), current_user)
-                r_occupied.HSet(reqip, strings.Join([]string{"id", iport}, "_"), id)
-                fmt.Fprintf(w, "Added port %s", iport)
+                    // Resets instance
+                    r_occupied.HSet(reqip, strings.Join([]string{"Available", iport}, "_"), available)
+                    r_occupied.HSet(reqip, strings.Join([]string{"current_user", iport}, "_"), current_user)
+                    r_occupied.HSet(reqip, strings.Join([]string{"id", iport}, "_"), id)
+                    fmt.Fprintf(w, "Added port %s", iport)
                 } else {
                     fmt.Fprintf(w, "Port has already been added")
                 }
@@ -312,6 +313,78 @@ func Removeme (w http.ResponseWriter, r *http.Request) {
                 }
         } else {
                 fmt.Fprintf(w, "INVALID key")
+        }
+    }
+}
+
+
+// Removes a port from an instance
+// If the instance has no more ports, it deletes it
+// This is an instantaneous action and it does not matter if there is a user already in the instance
+
+func Remove_my_port (w http.ResponseWriter, r *http.Request) {
+
+    var ppr Attach_Info
+    err := json.NewDecoder(r.Body).Decode(&ppr)
+
+    if err != nil {
+        fmt.Fprintf(w, "POST parameters could not be parsed")
+    } else {
+
+        key := ppr.Key
+        // Each IP has to identify itself
+        sender_ID := ppr.Sender
+        // There may be multiple containers per instance
+        iport := ppr.Port
+        reqip := ip_only(r.RemoteAddr)
+
+        if valid_adm_passwd(key){
+
+            // Checks all the current instances
+            instances := redkeys(r_occupied)
+            port_number, _ := strconv.Atoi(iport)
+
+            if stringInSlice(reqip, instances) {
+
+                // Port must be added
+                occports := ports_occupied(reqip)
+                if ! stringInSlice(iport, occports){
+                    fmt.Fprintf(w, "Port is not associated with the instance")
+
+                } else if (len(occports) == 1) && Valid_PK(reqip, sender_ID, iport) {
+
+                    // If last port, delete the instance
+                    _, e2 := r_occupied.Del(reqip).Result()
+
+                    switch e2 {
+                    case nil:
+                        fmt.Fprintf(w, "Instance removed")
+                    default:
+                        fmt.Fprintf(w, "Server error, Redis is not attached")
+                    }
+
+                } else {
+
+                    // Check for valid key
+                    if Valid_PK(reqip, sender_ID, iport){
+
+                        // Removes all the provided characteristics
+                        r_occupied.HDel(reqip, Sadder("id_", iport), Sadder("current_user_", iport), Sadder("Available_", iport))
+                        // Changes the port number
+                        r_occupied.HIncrBy(reqip, "Ports", -1*int64(math.Pow(2, float64((port_number-7000)%10))))
+                        fmt.Fprintf(w, "Removed port from instance")
+
+                    } else {
+                        fmt.Fprintf(w, "INVALID key")
+                    }
+                }
+
+            } else {
+                fmt.Fprintf(w, "INVALID, instance is not associated with the project")
+            }
+
+        } else {
+            fmt.Fprintf(w, "INVALID key")
         }
     }
 }
@@ -444,4 +517,39 @@ func Reverse(s string) string {
         runes[i], runes[j] = runes[j], runes[i]
     }
     return string(runes)
+}
+
+
+// Verifies that a port key key is valid
+// vmip (str): VM IPv4
+// kk (str): key
+// port_used (str)
+
+func Valid_PK(vmip string, kk string, port_used string) bool{
+
+
+    expected_key, _ := r_occupied.HGet(vmip, Sadder("id_", port_used)).Result()
+    if expected_key == kk {
+        return true
+    }
+    return false
+}
+
+
+// Checks the first 10 characters of a key string
+func Valid_PK10(vmip string, kk string, port_used string) bool{
+
+    expected_key, _ := r_occupied.HGet(vmip, Sadder("id_", port_used)).Result()
+    if expected_key[:10] == kk {
+        return true
+    }
+    return false
+}
+
+
+// Adds 2 strings
+func Sadder(s1 string, s2 string) string{
+
+    var l1 =[]string{s1, s2}
+    return strings.Join(l1, "")
 }
