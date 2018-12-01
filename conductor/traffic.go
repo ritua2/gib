@@ -10,6 +10,7 @@ package main
 
 import (
     "bytes"
+    "errors"
     "fmt"
     "github.com/gorilla/mux"
     "github.com/go-redis/redis"
@@ -92,8 +93,8 @@ func main(){
     r.HandleFunc("/api/instance/attachme", Attachme).Methods("POST")
     r.HandleFunc("/api/instance/removeme", Removeme).Methods("POST")
     r.HandleFunc("/api/instance/remove_my_port", Remove_my_port).Methods("POST")
-    r.HandleFunc("/api/instance/freeme", Freeme).Methods("GET")
-    r.HandleFunc("/api/instance/whoami", Whoami).Methods("GET")
+    r.HandleFunc("/api/instance/freeme/{uf10}", Freeme).Methods("GET")
+    r.HandleFunc("/api/instance/whoami/{uf10}", Whoami).Methods("GET")
     r.HandleFunc("/api/instance/whatsmyip", Whatsmyip).Methods("GET")
     http.Handle("/", r)
 
@@ -391,21 +392,37 @@ func Remove_my_port (w http.ResponseWriter, r *http.Request) {
 
 
 // Frees an instance
+// Needs to be executed from within the machine itself
+
 func Freeme (w http.ResponseWriter, r *http.Request){
 
     reqip := ip_only(r.RemoteAddr)
     instances := redkeys(r_occupied)
+    // First 10 charachers of password
+    UID10 := mux.Vars(r)["uf10"]
 
     if stringInSlice(reqip, instances) {
 
-        var available interface{} = "Yes"
-        var current_user interface{} = "Empty"
 
-        // Resets instance
-        r_occupied.HSet(reqip, "Available", available)
-        r_occupied.HSet(reqip, "current_user", current_user)
+        // Checks the port number of the instance
+        pnn, err := Porter10(reqip, UID10)
 
-        fmt.Fprintf(w, "Correctly freed instance records")
+        if err != nil {
+                fmt.Fprintf(w, "INVALID: port not attached")
+            } else {
+                // Frees the port
+                var available interface{} = "Yes"
+                var current_user interface{} = "Empty"
+
+                // Resets instance
+                r_occupied.HSet(reqip, Sadder("Available_", pnn), available)
+                r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
+
+                fmt.Fprintf(w, "Correctly freed instance")
+
+                // If all ports are empty, it sets the Available tag (TODO)
+
+            }
 
     } else {
         fmt.Fprintf(w, "INVALID: instance not attached")
@@ -419,6 +436,8 @@ func Whoami (w http.ResponseWriter, r *http.Request) {
 
     reqip := ip_only(r.RemoteAddr)
     instances := redkeys(r_occupied)
+    UID10 := mux.Vars(r)["uf10"]
+
     if stringInSlice(reqip, instances) {
 
         curuser, err := r_redirect_cache.Get(reqip).Result()
@@ -428,8 +447,8 @@ func Whoami (w http.ResponseWriter, r *http.Request) {
 
             var current_user interface{} = curuser
             var available interface{} = "No"
-            r_occupied.HSet(reqip, "Available", available)
-            r_occupied.HSet(reqip, "current_user", current_user)
+            r_occupied.HSet(reqip, Sadder("Available_", pnn), available)
+            r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
             // Deletes the temporary keys
             r_redirect_cache.Del(reqip)
             r_before_id.Del(reqip)
@@ -536,14 +555,18 @@ func Valid_PK(vmip string, kk string, port_used string) bool{
 }
 
 
-// Checks the first 10 characters of a key string
-func Valid_PK10(vmip string, kk string, port_used string) bool{
+// Checks the port of a 10 character hash
+// If the port is not associated with anything, it returns an error and port "NA"
+func Porter10(vmip string, kk string) (string, error){
 
-    expected_key, _ := r_occupied.HGet(vmip, Sadder("id_", port_used)).Result()
-    if expected_key[:10] == kk {
-        return true
+    for _, pn := range ports_occupied(vmip){
+        expected_key, _ := r_occupied.HGet(vmip, Sadder("id_", pn)).Result()
+        if strings.Contains(expected_key, kk) {
+            return pn, nil
+        }
     }
-    return false
+
+    return "NA", errors.New("Port is not available")
 }
 
 
@@ -553,3 +576,6 @@ func Sadder(s1 string, s2 string) string{
     var l1 =[]string{s1, s2}
     return strings.Join(l1, "")
 }
+
+
+// Checks empty ports (TODO)
