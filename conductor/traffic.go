@@ -150,7 +150,7 @@ func Assigner(w http.ResponseWriter, r *http.Request){
                     // Gets the instance available
                     ava, _ := r_occupied.HGet(instance, "Available").Result()
 
-                    // Ignores instances currently inc cache
+                    // Ignores instances currently in cache
                     if stringInSlice(instance, redkeys(r_redirect_cache)){
                        continue
                     }
@@ -403,26 +403,23 @@ func Freeme (w http.ResponseWriter, r *http.Request){
 
     if stringInSlice(reqip, instances) {
 
-
         // Checks the port number of the instance
         pnn, err := Porter10(reqip, UID10)
 
         if err != nil {
                 fmt.Fprintf(w, "INVALID: port not attached")
-            } else {
-                // Frees the port
-                var available interface{} = "Yes"
-                var current_user interface{} = "Empty"
+        } else {
+            // Frees the port
+            var available interface{} = "Yes"
+            var current_user interface{} = "Empty"
 
-                // Resets instance
-                r_occupied.HSet(reqip, Sadder("Available_", pnn), available)
-                r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
+            // Resets instance
+            r_occupied.HSet(reqip, Sadder("Available_", pnn), available)
+            r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
 
-                fmt.Fprintf(w, "Correctly freed instance")
-
-                // If all ports are empty, it sets the Available tag (TODO)
-
-            }
+            fmt.Fprintf(w, "Correctly freed instance")
+            r_occupied.HSet(reqip, "Available", available)
+        }
 
     } else {
         fmt.Fprintf(w, "INVALID: instance not attached")
@@ -578,4 +575,22 @@ func Sadder(s1 string, s2 string) string{
 }
 
 
-// Checks empty ports (TODO)
+// Checks empty ports
+func empty_ports(vmip string) []string{
+
+    var ep []string
+
+    abav, _ := r_occupied.HGet(vmip, "Available").Result()
+    if abav == "No"{
+        return ep
+    }
+
+    for _, pn := range ports_occupied(vmip){
+        ava, _ := r_occupied.HGet(vmip, Sadder("Available_", pn)).Result()
+
+        if ava == "Yes"{
+            ep = append(ep, ava)
+        }
+    }
+    return ep
+}
