@@ -124,13 +124,10 @@ func Checker(w http.ResponseWriter, r *http.Request){
 
 // Validates a user, requires json information about the user
 // Creates an empty redis key with information
-// MUST BE ADDED IN THE FUTURE
 func Assigner(w http.ResponseWriter, r *http.Request){
 
     UID := mux.Vars(r)["user_id"]
-
     var ppr Provided_Parameters
-
     err := json.NewDecoder(r.Body).Decode(&ppr)
 
     if err != nil {
@@ -138,32 +135,32 @@ func Assigner(w http.ResponseWriter, r *http.Request){
     } else {
 
         key := ppr.Key
-
         all_instances_occupied := true
 
-        //reqip := ip_only(r.RemoteAddr)
-
         if valid_adm_passwd(key){
-            instances := redkeys(r_occupied)
+            // Checks all instances with at least one port open
+            for _, instance := range available_instances(){
+                instance_ := Sadder(instance, "_")
 
-            for _, instance := range instances{
-                    // Gets the instance available
-                    ava, _ := r_occupied.HGet(instance, "Available").Result()
+                // Only ports not assigned yet
+                for _, emp := range empty_ports(instance){
 
-                    // Ignores instances currently in cache
-                    if stringInSlice(instance, redkeys(r_redirect_cache)){
-                       continue
+                    if red_key_check(r_redirect_cache, Sadder(instance_, emp)){
+                        // Ignores ports in cache
+                        continue
                     }
-
-                    if ava=="Yes"{
-                        // Sets the instance as occupied, server now has 20 s to redirect user
-                        r_redirect_cache.Set(instance, UID, 20*time.Second)
-                        fmt.Fprintf(w, "User assigned to: %s", instance)
-                        all_instances_occupied = false
-                        break
-                    }
+                    // Sets the instance as occupied, server now has 20 s to redirect user
+                    r_redirect_cache.Set(Sadder(instance_, emp), UID, 20*time.Second)
+                    fmt.Fprintf(w, "User assigned to: %s", Sadder(Sadder(instance, ":"), emp))
+                    all_instances_occupied = false
+                    break
                 }
-            if all_instances_occupied{
+                if ! all_instances_occupied{
+                    break
+                }
+            }
+
+            if all_instances_occupied {
                 fmt.Fprintf(w, "INVALID: cannot assign user, all instances are occupied")
             }
 
@@ -171,7 +168,6 @@ func Assigner(w http.ResponseWriter, r *http.Request){
             fmt.Fprintf(w, "INVALID key")
         }
     }
-
 }
 
 
@@ -513,7 +509,6 @@ func ports_occupied(instance string) []string{
     redports, _ := r_occupied.HGet(instance, "Ports").Result()
     lhj, _ := strconv.Atoi(redports)
     portsn := strconv.FormatInt(int64(lhj), 2)
-
     var pav []string
 
     for loc, port_used := range Reverse(portsn) {
@@ -589,8 +584,37 @@ func empty_ports(vmip string) []string{
         ava, _ := r_occupied.HGet(vmip, Sadder("Available_", pn)).Result()
 
         if ava == "Yes"{
-            ep = append(ep, ava)
+            ep = append(ep, pn)
         }
     }
     return ep
+}
+
+
+// Gets a list of available instances
+// Available is defined as having at least one empty port
+func available_instances() []string{
+
+    var instances_av []string
+
+    for _, insip := range redkeys(r_occupied){
+        abav, _ := r_occupied.HGet(insip, "Available").Result()
+        if abav == "Yes"{
+            instances_av = append(instances_av, insip)
+        }
+    }
+    return instances_av
+}
+
+
+// Checks if a particular key exists in a redis DB
+// tested_key (str): Key to be checked
+func red_key_check(redserver *redis.Client, tested_key string) bool{
+
+    _, err := redserver.Get(tested_key).Result()
+    if err == redis.Nil {
+        return false
+    }
+
+    return true
 }
