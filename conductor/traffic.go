@@ -9,7 +9,6 @@ Checks that a user is valid after login into wetty
 package main
 
 import (
-    "bytes"
     "errors"
     "fmt"
     "github.com/gorilla/mux"
@@ -64,19 +63,11 @@ var r_occupied *redis.Client = redis.NewClient(&redis.Options{
     })
 
 
-// Creates a temporary cache until user redirects
+// Creates a temporary cache for user redirections and similar
 var r_redirect_cache *redis.Client = redis.NewClient(&redis.Options{
     Addr: rurl2,
     Password: redauth,
     DB:1,
-    })
-
-
-// Stores user information before identifying with wetty
-var r_before_id *redis.Client = redis.NewClient(&redis.Options{
-    Addr: rurl2,
-    Password: redauth,
-    DB:2,
     })
 
 
@@ -177,33 +168,29 @@ func Redirect (w http.ResponseWriter, r *http.Request){
     UID := mux.Vars(r)["user_id"]
     TIP := mux.Vars(r)["target_ip"]
 
-    // Finds if the user is located at any instance
-    expected_user, err := r_redirect_cache.Get(TIP).Result()
-    _, e2 := r_before_id.Get(TIP).Result()
-    if (err == redis.Nil) || (e2 != redis.Nil) {
+    // Finds if the user is attached at any instance
+    user_instance := "NA"
+    available_redirect, _ := r_redirect_cache.Keys(Sadder(TIP, "*")).Result()
+    for _, avred := range available_redirect{
+        expected_user, err := r_redirect_cache.Get(avred).Result()
+        if err == redis.Nil{
+            continue
+        }
+        if expected_user == UID{
+            user_instance = avred
+            break
+        }
+    }
+
+    if user_instance == "NA"{
         fmt.Fprintf(w, "INVALID: %s has already been assigned to another user", TIP)
     } else {
+        // Gets the port number
+        user_instance = strings.Replace(user_instance, "_", ":", 1)
 
-        if UID == expected_user {
-            // Adds http:// to the user name
-            var b  bytes.Buffer
-            b.WriteString("http://")
-            b.WriteString(TIP)
-
-            // Instance is guaranteed to be attached
-            iport, _ :=  r_occupied.HGet(TIP, "port").Result()
-            b.WriteString(":")
-            b.WriteString(iport)
-
-            // 20s to complete redirect
-            r_redirect_cache.Set(TIP, UID, 20*time.Second)
-            r_before_id.Set(TIP, UID, 20*time.Second)
-
-            http.Redirect(w, r, b.String(), 302)
-
-        } else {
-            fmt.Fprintf(w, "INVALID, %s is not the expected user", UID)
-        }
+        // 20 s to complete redirect
+        r_redirect_cache.Set(user_instance, UID, 20*time.Second)
+        http.Redirect(w, r, Sadder("http://", user_instance), 302)
     }
 }
 
@@ -444,7 +431,6 @@ func Whoami (w http.ResponseWriter, r *http.Request) {
             r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
             // Deletes the temporary keys
             r_redirect_cache.Del(reqip)
-            r_before_id.Del(reqip)
             fmt.Fprintf(w, "%s", curuser)
 
         case redis.Nil:
