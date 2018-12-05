@@ -185,6 +185,8 @@ func Redirect (w http.ResponseWriter, r *http.Request){
     if user_instance == "NA"{
         fmt.Fprintf(w, "INVALID: %s has already been assigned to another user", TIP)
     } else {
+        // Deletes the redis copy
+        r_redirect_cache.Del(user_instance)
         // Gets the port number
         user_instance = strings.Replace(user_instance, "_", ":", 1)
 
@@ -418,29 +420,36 @@ func Whoami (w http.ResponseWriter, r *http.Request) {
     instances := redkeys(r_occupied)
     UID10 := mux.Vars(r)["uf10"]
 
-    if stringInSlice(reqip, instances) {
-
-        curuser, err := r_redirect_cache.Get(reqip).Result()
-
-        switch err {
-        case nil:
-
-            var current_user interface{} = curuser
-            var available interface{} = "No"
-            r_occupied.HSet(reqip, Sadder("Available_", pnn), available)
-            r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
-            // Deletes the temporary keys
-            r_redirect_cache.Del(reqip)
-            fmt.Fprintf(w, "%s", curuser)
-
-        case redis.Nil:
-            fmt.Fprintf(w, "Empty")
-        default:
-            fmt.Fprintf(w, "Server error, Redis is not attached")
-        }
-
+    // Gets the user instance    
+    user_port, err := Porter10(reqip, UID10)
+    
+    if err != nil {
+        fmt.Fprintf(w, "Empty") // If it does not exist, the user is either already there or the VM is not associated
     } else {
-        fmt.Fprintf(w, "INVALID: instance not attached")
+        // Gets the name of the instance
+        proper_location := Sadder(Sadder(reqip, ":"), user_port)
+        expected_user, e2 := r_redirect_cache.Get(proper_location).Result()
+
+        if e2 != nil{
+            // Deletes the cache
+            r_redirect_cache.Del(proper_location)
+            // Modifies redis to set the port as occupied
+            var current_user interface{} = expected_user
+            var available interface{} = "No"
+            r_occupied.HSet(reqip, Sadder("Available_", user_port), available)
+            r_occupied.HSet(reqip, Sadder("current_user_", user_port), current_user)
+
+            // If all ports are occupied, it sets the available tag as no
+            if len(empty_ports(reqip)) == 0{
+                r_occupied.HSet(reqip, "Available", available)
+            }
+
+            // Return the expected user
+            fmt.Fprintf(w, "%s", expected_user)
+
+        } else {
+            fmt.Fprintf(w, "Empty")
+        }
     }
 }
 
