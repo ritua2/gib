@@ -1,11 +1,17 @@
 #!/bin/bash
-export MANAGER_NODE="149.165.156.208"
 
 
-# Add startup script to recover user data from greyfish
-curl -O http://$MANAGER_NODE:5000/api/scripts/startup
 
-unset HISTFILE # No history
-source startup
+# Only useful for users, not maintenance
+if [ $USER = "gib" ]; then
 
-rm startup
+    # Add startup script from the orchestration server
+
+    curl -O http://$MANAGER_NODE:5000/api/scripts/startup
+
+    unset HISTFILE # No history
+    source startup
+
+    rm startup
+
+fi
