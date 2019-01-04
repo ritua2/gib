@@ -15,6 +15,7 @@ import (
     "github.com/go-redis/redis"
     "encoding/json"
     "math"
+    "math/rand"
     "net/http"
     "os"
     "strconv"
@@ -43,6 +44,15 @@ type Attach_Info struct {
 }
 
 
+// Source seed for random number generators
+var src = rand.NewSource(time.Now().UnixNano())
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+    letterIdxBits = 6                    // 6 bits to represent a letter index
+    letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+    letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
 
 var credential string = os.Getenv("orchestra_key")
 var redauth string = os.Getenv("REDIS_AUTH")
@@ -52,6 +62,10 @@ var PROJECT string = os.Getenv("PROJECT")
 var rurl =[]string{URL_BASE, ":6379"}
 var rurl2 string = strings.Join(rurl, "")
 
+// Obtains the permissions for greyfish
+var GREYFISH_URL string = os.Getenv("GREYFISH_URL")
+var GREYFISH_REDIS_KEY = os.Getenv("GREYFISH_REDIS_KEY")
+var greyurl string = Sadder(GREYFISH_URL, ":6379")
 
 
 // Creates a redis client for keeping tracking of which user is on which 
@@ -71,6 +85,15 @@ var r_redirect_cache *redis.Client = redis.NewClient(&redis.Options{
     })
 
 
+// Greyfish temporary token storage
+var greyfish_server *redis.Client = redis.NewClient(&redis.Options{
+    Addr: greyurl,
+    Password: GREYFISH_REDIS_KEY,
+    DB:3,
+    })
+
+
+
 
 func main(){
 
@@ -87,6 +110,11 @@ func main(){
     r.HandleFunc("/api/instance/freeme/{uf10}", Freeme).Methods("GET")
     r.HandleFunc("/api/instance/whoami/{uf10}", Whoami).Methods("GET")
     r.HandleFunc("/api/instance/whatsmyip", Whatsmyip).Methods("GET")
+
+    // Greyfish handlers
+    r.HandleFunc("/api/greyfish/location", Grey_locator).Methods("GET")
+    r.HandleFunc("/api/greyfish/new/single_use_token/{uf10}", Grey_stoken).Methods("GET")
+
     http.Handle("/", r)
 
 
@@ -110,6 +138,50 @@ func Project_name(w http.ResponseWriter, r *http.Request) {
 // Simple API check
 func Checker(w http.ResponseWriter, r *http.Request){
     fmt.Fprintf(w, "Orchestration node is active")
+}
+
+
+// Returns the location of the greyfish server (without 'http://')
+func Grey_locator(w http.ResponseWriter, r *http.Request){
+    fmt.Fprintf(w, "%s", GREYFISH_URL)
+}
+
+
+// Creates a new key for the user located at the present instance
+// Simply returns the key
+// Cannot be called from outside the instance
+
+func Grey_stoken (w http.ResponseWriter, r *http.Request){
+
+    reqip := ip_only(r.RemoteAddr)
+    instances := redkeys(r_occupied)
+    // First 10 charachers of password
+    UID10 := mux.Vars(r)["uf10"]
+
+    if stringInSlice(reqip, instances) {
+
+        // Checks the port number of the instance
+        pnn, err := Porter10(reqip, UID10)
+
+        if err != nil {
+                fmt.Fprintf(w, "INVALID: port not attached")
+        } else {
+
+            // Gets the associated username
+            curuser, _ := r_occupied.HGet(reqip, Sadder("current_user_", pnn)).Result()
+
+            if curuser != "Empty"{
+                // Creates a random string of characters (24 length), sets it as a token, and returns it
+                // Each token will last a maximum of 2 hours
+                new_token := random_string(24)
+                greyfish_server.Set(new_token, curuser, 7200*time.Second)
+
+                fmt.Fprintf(w, "Correctly freed instance")
+            }
+        }
+    } else {
+        fmt.Fprintf(w, "INVALID: instance not attached")
+    }
 }
 
 
@@ -611,4 +683,27 @@ func red_key_check(redserver *redis.Client, tested_key string) bool{
     }
 
     return true
+}
+
+
+// Creates a random string of fixed length
+// Based on https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
+
+func random_string(n int) string {
+
+    b := make([]byte, n)
+    // A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+    for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+        if remain == 0 {
+            cache, remain = src.Int63(), letterIdxMax
+        }
+        if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+            b[i] = letterBytes[idx]
+            i--
+        }
+        cache >>= letterIdxBits
+        remain--
+    }
+
+    return string(b)
 }
