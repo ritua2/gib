@@ -3,7 +3,7 @@
 
 
 # Only useful for users, not maintenance
-if [ $USER = "gib" ]; then
+if [ "$USER" = "gib" ]; then
 
     # Add startup script from the orchestration server
 

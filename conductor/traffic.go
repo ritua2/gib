@@ -175,8 +175,7 @@ func Grey_stoken (w http.ResponseWriter, r *http.Request){
                 // Each token will last a maximum of 2 hours
                 new_token := random_string(24)
                 greyfish_server.Set(new_token, curuser, 7200*time.Second)
-
-                fmt.Fprintf(w, "Correctly freed instance")
+                fmt.Fprintf(w, "%s", new_token)
             }
         }
     } else {

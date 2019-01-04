@@ -11,11 +11,11 @@ COPY main_daemon.sh    /bin/main_daemon
 RUN apk add --no-cache bash && adduser -D -h /home/gib -s /bin/bash gib  &&\
     echo "gib:" | chpasswd  &&\
     # Add sudo group
-    apk --no-cache  add shadow curl inotify-tools netcat-openbsd  &&  userdel -r term &&\
+    apk --no-cache  add shadow curl inotify-tools netcat-openbsd  e2fsprogs-extra &&  userdel -r term &&\
     # Startup scripts are immutable
     chown -R gib:gib /home/gib &&\
     # Disallows su
     chmod 000 /bin/su &&\
-    chmod +x /bin/main_daemon && chmod +x /bin/monitor*
+    chmod +x /bin/main_daemon
 
 CMD main_daemon

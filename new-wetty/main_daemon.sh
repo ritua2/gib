@@ -12,16 +12,15 @@ orchestra_key=
 # Changes the user profile to update the line
 sed -i '2s/.*/export MANAGER_NODE='"\"$conductor\""'/' /user_scripts/.profile
 
-
 # Adds the first 12 characters of the UUID key to the profile as a check
 # However, the full key is still required in order to remove individual ports
 UUID_f10="${NEW_UUID:0:12}"
-printf "export UUID_f10=\"$UUID_f10\"\n" >> /user_scripts/.profile
+sed -i '3s/.*/export UUID_f10='"\"$UUID_f10\""'/' /user_scripts/.profile
 
 
 # Adds the needed commands to global profile and logout
 cat /user_scripts/.profile >> /etc/profile
-cat /user_scripts/.bash_logout >> /etc/bash.bash_logout
+cat /user_scripts/.bash_logout >> /home/gib/.bash_logout
 
 # Deletes the old and unnecessary scripts
 rm /user_scripts/.profile /user_scripts/.bash_logout
