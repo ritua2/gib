@@ -7,7 +7,7 @@ if [ "$USER" != "root" ]; then
 
     if [ "$USER" != "Empty" ]; then
         # Free instance
-        curl http://$MANAGER_NODE:5000/api/instance/freeme/$UUID_f10
+        curl -s http://$MANAGER_NODE:5000/api/instance/freeme/$UUID_f10
 
         # Creates a temporary directory and moves all the stuff in the current one there
         tar -zcf summary.tar.gz  /home/gib

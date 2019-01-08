@@ -2,7 +2,7 @@
 
 
 # Gets the username
-export USER=$(curl http://$MANAGER_NODE:5000/api/instance/whoami/$UUID_f10)
+export USER=$(curl -s http://$MANAGER_NODE:5000/api/instance/whoami/$UUID_f10)
 
 
 
@@ -13,7 +13,7 @@ if [ "$USER" = "Empty" ]; then
 fi
 
 # Gets the greyfish server location
-export GS=$(curl http://$MANAGER_NODE:5000/api/greyfish/location)
+export GS=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/location)
 
 # Gets two greyfish keys
 GK1=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/new/single_use_token/$UUID_f10)
@@ -21,7 +21,7 @@ GK2=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/new/single_use_token/$UUID_
 
 
 # Gets all the user files
-curl http://$GS:2001/grey/get_all/$GK1/$USER > summary.tar.gz
+curl -s http://$GS:2001/grey/get_all/$GK1/$USER > summary.tar.gz
 
 # Checks that the previous data is actually tarred
 if { tar ztf "summary.tar.gz" || tar tf "summary.tar.gz"; } >/dev/null 2>&1; then
