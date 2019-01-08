@@ -129,7 +129,7 @@ RUN set -ex \
 
 # Changes done, needed for python APIs and python parsers
 COPY json_parser.py /bin/json_parser
-COPY selector.py /bin/selector_API
+COPY selector.py /bin/selector_API.py
 
 
 RUN chmod +x /bin/json_parser /bin/selector_API &&\

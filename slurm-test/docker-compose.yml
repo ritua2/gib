@@ -11,6 +11,7 @@ services:
     environment:
       - CONDUCTOR_IP
       - CONDUCTOR_PASSWORD
+      - ODP
 
     volumes:
       - ./volumes/lib:/var/lib/slurmd
