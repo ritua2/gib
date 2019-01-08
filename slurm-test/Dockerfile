@@ -132,7 +132,7 @@ COPY json_parser.py /bin/json_parser
 COPY selector.py /bin/selector_API.py
 
 
-RUN chmod +x /bin/json_parser /bin/selector_API &&\
+RUN chmod +x /bin/json_parser /bin/selector_API.py &&\
     pip3.6 install gunicorn Flask redis
 
 

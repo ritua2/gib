@@ -52,7 +52,7 @@ def job_upload():
 
 # Checks if an IP is valid or not
 def valid_IP(IP):
-    if IP in r.keys():
+    if str.encode(IP) in r.keys():
         return True
     return False
 

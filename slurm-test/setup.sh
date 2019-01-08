@@ -18,5 +18,5 @@ read CONDUCTOR_PASSWORD
 printf "Enter output data path: "
 read ODP
 
-CONDUCTOR_IP="$CONDUCTOR_IP"  CONDUCTOR_PASSWORD="$CONDUCTOR_PASSWORD" ODP="$ODP" docker-compose up -d --build
+CONDUCTOR_IP="$CONDUCTOR_IP"  CONDUCTOR_PASSWORD="$CONDUCTOR_PASSWORD" output_data_path="$ODP" docker-compose up -d --build
 cd ..
