@@ -15,7 +15,7 @@ import uuid
 
 app = Flask(__name__)
 DOWNLOAD_PATH = os.environ['output_data_path']
-CURDIR = dir_path = os.path.dirname(os.path.realpath(__file__)) # Current director
+CURDIR = dir_path = os.path.dirname(os.path.realpath(__file__)) # Current directory
 PSSWRD = os.environ['listener_password']
 
 

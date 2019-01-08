@@ -8,6 +8,10 @@ services:
     tty: true
     ports:
       - "5000-5800:5000-5800"
+    environment:
+      - CONDUCTOR_IP
+      - CONDUCTOR_PASSWORD
+
     volumes:
       - ./volumes/lib:/var/lib/slurmd
       - ./volumes/spool:/var/spool/slurmd
