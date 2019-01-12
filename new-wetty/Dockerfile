@@ -5,6 +5,7 @@ COPY user_profile.sh /user_scripts/.profile
 COPY bash_logout.sh  /user_scripts/.bash_logout
 COPY introduction.txt /etc/motd
 COPY main_daemon.sh    /bin/main_daemon
+COPY sender.sh /bin/sender
 
 USER root
 

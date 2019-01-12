@@ -8,6 +8,8 @@ printf "$NEW_UUID" > ./autokey
 
 conductor=
 orchestra_key=
+# Must include http://----:port (no final / )
+SLURM=
 
 # Changes the user profile to update the line
 sed -i '2s/.*/export MANAGER_NODE='"\"$conductor\""'/' /user_scripts/.profile
@@ -16,6 +18,7 @@ sed -i '2s/.*/export MANAGER_NODE='"\"$conductor\""'/' /user_scripts/.profile
 # However, the full key is still required in order to remove individual ports
 UUID_f10="${NEW_UUID:0:12}"
 sed -i '3s/.*/export UUID_f10='"\"$UUID_f10\""'/' /user_scripts/.profile
+sed -i '4s/.*/export SLURM='"\"$SLURM\""'/' /user_scripts/.profile
 
 
 # Adds the needed commands to global profile and logout
