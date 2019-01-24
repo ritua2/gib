@@ -65,10 +65,10 @@ function sender     {
     # Commands
     ###############
 
-    printf "${BLUEBLUE}  Enter the list of input commands (must be bash compatible), as you would in a terminal${NCNC}\n"
+    printf "${BLUEBLUE}  Enter the list of compile commands (must be bash compatible), as you would in a terminal${NCNC}\n"
     printf "${BLUEBLUE}  Empty command to finish ${NCNC}\n"
 
-    number_of_commands=0
+    compile_commands=0
 
     while true
     do
@@ -79,9 +79,30 @@ function sender     {
             break
         fi
 
-        printf "\"$number_of_commands\":\"$COMSAFE\",\n" >> $jfile
+        printf "\"C$compile_commands\":\"$COMSAFE\",\n" >> $jfile
 
-        number_of_commands=$(($number_of_commands + 1))
+        compile_commands=$(($compile_commands + 1))
+
+    done
+
+    printf "\n\n\n"
+    printf "${BLUEBLUE}  Enter the list of run commands (must be bash compatible), as you would in a terminal${NCNC}\n"
+    printf "${BLUEBLUE}  Empty command to finish ${NCNC}\n"
+
+    run_commands=0
+
+    while true
+    do
+        read COM
+        COMSAFE="${COM//\"/\\\\\"}" 
+
+        if [ -z "$COM" ]; then
+            break
+        fi
+
+        printf "\"R$run_commands\":\"$COMSAFE\",\n" >> $jfile
+
+        run_commands=$(($run_commands + 1))
 
     done
 
@@ -151,9 +172,10 @@ function sender     {
     unix_time=$(date +%s)
 
     # Adds other metadata
-    printf "\"NC\":\"$number_of_commands\",\n" >> $jfile
+    printf "\"CC\":\"$compile_commands\",\n" >> $jfile
+    printf "\"RC\":\"$run_commands\",\n" >> $jfile
     printf "\"Unix_time\":\"$unix_time\",\n" >> $jfile
-    printf "\"Date\":\"$YYYYMMDD\"\n}" >> $jfile
+    printf "\"Date\":\"$YYYYMMDD\"\n}\n" >> $jfile
 
 
     zip -r "$newdir".zip "$newdir"
