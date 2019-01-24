@@ -41,7 +41,7 @@ export PROJECT=$(curl -s http://$MANAGER_NODE:5000/api/project/name)
 PS1="$USER@$PROJECT: $PWD \$ " 
 
 
-function sender     {
+function slurm_submit     {
 
     # Colors, helpful for printing
     GREENGREEN='\033[0;32m'
@@ -172,8 +172,39 @@ function sender     {
     unix_time=$(date +%s)
 
     # Adds other metadata
-    printf "\"CC\":\"$compile_commands\",\n" >> $jfile
-    printf "\"RC\":\"$run_commands\",\n" >> $jfile
+
+    total_commands=$(($compile_commands + $run_commands))
+
+    case "$total_commands" in
+        "2")
+            printf "\"CC\":\"$compile_commands\",\n" >> $jfile
+            printf "\"RC\":\"$run_commands\",\n" >> $jfile
+            printf "\"Job\":\"Both\",\n" >> $jfile
+            ;;
+
+        "1")
+            if [ "$compile_commands" -ne "0" ]; then
+                printf "\"CC\":\"$compile_commands\",\n" >> $jfile
+                printf "\"Job\":\"Compile\",\n" >> $jfile
+
+            fi
+
+            if [ "$run_commands" -ne "0" ]; then
+                printf "\"RC\":\"$compile_commands\",\n" >> $jfile
+                printf "\"Job\":\"Run\",\n" >> $jfile
+
+            fi
+            ;;
+
+        "0")
+            # No commands submitted
+            printf "${REDRED}INVALID job, no commands provided${NCNC}\n\n"
+            rm -rf "$newdir"*
+            exit
+            ;;
+    esac
+
+
     printf "\"Unix_time\":\"$unix_time\",\n" >> $jfile
     printf "\"Date\":\"$YYYYMMDD\"\n}\n" >> $jfile
 
