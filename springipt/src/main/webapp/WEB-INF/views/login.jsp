@@ -26,6 +26,9 @@
 
     </div>
 </div>-->
+<c:if test="${pageContext.request.userPrincipal.name != null}">
+    <script>window.location.replace("${contextPath}/welcome");</script>
+</c:if>
 
 <div class="Site-content">
   <!-- LOGIN FORM -->

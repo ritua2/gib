@@ -11,21 +11,21 @@
                     <h5>Get started</h5>
                     <ul>
                         <li><a href="${contextPath}/welcome">Home</a></li>
-                        <li><a href="#">Sign up</a></li>
+                        <li><a href="${contextPath}/login">Sign up</a></li>
                     </ul>
                 </div>
                 <div class="col-sm-3">
                     <h5>About us</h5>
                     <ul>
-                        <li><a href="#">Details about IPT</a></li>
-                        <li><a href="#">Contact us</a></li>
+                        <li><a href="#">Project Overview</a></li>
+                        <li><a href="#">Project Team</a></li>
                     </ul>
                 </div>
                 <div class="col-sm-3">
                     <h5>Support</h5>
                     <ul>
                         <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Forums</a></li>
+                        <li><a href="${contextPath}/comments">Forums</a></li>
                     </ul>
                 </div>
                 <div class="col-sm-3 info">
