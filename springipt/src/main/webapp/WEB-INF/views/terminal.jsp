@@ -6,82 +6,84 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="base.jsp" />
-<h1>Terminal</h1>
-<!-- This particular block template is only for a tab header.
-This block can be modified or removed completely, just be sure to remove the
-opening and closing "headersum" blocks.  -->
-<!-- {% endblock %}
+<div class="container">
+    <h1>Terminal</h1>
+    <!-- This particular block template is only for a tab header.
+    This block can be modified or removed completely, just be sure to remove the
+    opening and closing "headersum" blocks.  -->
+    <!-- {% endblock %}
 
-{% block body %} -->
-<table cellpadding="0" cellspacing="0" width="100%" height="350px">
-<tr>
-  <td width="75%">
-  <div class="terminal">
-    <!-- {% if url %} -->
-    <%-- <c:if test="url"> --%>
-      <iframe id="webterm" src="http://<%= System.getenv("WETTY_SERVER") %>:3000/wetty/"  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
-    <!-- {% else %} -->
-<%--     </c:if>
-    <c:if test="url"> --%>
-      <!-- <iframe id="webterm" src=""  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe> -->
-    <!-- {% endif %} -->
-<%--     </c:if> --%>
+    {% block body %} -->
+    <table cellpadding="0" cellspacing="0" width="100%" height="350px">
+    <tr>
+      <td width="75%">
+      <div class="terminal">
+        <!-- {% if url %} -->
+        <%-- <c:if test="url"> --%>
+          <iframe id="webterm" src="http://<%= System.getenv("WETTY_SERVER") %>:3000/wetty/"  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+        <!-- {% else %} -->
+    <%--     </c:if>
+        <c:if test="url"> --%>
+          <!-- <iframe id="webterm" src=""  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe> -->
+        <!-- {% endif %} -->
+    <%--     </c:if> --%>
+      </div>
+      </td>
+      <td valign="top">
+      <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Upload Additional Files and they will show up in /home/ipt within your IPT terminal."><h3>File Upload</h3></a>
+      <form id="uploadForm" action="${contextPath}/terminal/upload" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <div id="myRadioGroup">
+        File upload <input type="radio" name="filefolder" checked="checked" value="file" />
+        Folder upload <input type="radio" name="filefolder" value="folder" />
+        <div id="file" class="desc">
+    	    <div class="form-group">
+    	        <input type="file" class="form-control" id="file"
+    	                       placeholder="Add additional files or folders" name="fileToUpload" >
+    	    </div>
+        </div>
+        <div id="folder" class="desc">
+    	    <div class="form-group">
+    	        <input type="file" class="form-control" id="folder"
+    	                       placeholder="Add additional files or folders" name="folderToUpload" webkitdirectory mozdirectory directory multiple>
+    	        <input type="hidden" id="uploadId" name="hiddenInput">
+    	    </div>
+        </div>
+    	</div>
+        <div class="text-right">
+          <button type="submit" class="btn btn-default">Upload</button>
+        </div>
+      </form>
+      <br/><br/>
+      
+        <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Select file or folder to download. Folder path ends with a slash '/' "><h3>Download File/Folder </h3></a>
+      <form id="downloadForm" method="GET" action="${contextPath}/terminal/download" enctype="multipart/form-data">
+          <div class="form-group">
+    	  <select id=fileToDownload>
+      	    <option value="">--Select--</option>
+    	  </select>
+              <input type="hidden" name="action" value="download">
+          </div>
+          <table>
+    	<td width="80%">
+          <div class="text-left">
+              <button id=refreshList type="button" class="btn btn-default">Refresh List</button>
+          </div>
+    	</td>
+    	<td align="right">
+          <div class="text-right">
+              <button type="submit" class="btn btn-default">Download</button>
+          </div>
+    	</td>
+          </table>
+      </form>
+
+      </td>
+    </tr>
+    </table>
   </div>
-  </td>
-  <td valign="top">
-  <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Upload Additional Files and they will show up in /home/ipt within your IPT terminal."><h3>File Upload</h3></a>
-  <form id="uploadForm" action="${contextPath}/terminal/upload" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-    <div id="myRadioGroup">
-    File upload <input type="radio" name="filefolder" checked="checked" value="file" />
-    Folder upload <input type="radio" name="filefolder" value="folder" />
-    <div id="file" class="desc">
-	    <div class="form-group">
-	        <input type="file" class="form-control" id="file"
-	                       placeholder="Add additional files or folders" name="fileToUpload" >
-	    </div>
-    </div>
-    <div id="folder" class="desc">
-	    <div class="form-group">
-	        <input type="file" class="form-control" id="folder"
-	                       placeholder="Add additional files or folders" name="folderToUpload" webkitdirectory mozdirectory directory multiple>
-	        <input type="hidden" id="uploadId" name="hiddenInput">
-	    </div>
-    </div>
-	</div>
-    <div class="text-right">
-      <button type="submit" class="btn btn-default">Upload</button>
-    </div>
-  </form>
-  <br/><br/>
+    <!-- {% endblock %}
   
-    <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Select file or folder to download. Folder path ends with a slash '/' "><h3>Download File/Folder </h3></a>
-  <form id="downloadForm" method="GET" action="${contextPath}/terminal/download" enctype="multipart/form-data">
-      <div class="form-group">
-	  <select id=fileToDownload>
-  	    <option value="">--Select--</option>
-	  </select>
-          <input type="hidden" name="action" value="download">
-      </div>
-      <table>
-	<td width="80%">
-      <div class="text-left">
-          <button id=refreshList type="button" class="btn btn-default">Refresh List</button>
-      </div>
-	</td>
-	<td align="right">
-      <div class="text-right">
-          <button type="submit" class="btn btn-default">Download</button>
-      </div>
-	</td>
-      </table>
-  </form>
-
-  </td>
-</tr>
-</table>
-<!-- {% endblock %}
-
 {% block scripts %} -->
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
   <script>
@@ -220,3 +222,5 @@ opening and closing "headersum" blocks.  -->
       });
   </script>
 <!-- {% endblock %} -->
+
+<jsp:include page="footer.jsp" />
