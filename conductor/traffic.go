@@ -92,6 +92,13 @@ var greyfish_server *redis.Client = redis.NewClient(&redis.Options{
     DB:3,
     })
 
+// Greyfish temporary token storage
+var misc *redis.Client = redis.NewClient(&redis.Options{
+    Addr: rurl2,
+    Password: redauth,
+    DB:4,
+    })
+
 
 
 
@@ -101,6 +108,7 @@ func main(){
 
     r.HandleFunc("/api/scripts/startup", Startup_supplier).Methods("GET")
     r.HandleFunc("/api/project/name", Project_name).Methods("GET")
+    r.HandleFunc("/api/status/containers/available", AvCon_API).Methods("GET")
     r.HandleFunc("/api/active", Checker).Methods("GET")
     r.HandleFunc("/api/assign/users/{user_id}", Assigner).Methods("POST")
     r.HandleFunc("/api/redirect/users/{user_id}/{target_ip}", Redirect).Methods("GET")
@@ -132,6 +140,12 @@ func Startup_supplier(w http.ResponseWriter, r *http.Request) {
 // Returns the project name
 func Project_name(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "%s", PROJECT)
+}
+
+
+// Returns a string of the available docker containers
+func AvCon_API(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "%s", available_containers())
 }
 
 
@@ -307,6 +321,7 @@ func Attachme (w http.ResponseWriter, r *http.Request){
                     r_occupied.HSet(reqip, strings.Join([]string{"Available", iport}, "_"), available)
                     r_occupied.HSet(reqip, strings.Join([]string{"current_user", iport}, "_"), current_user)
                     r_occupied.HSet(reqip, strings.Join([]string{"id", iport}, "_"), id)
+                    change_container_availability(1)
                     fmt.Fprintf(w, "Added port %s", iport)
                 } else {
                     fmt.Fprintf(w, "Port has already been added")
@@ -330,6 +345,7 @@ func Attachme (w http.ResponseWriter, r *http.Request){
                 if e2 != nil {
                     fmt.Fprintf(w, "Server error, Redis is not attached")
                 } else{
+                    change_container_availability(1)
                     fmt.Fprintf(w, "Instance correctly attached")
                 }
             }
@@ -363,6 +379,7 @@ func Removeme (w http.ResponseWriter, r *http.Request) {
 
                     switch e2 {
                     case nil:
+                        change_container_availability(-1)
                         fmt.Fprintf(w, "Instance removed")
                     default:
                         fmt.Fprintf(w, "Server error, Redis is not attached")
@@ -415,6 +432,7 @@ func Remove_my_port (w http.ResponseWriter, r *http.Request) {
 
                     switch e2 {
                     case nil:
+                        change_container_availability(-1)
                         fmt.Fprintf(w, "Instance removed")
                     default:
                         fmt.Fprintf(w, "Server error, Redis is not attached")
@@ -429,6 +447,7 @@ func Remove_my_port (w http.ResponseWriter, r *http.Request) {
                         r_occupied.HDel(reqip, Sadder("id_", iport), Sadder("current_user_", iport), Sadder("Available_", iport))
                         // Changes the port number
                         r_occupied.HIncrBy(reqip, "Ports", -1*int64(math.Pow(2, float64((port_number-7000)%10))))
+                        change_container_availability(-1)
                         fmt.Fprintf(w, "Removed port from instance")
 
                     } else {
@@ -474,6 +493,7 @@ func Freeme (w http.ResponseWriter, r *http.Request){
             r_occupied.HSet(reqip, Sadder("current_user_", pnn), current_user)
 
             fmt.Fprintf(w, "Correctly freed instance")
+            change_container_availability(1)
             r_occupied.HSet(reqip, "Available", available)
         }
 
@@ -515,6 +535,7 @@ func Whoami (w http.ResponseWriter, r *http.Request) {
             }
 
             // Return the expected user
+            change_container_availability(-1)
             fmt.Fprintf(w, "%s", expected_user)
 
         } else {
@@ -706,3 +727,24 @@ func random_string(n int) string {
 
     return string(b)
 }
+
+
+
+// Adds one to the counter of available systems
+func available_containers() string {
+
+    val, err := misc.Get("Available containers").Result()
+    if err != nil {
+        return "Redis is not correctly setup"
+    }
+    
+    return val
+}
+
+
+
+// Adds to the list of available containers, one by default
+func change_container_availability(a1 int64) {
+    misc.IncrBy("Available containers", a1)
+}
+

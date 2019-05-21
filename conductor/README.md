@@ -9,8 +9,6 @@ the base URL for the project, and the base key to be used administrative purpose
 
 
 ```bash
-	# Change the influxdb log credentials
-	vi credentials.yml
 	# Select a redis password
-	URL_BASE=$SERVER_URL REDIS_AUTH=$REDIS_AUTH orchestra_key=$ORCHESTRA_KEY PROJECT=$PROJECT_NAME  docker-compose up -d --build
+	URL_BASE=example.com REDIS_AUTH=redispassword orchestra_key=orchestra PROJECT=gib GREYFISH_URL=greyfishexample.com GREYFISH_REDIS_KEY=greyfish  docker-compose up -d --build
 ```

@@ -12,6 +12,7 @@ services:
     environment:
       - conductor
       - orchestra_key
+      - SLURM
 
     ports:
       - "7005:3000"
