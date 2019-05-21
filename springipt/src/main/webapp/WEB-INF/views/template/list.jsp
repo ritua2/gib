@@ -3,12 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
-<!DOCTYPE html>
-<html lang="en">
 <jsp:include page="../base.jsp" />
 <jsp:include page="../fragments/header.jsp" />
-
-<body>
 
 	<div class="container">
 
@@ -68,7 +64,4 @@
 
 	</div>
 
-	<jsp:include page="../fragments/footer.jsp" />
-
-</body>
-</html>
+<jsp:include page="footer.jsp" />
