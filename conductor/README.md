@@ -4,9 +4,8 @@
 **Installation**  
 
 All setup is autmatic after the repository has been initialized. User simply needs to specify the Redis key,
-the base URL for the project, and the base key to be used administrative purposes.  
-The InfluxDB database, although installed, is not used for the current iteration of the project. Nonetheless,
-it will be used in the future to maintain user access logs.
+the base URL for the project, and the base key to be used administrative purposes.
+
 
 
 ```bash

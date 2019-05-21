@@ -21,23 +21,6 @@ services:
       command: go run traffic.go
 
 
-
-    influxdb:
-      image: "influxdb:latest"
-      volumes:
-        - ./data/influxdb:/var/lib/influxdb
-      ports:
-        - "8086:8086"
-        - "8083:8083"
-      extends:
-        file:
-          credentials.yml
-        service:
-          db_creds
-      command: "influxd"
-
-
-
     redis:
       image: 'redis:4-alpine'
       environment:
