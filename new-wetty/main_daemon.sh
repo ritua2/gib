@@ -6,10 +6,6 @@ NEW_UUID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 printf "$NEW_UUID" > ./autokey
 
-conductor=
-orchestra_key=
-# Must include http://----:port (no final / )
-SLURM=
 
 # Changes the user profile to update the line
 sed -i '2s/.*/export MANAGER_NODE='"\"$conductor\""'/' /user_scripts/.profile

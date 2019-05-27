@@ -227,7 +227,7 @@ func Assigner(w http.ResponseWriter, r *http.Request){
                     }
                     // Sets the instance as occupied, server now has 20 s to redirect user
                     r_redirect_cache.Set(Sadder(instance_, emp), UID, 20*time.Second)
-                    fmt.Fprintf(w, "User assigned to: %s", Sadder(Sadder(instance, ":"), emp))
+                    fmt.Fprintf(w, "%s", Sadder(Sadder(instance, ":"), emp))
                     all_instances_occupied = false
                     break
                 }
@@ -237,7 +237,7 @@ func Assigner(w http.ResponseWriter, r *http.Request){
             }
 
             if all_instances_occupied {
-                fmt.Fprintf(w, "INVALID: cannot assign user, all instances are occupied")
+                fmt.Fprintf(w, "False")
             }
 
         } else {
@@ -277,6 +277,9 @@ func Redirect (w http.ResponseWriter, r *http.Request){
 
         // 20 s to complete redirect
         r_redirect_cache.Set(user_instance, UID, 20*time.Second)
+
+        // Automatic login by: wetty/ssh/<username>?sshpass=<password>
+
         http.Redirect(w, r, Sadder("http://", user_instance), 302)
     }
 }
@@ -730,7 +733,7 @@ func random_string(n int) string {
 
 
 
-// Adds one to the counter of available systems
+// Finds the available containers
 func available_containers() string {
 
     val, err := misc.Get("Available containers").Result()
@@ -743,7 +746,7 @@ func available_containers() string {
 
 
 
-// Adds to the list of available containers, one by default
+// Adds to the list of available containers
 func change_container_availability(a1 int64) {
     misc.IncrBy("Available containers", a1)
 }

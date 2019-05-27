@@ -18,8 +18,7 @@ services:
         - PROJECT
         - GREYFISH_URL
         - GREYFISH_REDIS_KEY
-        - gthreads
-      command: gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app
+      command: go run traffic.go
 
 
     redis:
