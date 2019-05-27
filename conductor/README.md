@@ -16,4 +16,4 @@ the base URL for the project, and the base key to be used administrative purpose
 
 **Note**
 
-A previous version of the current code, written in python is available [here](./gocode).
+A previous version of the current code, written in go is available [here](./gocode). Both are similar as of May 27th, 2019 but the go version will no longer be maintained.
