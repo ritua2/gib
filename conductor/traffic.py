@@ -22,15 +22,11 @@ GREYFISH_URL = os.environ["GREYFISH_URL"]
 GREYFISH_REDIS_KEY = os.environ["GREYFISH_REDIS_KEY"]
 
 
-# Redis 
-r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
-r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
-greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
-misc = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
 
 
 # Adds to the list of available containers
 def change_container_availability(a1):
+    misc = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
     misc.incrby("Available containers", a1)
 
 
@@ -61,6 +57,7 @@ def red_key_check(rdb, tested_key):
 
 
 def available_instances():
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     instances_av = []
     for insip in redkeys(r_occupied):
         abav = r_occupied.hget(insip, "Available").decode("UTF-8")
@@ -75,6 +72,7 @@ def available_instances():
 # instance (str)
 def ports_occupied(instance):
 
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     redports = int(r_occupied.hget(instance, "Ports").decode("UTF-8"))
     # Shows the ports in binary: 0b100 = 4, and reverses it
     portsn = bin(redports)[2:][::-1]
@@ -91,6 +89,7 @@ def ports_occupied(instance):
 # vmip (str): VM IP
 def empty_ports(vmip):
 
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     ep = []
     abav = r_occupied.hget(vmip, "Available").decode("UTF-8")
     if abav == "No":
@@ -109,6 +108,7 @@ def empty_ports(vmip):
 # kk (str): key
 # port_used (str)
 def Valid_PK(vmip, kk, port_used):
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     expected_key = r_occupied.hget(vmip, "id_"+port_used).decode("UTF-8")
     if expected_key == kk:
         return True
@@ -121,6 +121,7 @@ def Valid_PK(vmip, kk, port_used):
 # If the port is not associated with anything, it returns ["NA", 1]
 def Porter10(vmip, kk):
 
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     for pn in ports_occupied(vmip):
         expected_key = r_occupied.hget(vmip, "id_"+pn).decode("UTF-8")
         if kk in expected_key:
@@ -170,6 +171,7 @@ def project_name():
 # Returns a string of available docker containers
 @app.route("/api/status/containers/available", methods=['GET'])
 def AvCon_API():
+    misc = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
     return misc.get("Available containers").decode("UTF-8")
 
 
@@ -182,6 +184,8 @@ def active():
 
 @app.route("/api/assign/users/<user_id>", methods=['POST'])
 def assigner(user_id):
+
+    r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -223,6 +227,8 @@ def assigner(user_id):
 @app.route("/api/redirect/users/<user_id>/<target_ip>", methods=['GET'])
 def redirect_to_wetty(user_id, target_ip):
 
+    r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
+
     # Finds if the user is attached to any instance
     available_redirect = [x.decode("UTF-8") for x in r_redirect_cache.keys(target_ip+"_*")]
     for avred in available_redirect:
@@ -251,6 +257,8 @@ def redirect_to_wetty(user_id, target_ip):
 
 @app.route("/api/instance/attachme", methods=['POST'])
 def attachme():
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -312,6 +320,8 @@ def attachme():
 @app.route("/api/instance/removeme", methods=['POST'])
 def removeme():
 
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+
     if not request.is_json:
         return "POST parameters could not be parsed"
 
@@ -341,6 +351,8 @@ def removeme():
 # This is an instantaneous action and it does not matter if there is a user already in the instance
 @app.route("/api/instance/remove_my_port", methods=['POST'])
 def remove_my_port():
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -392,6 +404,9 @@ def remove_my_port():
 # Needs to be executed from within the machine itself
 @app.route("/api/instance/freeme/<uf10>", methods=['GET'])
 def freeme(uf10):
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+
     reqip = request.environ['REMOTE_ADDR']
     instances = redkeys(r_occupied)
 
@@ -417,6 +432,10 @@ def freeme(uf10):
 # Sets up the Redis table with the instance as occupied
 @app.route("/api/instance/whoami/<uf10>", methods=['GET'])
 def whoami(uf10):
+
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
 
     reqip = request.environ['REMOTE_ADDR']
     user_port, err = Porter10(reqip, uf10)
@@ -471,6 +490,9 @@ def grey_locator():
 # Cannot be called from outside the instance
 @app.route("/api/greyfish/new/single_use_token/<uf10>", methods=['GET'])
 def grey_stoken(uf10):
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
 
     reqip = request.environ['REMOTE_ADDR']
     instances = redkeys(r_occupied)
