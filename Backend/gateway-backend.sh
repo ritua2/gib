@@ -9,15 +9,26 @@ unzip_files_folder=$(grep UnzipFilesFolder configure | cut -d"=" -f2)
 scheduling_system=$(grep ScheduleingSystem configure | cut -d"=" -f2)
 serverip=$(grep MainServerIP configure | cut -d'=' -f2)
 greyfiship=$(grep GreyFishIP configure | cut -d'=' -f2)
-
+greyfishkey=greyfish
 
 
 currentdir=$(pwd)
 # Getting the files from greyfish
 cd $folder_to_check
-curl -O http://$greyfiship:2000/grey/grey_dir/greyfish/commonuser/jobs_left
-tar -xzf jobs_left
-rm jobs_left
+jobs_left=$(wget --content-disposition http://$greyfiship:2000/grey/download_checksum_dir/$greyfishkey/commonuser/jobs_left 2>&1 | grep "Saving to" | cut -d':' -f2| cut -d' ' -f2 | tr -cd "[:print:]")
+echo "Download $jobs_left"
+checksum=$(cat $jobs_left | shasum -a 256 |cut -c1-8)
+echo $checksum
+while [ $(basename $jobs_left) != ${checksum}.tar.gz ]; do 
+	echo $checksum.tar.gz is not equal $jobs_left.tar.gz
+	rm $jobs_left
+	jobs_left=$(wget --content-disposition http://$greyfiship:2000/grey/grey/$greyfishkey/commonuser/$jobs_left/checksum_files 2>&1 | grep "Saving to" | cut -d':' -f2| cut -d' ' -f2 | tr -cd "[:print:]")
+	checksum=$(cat $jobs_left | shasum -a 256 |cut -c1-8)
+done 
+
+curl http://$greyfiship:2000/grey/delete_checksum_file/${greyfishkey}/commonuser/$jobs_left
+tar -xzf $jobs_left
+rm $jobs_left
 
 cd $currentdir
 
@@ -90,7 +101,7 @@ for j in $new_compile_jobs; do
 	# sending back results
 	cd $currentdir
 	tar -czf $unzip_files_folder/${name}_output.tar.gz $unzip_files_folder/$name/*
-	curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://${greyfiship}:2000/grey/upload/greyfish/${username}/${name}
+	curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://${greyfiship}:2000/grey/upload/${greyfishkey}/${username}/${name}
 
 	# zip -r ${name}_output.zip  $unzip_files_folder/$name
 	# curl -F file=@$unzip_files_folder/$name/${name}_output.zip http://${greyfiship}:2000/grey/upload/dev/commonuser/output
@@ -118,7 +129,7 @@ for j in $finished_jobs; do
 	username=$(python ${currentdir}/json_parser.py meta.json User)
 	cd $currentdir
 	tar -czf $unzip_files_folder/${name}_output.tar.gz $unzip_files_folder/$name/*
-	curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://${greyfiship}:2000/grey/upload/greyfish/${username}/${name}
+	curl -F file=@$unzip_files_folder/${name}_output.tar.gz http://${greyfiship}:2000/grey/upload/${greyfishkey}/${username}/${name}
 	# curl --header "Content-Type: application/json" --request POST --data "{\"Job_ID\":\"$name\", \"password\":\"abc123\",\"User\":\"akn752\", \"OUTPUT_DIRS\":[], \"OUTPUT_FILES\":[]}" http://${serverip}:5000/listener/api/users/output_data
 	# zip -r $unzip_files_folder/$name/${name}_output.zip $unzip_files_folder/$name
 	# curl -F file=@$unzip_files_folder/$name/${name}_output.zip http://${greyfiship}:2000/grey/upload/dev/commonuser/output
