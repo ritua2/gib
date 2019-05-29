@@ -247,8 +247,12 @@ public class UploadController {
 		}
 
 		try {
-			Process p = Runtime.getRuntime().exec("scp -o \"StrictHostKeyChecking no\" -i /usr/local/tomcat/.ssh/PrivateKey.ppk /usr/local/tomcat/compile01.zip akn752@comet.sdsc.edu:/home/akn752");
+			Process p = Runtime.getRuntime().exec("scp -i /usr/local/tomcat/.ssh/PrivateKey.ppk /usr/local/tomcat/compile01.zip akn752@comet.sdsc.edu:/home/akn752");
+			int exitCode = p.waitFor();
+            System.out.println("File transferred ExitCode=" + exitCode);
 		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
@@ -317,7 +321,7 @@ public class UploadController {
 		}
 
 		try {
-			Process p = Runtime.getRuntime().exec("scp -o \"StrictHostKeyChecking no\" -i /usr/local/tomcat/.ssh/PrivateKey.ppk /usr/local/tomcat/run01.zip akn752@comet.sdsc.edu:/home/akn752");
+			Process p = Runtime.getRuntime().exec("scp -i /usr/local/tomcat/.ssh/PrivateKey.ppk /usr/local/tomcat/run01.zip akn752@comet.sdsc.edu:/home/akn752");
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
