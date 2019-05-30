@@ -18,6 +18,7 @@ COPY grey_regular.py    /grey/grey_regular.py
 COPY admin.py           /grey/admin.py
 COPY API_Daemon.sh      /grey/API_Daemon.sh
 COPY setup.sh           /grey/setup.sh
+COPY checksums.py       /grey/checksums.py
 
 
 # Installs the necessary packages

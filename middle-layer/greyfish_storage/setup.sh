@@ -8,27 +8,24 @@
 #  | -deletes:   Deleted file/dir
 #  | -overhaul:  Only covers users who have completely updated their repo using the appropriate command
 
-if [ "$influx_command" = "influxd" ]; then
 
-   curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query --data-urlencode 'q=CREATE DATABASE "greyfish"'
-   curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query --data-urlencode 'q=CREATE DATABASE "failed_login"'
-   printf "Created InfluxDB databases\n"
+curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query --data-urlencode 'q=CREATE DATABASE "greyfish"'
+curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query --data-urlencode 'q=CREATE DATABASE "failed_login"'
+printf "Created InfluxDB databases\n"
 
-   # Assigns write privileges
-   curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query \
-        --data-urlencode "q=GRANT WRITE ON \"greyfish\" TO \"$INFLUXDB_WRITE_USER\""
-   curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query \
-    	--data-urlencode "q=GRANT WRITE ON \"failed_login\" TO \"$INFLUXDB_WRITE_USER\""
+# Assigns write privileges
+curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query \
+    --data-urlencode "q=GRANT WRITE ON \"greyfish\" TO \"$INFLUXDB_WRITE_USER\""
+curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query \
+	--data-urlencode "q=GRANT WRITE ON \"failed_login\" TO \"$INFLUXDB_WRITE_USER\""
 
-   # Assigns read privileges
-   curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query \
-        --data-urlencode "q=GRANT READ ON \"greyfish\" TO \"$INFLUXDB_READ_USER\""
+# Assigns read privileges
+curl -XPOST -u $INFLUXDB_ADMIN_USER:$INFLUXDB_ADMIN_PASSWORD  http://$URL_BASE:8086/query \
+    --data-urlencode "q=GRANT READ ON \"greyfish\" TO \"$INFLUXDB_READ_USER\""
 
-   # False logins remain an admin priviledge
+# False logins remain an admin priviledge
 
-   printf "Database privileges have been added\n"
-
-fi
+printf "Database privileges have been added\n"
 
 
 rm -- "$0"

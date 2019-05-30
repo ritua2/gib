@@ -11,8 +11,8 @@ from influxdb import InfluxDBClient
 
 
 # Checks for correct codes
-influx_logs = os.environ["influx_command"] == "influxd"
-redis_active = os.environ["redis_command"] == "redis-server --requirepass $REDIS_AUTH"
+influx_logs = True # Logs are always active
+redis_active = True # Always active
 
 if redis_active:
 

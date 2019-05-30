@@ -4,21 +4,22 @@
 **Installation**  
 
 All setup is automatic after the repository has been downloaded. Modify the environmental variables in command line or in *.env*.
+It is strongly recommended that the user change all the passwords and keys provided.
 
-For example, to change the URL and orchestration key alone:
 
 
 
 ```bash
 	# Select a redis password
-	URL_BASE=example.com orchestra_key=orchestra docker-compose up -d --build
+	source .env
+	docker-compose up -d --build
 ```
 
 To activate or switch off the APIs, enter the greyfish docker container and do:  
 
 ```bash
 # Enter container
-docker exec -it middle-layer_greyfish_1 bash
+docker exec -it greyfish bash
 cd /grey
 # Start the needed databases and assign permission (APIs will not be started)
 /grey/setup.sh

@@ -46,14 +46,6 @@ cd /grey
 Note: deactivating the APIs will not change or delete any data, it will simply no longer be able to accept communications from outside.
 
 
-**Partial installations**  
-
-* Installation without Redis temporary tokens: Set *redis_command* to a different Linux command.
-* Installation without InfluxDB logs: Set *influx_command* to a a different Linux command.
-
-Note: Greyfish can be setup without Redis and InfluxDB.
-
-
 
 
 #### Usage 
