@@ -43,10 +43,6 @@ PS1="$USER@$PROJECT: $PWD \$ "
 
 function slurm_submit     {
 
-    # Requests a new greyfish key for the user
-    GK_slurm=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/new/commonuser_token/$UUID_f10)
-
-
     # Colors, helpful for printing
     GREENGREEN='\033[0;32m'
     REDRED='\033[0;31m'
@@ -215,15 +211,13 @@ function slurm_submit     {
 
     zip -r "$newdir".zip "$newdir"
 
+
     printf "\n\n"
 
-
-    # Uploads the result to Greyfish
-    curl -s -F file=@"$newdir".zip http://$GS:2000/grey/upload/$GK_slurm/commonuser/jobs_left
+    # Uploads the result
+    curl -s -F file=@"$newdir".zip "$SLURM/gib/upload/job"
 
     rm -rf "$newdir"*
-
-    printf "\nJobs uploaded and waiting to be executed"
 
     printf "\n\n"
 }
