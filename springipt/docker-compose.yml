@@ -31,13 +31,6 @@ services:
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
       - data:/var/lib/mysql
-  wetty:
-    build: ./wetty
-    container_name: wetty_springipt
-    ports:
-      - "3000:3000"
-    volumes:
-      - myvol:/home/term
 volumes:
   data:
     driver: local

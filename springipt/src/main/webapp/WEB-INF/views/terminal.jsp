@@ -3,6 +3,9 @@
 {% block headersum %} -->
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.io.*" %>
+<%@ page import="java.lang.*"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="base.jsp" />
@@ -19,8 +22,36 @@
       <td width="75%">
       <div class="terminal">
         <!-- {% if url %} -->
-        <%-- <c:if test="url"> --%>
-          <iframe id="webterm" src="http://<%= System.getenv("WETTY_SERVER") %>:3000/wetty/"  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+        <%-- <c:if test="url"> --%>    
+        <%-- right here --%>
+        <%-- the ip address is different for each user --%>
+        <c:set var="username" value="${pageContext.request.userPrincipal.name}" />
+        <c:set var="path" value="${contextPath}" />
+        <%
+          String username = (String)pageContext.getAttribute("username");
+          String path =getServletContext().getRealPath("/");
+          String result = "";
+          System.out.println(getServletContext().getRealPath("/"));
+          try {
+            Runtime r = Runtime.getRuntime();                    
+            String command = path.concat("resources/UserTerminal.sh ").concat(username);
+            Process p = r.exec(command);
+            BufferedReader in =
+                new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println(inputLine);
+                result += inputLine;
+            }
+            in.close();
+
+          } catch (IOException e) {
+               System.out.println(e);
+          }
+          System.out.println("result is " + result);
+          pageContext.setAttribute("UserRedirect", result);
+        %>
+          <iframe id="webterm" src=<%= pageContext.getAttribute("UserRedirect") %> style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
         <!-- {% else %} -->
     <%--     </c:if>
         <c:if test="url"> --%>
