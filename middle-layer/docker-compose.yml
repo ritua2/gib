@@ -1,0 +1,86 @@
+version: '3'
+
+
+volumes:
+  greyfish:
+  influxdb:
+
+
+services:
+
+  # Manager node: User orchestration
+    manager_node:
+        build: ./manager_node
+        image: "ipt/manager_node"
+        container_name: manager_node
+        ports:
+            - "5000:5000"
+        environment:
+            - REDIS_AUTH
+            - orchestra_key
+            - URL_BASE
+            - PROJECT
+            - GREYFISH_URL
+            - GREYFISH_REDIS_KEY
+            - gthreads
+        command: gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app
+
+
+    # Cloud storage
+    greyfish:
+        build: ./greyfish_storage
+        image: "ipt/greyfish"
+        container_name: greyfish
+        ports:
+          - "2000-2004:2000-2004"
+        volumes:
+          - "greyfish:/greyfish"
+
+        environment:
+            - greyfish_key
+            - greyfish_path
+            - greyfish_threads
+            - URL_BASE
+            - REDIS_AUTH
+            # InfluxDB variables
+            - INFLUXDB
+            - INFLUXDB_HTTP_AUTH_ENABLED
+            - INFLUXDB_ADMIN_USER
+            - INFLUXDB_ADMIN_PASSWORD
+            - INFLUXDB_READ_USER
+            - INFLUXDB_READ_USER_PASSWORD 
+            - INFLUXDB_WRITE_USER
+            - INFLUXDB_WRITE_USER_PASSWORD 
+
+        command: "tail -F anything"
+
+
+    # LOGS: InfluxDB
+    influxdb:
+        image: influxdb:latest
+        container_name: influxdb
+        volumes:
+            - ./data/influxdb:/var/lib/influxdb
+        ports:
+            - "8086:8086"
+            - "8083:8083"
+        environment:
+            - INFLUXDB
+            - INFLUXDB_HTTP_AUTH_ENABLED
+            - INFLUXDB_ADMIN_USER
+            - INFLUXDB_ADMIN_PASSWORD
+            - INFLUXDB_READ_USER
+            - INFLUXDB_READ_USER_PASSWORD 
+            - INFLUXDB_WRITE_USER
+            - INFLUXDB_WRITE_USER_PASSWORD 
+        command: influxd
+
+    # Temporary keys and instance information
+    redis:
+        image: 'redis:4-alpine'
+        container_name: redis
+        environment:
+            - REDIS_AUTH
+        command: redis-server --requirepass $REDIS_AUTH
+        ports:
+            - '6379:6379'
