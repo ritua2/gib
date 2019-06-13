@@ -251,7 +251,7 @@ def redirect_to_wetty(user_id, target_ip):
     # 20 s to complete redirect
     r_redirect_cache.setex(user_instance, 20, user_id)
 
-    return redirect("http://"+user_instance, code=302)
+    return redirect("http://"+user_instance+"/wetty", code=302)
 
 
 

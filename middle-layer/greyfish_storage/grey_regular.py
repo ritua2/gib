@@ -37,12 +37,10 @@ def all_user_files(toktok, gkey):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "json-all-user-files")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
 
-    bf.greyfish_log(IP_addr, toktok, "json summary", "all files")
     return jsonify(bf.structure_in_json(GREYFISH_FOLDER+'DIR_'+toktok))
 
 
@@ -52,14 +50,12 @@ def user_files(toktok, gkey, DIR=''):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "json-user-dir")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
 
     # Accounts for users without a sandbox yet
     try:
-        bf.greyfish_log(IP_addr, toktok, "json summary", "single dir", '/'.join(DIR.split('++')))
         return jsonify(bf.structure_in_json(GREYFISH_FOLDER+'DIR_'+toktok+'/'+'/'.join(DIR.split('++'))))
 
     except:
@@ -74,7 +70,6 @@ def result_upload(toktok, gkey, DIR=''):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "upload-file")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
@@ -93,7 +88,6 @@ def result_upload(toktok, gkey, DIR=''):
     if not os.path.exists(GREYFISH_FOLDER+'DIR_'+str(toktok)+'/'+'/'.join(DIR.split('++'))):
         os.makedirs(GREYFISH_FOLDER+'DIR_'+str(toktok)+'/'+'/'.join(DIR.split('++')))
 
-    bf.greyfish_log(IP_addr, toktok, "upload", "single file", '/'.join(DIR.split('++')), new_name)
     file.save(os.path.join(GREYFISH_FOLDER+'DIR_'+str(toktok)+'/'+'/'.join(DIR.split('++')), new_name))
     return 'File succesfully uploaded to Greyfish'
 
@@ -104,14 +98,12 @@ def delete_file(toktok, gkey, FILE, DIR=''):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "delete-file")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
 
     try:       
         os.remove(GREYFISH_FOLDER+'DIR_'+str(toktok)+'/'+'/'.join(DIR.split('++'))+'/'+str(FILE))
-        bf.greyfish_log(IP_addr, toktok, "delete", "single file", '/'.join(DIR.split('++')), new_nam)
         return 'File succesfully deleted from Greyfish storage'
 
     except:
@@ -124,12 +116,10 @@ def delete_dir(toktok, gkey, DIR):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "delete-dir")
         return "INVALID key"
 
     try:
         shutil.rmtree(GREYFISH_FOLDER+'DIR_'+str(toktok)+'/'+'/'.join(DIR.split('++'))+'/')
-        bf.greyfish_log(IP_addr, toktok, "delete", "single dir", '/'.join(DIR.split('++')))
         return "Directory deleted"
     except:
         return "User directory does not exist"
@@ -141,7 +131,6 @@ def grey_file(gkey, toktok, FIL, DIR=''):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "download-file")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
@@ -150,7 +139,6 @@ def grey_file(gkey, toktok, FIL, DIR=''):
     if str(FIL) not in os.listdir(USER_DIR):
        return 'INVALID, File not available'
 
-    bf.greyfish_log(IP_addr, toktok, "download", "single file", '/'.join(DIR.split('++')), FIL)
     return send_file(USER_DIR+str(FIL), as_attachment=True)
 
 
@@ -161,7 +149,6 @@ def upload_dir(gkey, toktok, DIR):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "upload-dir")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
@@ -197,7 +184,6 @@ def upload_dir(gkey, toktok, DIR):
     except:
         return "Could not open tar file" 
 
-    bf.greyfish_log(IP_addr, toktok, "upload", "dir", '/'.join(DIR.split('++')))
     return 'Directory succesfully uploaded to Greyfish'
 
 
@@ -208,7 +194,6 @@ def grey_dir(gkey, toktok, DIR=''):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "download-dir")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
         return 'INVALID, User directory does not exist'
@@ -226,8 +211,7 @@ def grey_dir(gkey, toktok, DIR=''):
     tar.close()
 
     os.chdir(CURDIR)
-
-    bf.greyfish_log(IP_addr, toktok, "download", "dir", '/'.join(DIR.split('++')))
+    
     return send_file(USER_DIR+"summary.tar.gz")
 
 
@@ -240,7 +224,6 @@ def download_checksum_dir(gkey, toktok, DIR=''):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "download-dir")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
@@ -270,7 +253,6 @@ def download_checksum_dir(gkey, toktok, DIR=''):
     shutil.move("summary.tar.gz", checksum_dir + checksum8_name)
     os.chdir(CURDIR)
 
-    bf.greyfish_log(IP_addr, toktok, "download checksum", "dir", '/'.join(DIR.split('++')))
     return send_file(checksum_dir + checksum8_name, as_attachment=True)
 
 
@@ -282,13 +264,11 @@ def delete_checksum_file(toktok, gkey, FILE):
     IP_addr = request.environ['REMOTE_ADDR']
     checksum_dir = GREYFISH_FOLDER+'DIR_'+str(toktok)+'/checksum_files/'
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "delete-file")
         return "INVALID key"
     if not os.path.exists(checksum_dir+FILE):
         return 'Checksum file is not present in Greyfish'
     
     os.remove(checksum_dir+FILE)
-    bf.greyfish_log(IP_addr, toktok, "delete", "checksum file", FILE)
     return 'Checksum file succesfully deleted from Greyfish storage'
 
 

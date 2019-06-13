@@ -25,7 +25,6 @@ def push_all(toktok, gkey):
 
     IP_addr = request.environ['REMOTE_ADDR']
     if not bf.valid_key(gkey, toktok):
-        bf.failed_login(gkey, IP_addr, toktok, "push-all-user-content")
         return "INVALID key"
     if str('DIR_'+toktok) not in os.listdir(GREYFISH_FOLDER):
        return 'INVALID, User directory does not exist'
@@ -70,7 +69,6 @@ def push_all(toktok, gkey):
     tar.close()
     os.remove(USER_DIR+new_name)
 
-    bf.greyfish_log(IP_addr, toktok, "push")
     return 'User contents updated in Greyfish'
 
 

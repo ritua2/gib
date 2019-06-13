@@ -3,19 +3,20 @@
 
 **Installation**  
 
-All setup is automatic after the repository has been downloaded. Modify the environmental variables in command line or in *.env*.
+All setup is automatic after the repository has been downloaded. Modify the environmental variables in *.env*.  
 It is strongly recommended that the user change all the passwords and keys provided.
 
+Note: If any variable has the same value as another, the user must repeat them (using $VARIABLE is not allowed).
 
 
 
 ```bash
-	# Select a redis password
-	source .env
-	docker-compose up -d --build
+source .env
+mkdir greyfish
+docker-compose up -d --build
 ```
 
-To activate or switch off the APIs, enter the greyfish docker container and do:  
+To activate or switch off the cloud storage APIs, enter the greyfish docker container and do:  
 
 ```bash
 # Enter container
@@ -28,6 +29,22 @@ cd /grey
 # Deactivate
 ./API_Daemon.sh -down
 ```
+
+
+To activate or switch off the manager node APIs, enter the greyfish docker container and do:  
+
+```bash
+# Enter container
+docker exec -it manager_node bash
+
+# Activate (change the number of threads if needed with the -w flag, defined in .env)
+gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app &
+# Deactivate
+pkill gunicorn
+```
+
+
+gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app
 
 
 **Note**
