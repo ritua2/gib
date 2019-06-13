@@ -66,4 +66,5 @@ mv ./autokey /root/autokey
 # Kill all listener APIs
 pkill nc
 
-yarn start
+cd /gib/wetty
+node index.js
