@@ -22,8 +22,6 @@ To activate or switch off the cloud storage APIs, enter the greyfish docker cont
 # Enter container
 docker exec -it greyfish bash
 cd /grey
-# Start the needed databases and assign permission (APIs will not be started)
-/grey/setup.sh
 # Activate (change the number of threads if needed, standard is 4)
 ./API_Daemon.sh -up
 # Deactivate
@@ -42,10 +40,6 @@ gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app &
 # Deactivate
 pkill gunicorn
 ```
-
-
-gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app
-
 
 **Note**
 

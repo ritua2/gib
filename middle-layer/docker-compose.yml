@@ -20,8 +20,6 @@ services:
             - orchestra_key
             - URL_BASE
             - PROJECT
-            - GREYFISH_URL
-            - GREYFISH_REDIS_KEY
             - gthreads
         command: "tail -F anything"
 

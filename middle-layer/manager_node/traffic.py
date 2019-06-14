@@ -18,8 +18,8 @@ URL_BASE = os.environ["URL_BASE"]
 REDIS_AUTH = os.environ["REDIS_AUTH"]
 orchestra_key = os.environ["orchestra_key"]
 PROJECT = os.environ["PROJECT"]
-GREYFISH_URL = os.environ["GREYFISH_URL"]
-GREYFISH_REDIS_KEY = os.environ["GREYFISH_REDIS_KEY"]
+GREYFISH_URL = URL_BASE
+GREYFISH_REDIS_KEY = REDIS_AUTH
 
 
 
@@ -182,6 +182,7 @@ def active():
 
 
 
+# Requests an available container for a user
 @app.route("/api/assign/users/<user_id>", methods=['POST'])
 def assigner(user_id):
 
@@ -255,6 +256,7 @@ def redirect_to_wetty(user_id, target_ip):
 
 
 
+# Adds a new container by port and IP
 @app.route("/api/instance/attachme", methods=['POST'])
 def attachme():
 
@@ -281,11 +283,12 @@ def attachme():
     instances = redkeys(r_occupied)
     port_number = int(iport)
 
-    # Instance is already occupied
+    # Instance IP has already been added
     if reqip in instances:
         occports = ports_occupied(reqip)
         if not (iport in occports):
             r_occupied.hincrby(reqip, "Ports", 2**((port_number-7000)%10))
+            r_occupied.hset(reqip, "Available", "Yes")
             r_occupied.hset(reqip, "Available_"+iport, "Yes")
             r_occupied.hset(reqip, "current_user_"+iport, "Empty")
             r_occupied.hset(reqip, "id_"+iport, sender_ID)

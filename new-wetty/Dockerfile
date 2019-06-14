@@ -14,7 +14,7 @@ COPY main_daemon.sh    /bin/main_daemon
 WORKDIR /gib
 
 
-RUN apt-get update && apt-get install -y vim &&\
+RUN apt-get update && apt-get install -y netcat netcat-openbsd unzip vim zip &&\
     git clone https://github.com/krishnasrinivas/wetty.git &&\
     cd wetty/ && yarn && yarn build && yarn global add wetty.js &&\
     useradd -ms /bin/bash "$gib_user"  && echo "$gib_user":"$gib_password" | chpasswd &&\
