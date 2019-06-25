@@ -7,22 +7,17 @@ Contains a set of functions that are called accross the other APIs
 import os
 import datetime, time
 from pathlib import Path
+import redis
 
 
-# Checks for correct codes
-redis_active = True # Always active
 
-if redis_active:
-
-    import redis
-
-    # Assigns each token to a valid ID
-    r_tok = redis.Redis(host=os.environ['URL_BASE'], password=os.environ['REDIS_AUTH'], db=3)
 
 
 
 # Checks if the provided user key is valid
 def valid_key(ukey, username):
+
+    r_tok = redis.Redis(host=os.environ['URL_BASE'], password=os.environ['REDIS_AUTH'], db=3)
 
     if ukey == os.environ['greyfish_key']:
         return True
