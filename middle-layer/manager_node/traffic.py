@@ -126,8 +126,8 @@ def Porter10(vmip, kk):
         expected_key = r_occupied.hget(vmip, "id_"+pn).decode("UTF-8")
         if kk in expected_key:
             return [pn, 0]
-        else:
-            return ["NA", 1]
+    else:
+        return ["NA", 1]
 
 
 

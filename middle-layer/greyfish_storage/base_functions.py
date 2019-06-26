@@ -22,14 +22,13 @@ def valid_key(ukey, username):
     if ukey == os.environ['greyfish_key']:
         return True
 
-    if redis_active:
-        if r_tok.get(ukey) == None:
-            return False
+    if r_tok.get(ukey) == None:
+        return False
 
-        if r_tok.get(ukey).decode("UTF-8") == username:
-            # Deletes the token since it is single use
-            r_tok.delete(ukey)
-            return True
+    if r_tok.get(ukey).decode("UTF-8") == username:
+        # Deletes the token since it is single use
+        r_tok.delete(ukey)
+        return True
 
     return False
 
