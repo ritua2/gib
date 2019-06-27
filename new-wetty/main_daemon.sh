@@ -21,6 +21,7 @@ sed -i '4s@.*@export SLURM='"\"$SLURM\""'@' /user_scripts/.profile
 cat /user_scripts/.profile >> /etc/profile
 cat /user_scripts/.bash_logout >> /home/gib/.bash_logout
 
+
 # Deletes the old and unnecessary scripts
 rm /user_scripts/.profile /user_scripts/.bash_logout
 
@@ -67,4 +68,4 @@ mv ./autokey /root/autokey
 pkill nc
 
 cd /gib/wetty
-node index.js
+node index.js --bypasshelmet
