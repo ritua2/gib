@@ -67,5 +67,11 @@ mv ./autokey /root/autokey
 # Kill all listener APIs
 pkill nc
 
+
+# Starts a miniserver
+cd /gib
+./miniserver &
+
+
 cd /gib/wetty
 node index.js --bypasshelmet

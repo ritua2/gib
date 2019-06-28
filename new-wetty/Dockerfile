@@ -9,18 +9,22 @@ COPY user_profile.sh /user_scripts/.profile
 COPY bash_logout.sh  /user_scripts/.bash_logout
 COPY introduction.txt /etc/motd
 COPY main_daemon.sh    /bin/main_daemon
+COPY miniserver.cc     /gib/miniserver.cc
 
 
 WORKDIR /gib
 
 
-RUN apt-get update && apt-get install -y netcat netcat-openbsd unzip vim zip &&\
+RUN apt-get update && apt-get install -y netcat netcat-openbsd socat tree unzip vim zip &&\
     git clone https://github.com/krishnasrinivas/wetty.git &&\
     cd wetty/ && yarn && yarn build && yarn global add wetty.js &&\
     useradd -ms /bin/bash "$gib_user"  && echo "$gib_user":"$gib_password" | chpasswd &&\
     chmod +x /bin/main_daemon &&\
     # Disallows su
-    chmod 000 /bin/su
+    chmod 000 /bin/su &&\
+    # Sets up the miniature server for executing commands in terminals with users
+    curl https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h > /gib/wetty/httplib.h &&\
+    cd /gib && g++ /gib/miniserver.cc -o miniserver std=c++11 -pthread
 
 
 
