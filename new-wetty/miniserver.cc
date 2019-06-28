@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -12,6 +13,7 @@
 
 using namespace httplib;
 using std::cout;
+using std::ofstream;
 using std::string;
 
 
@@ -63,6 +65,7 @@ string read_directory(const string& base_path, string &final_string)
 }
 
 
+
 int main(void) {
     Server svr;
 
@@ -79,6 +82,25 @@ int main(void) {
 
         res.set_content(contents.c_str(), "text/plain");
     });
+
+
+    // Uploads a file
+    svr.Post("/multipart", [&](const auto& req, auto& res) {
+        auto size = req.files.size();
+        auto ret = req.has_file("name1");
+        const auto& file = req.get_file_value("name1");
+        string filename = file.filename;
+        auto body = req.body.substr(file.offset, file.length);
+
+        string file_path_in_wetty = "/home/gib/";
+        file_path_in_wetty.append(filename);
+
+        // Writes contents to the file
+        ofstream written_file(file_path_in_wetty);
+        written_file << body;
+        written_file.close();
+    });
+
 
     svr.listen("0.0.0.0", 3100);
 }
