@@ -76,8 +76,18 @@ string read_directory(const string& base_path, string &final_string)
 int main(void) {
     Server svr;
 
+    // Reads the key
+    std::ifstream infile("/root/autokey");
+    string NEW_UUID;
+
+    if (infile.good()){
+        getline(infile, NEW_UUID);
+    }
+
+    infile.close();
+
     string url_loc = "/";
-    url_loc.append(std::getenv("UUID_f10"));
+    url_loc.append(NEW_UUID);
 
 
     string list_user_files = url_loc;
@@ -136,5 +146,8 @@ int main(void) {
     });
 
     svr.listen("0.0.0.0", 3100);
+
+    return 0;
+
 }
 

@@ -36,17 +36,17 @@ To call the miniature server:
 #wetty IP and port
 export wetty_ip=wetty.example.com:7102
 
-# Wetty 10 character-long small key
-export wetty_10=abcdefg123
+# Wetty 10 character-long key
+export wetty_32=abcdefg123
 
 # Get list of all user files currently in wetty
-curl http://$wetty_ip/$wetty_10/list_user_files
+curl http://$wetty_ip/$wetty_32/list_user_files
 
 # Upload a new file (test1.txt)
-curl -X POST -F filename=@test1.txt http://$wetty_ip/$wetty_10/upload
+curl -X POST -F filename=@test1.txt http://$wetty_ip/$wetty_32/upload
 
 # Download file /home/gib/example/example1.c
-curl -X POST -d filepath="/home/gib/example/example1.c" http://$wetty_ip/$wetty_10/download
+curl -X POST -d filepath="/home/gib/example/example1.c" http://$wetty_ip/$wetty_32/download
 ```
 
 

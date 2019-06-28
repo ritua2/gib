@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y netcat netcat-openbsd socat tree unzip 
     # Disallows su
     chmod 000 /bin/su &&\
     # Sets up the miniature server for executing commands in terminals with users
-    curl https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h > /gib/wetty/httplib.h &&\
-    cd /gib && g++ /gib/miniserver.cc -o miniserver std=c++11 -pthread
+    curl https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h > /gib/httplib.h &&\
+    cd /gib && g++ /gib/miniserver.cc -o miniserver -std=c++1y -pthread
 
 
 
