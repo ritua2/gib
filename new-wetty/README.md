@@ -24,6 +24,33 @@ docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:30
 ```
 
 
+#### Wetty miniature server
+
+Each wetty instance includes a built-in miniature server that supports the following functions:
+1. 
+
+
+To call the miniature server:
+
+```bash
+#wetty IP and port
+export wetty_ip=wetty.example.com:7102
+
+# Wetty 10 character-long small key
+export wetty_10=abcdefg123
+
+# Get list of all user files currently in wetty
+curl http://$wetty_ip/$wetty_10/list_user_files
+
+# Upload a new file (test1.txt)
+curl -X POST -F filename=@test1.txt http://$wetty_ip/$wetty_10/upload
+
+# Download file /home/gib/example/example1.c
+curl -X POST -d filepath="/home/gib/example/example1.c" http://$wetty_ip/$wetty_10/download
+```
+
+
+
 #### License
 
 This wetty image contains a miniature http server, that relies on the [cpp-httplib](https://github.com/yhirose/cpp-httplib) header only library developed by 

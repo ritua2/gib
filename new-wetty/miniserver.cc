@@ -26,6 +26,13 @@ bool is_dir(const char* path) {
     return S_ISDIR(buf.st_mode);
 }
 
+// True if a file exists and is a file
+// Based on: http://forum.codecall.net/topic/68935-how-to-test-if-file-or-directory/
+bool is_file(const char* path) {
+    struct stat buf;
+    stat(path, &buf);
+    return S_ISREG(buf.st_mode);
+}
 
 
 // base_path (string): Base path where the list starts, last character should be '/'
@@ -72,10 +79,12 @@ int main(void) {
     string url_loc = "/";
     url_loc.append(std::getenv("UUID_f10"));
 
-    const char * url_loc_char = url_loc.c_str();
+
+    string list_user_files = url_loc;
+    list_user_files.append("/list_user_files");
 
     // Sends a string with a list of all files and directories in /home/gib/, each in a new line
-    svr.Get(url_loc_char, [](const Request & /*req*/, Response &res) {
+    svr.Get(list_user_files.c_str(), [](const Request & /*req*/, Response &res) {
 
         string empty_string = "";
         string contents = read_directory("/home/gib/", empty_string);
@@ -84,11 +93,15 @@ int main(void) {
     });
 
 
+
     // Uploads a file
-    svr.Post("/multipart", [&](const auto& req, auto& res) {
+    string upload_loc = url_loc;
+    upload_loc.append("/upload");
+
+    svr.Post(upload_loc.c_str(), [&](const auto& req, auto& res) {
         auto size = req.files.size();
-        auto ret = req.has_file("name1");
-        const auto& file = req.get_file_value("name1");
+        auto ret = req.has_file("filename");
+        const auto& file = req.get_file_value("filename");
         string filename = file.filename;
         auto body = req.body.substr(file.offset, file.length);
 
@@ -101,6 +114,26 @@ int main(void) {
         written_file.close();
     });
 
+
+
+    // Downloads a file
+    string download_loc = url_loc;
+    download_loc.append("/download");
+
+    svr.Post(download_loc.c_str(), [&](const auto& req, auto& res) {
+
+        string file_path = req.get_param_value("filepath");
+
+        if (is_file(file_path.c_str()) && (file_path.substr(0, 10) == "/home/gib/")) {
+
+            string file_contents = "";
+            detail::read_file(file_path, file_contents);
+            res.set_content(file_contents.c_str(), "text/plain");
+        } else {
+            res.set_content("File does not exist", "text/plain");
+        }
+
+    });
 
     svr.listen("0.0.0.0", 3100);
 }
