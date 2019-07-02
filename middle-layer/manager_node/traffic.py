@@ -552,5 +552,35 @@ def grey_commonuser_token(uf10):
 
 
 
+# Creates a temporary key for a greyfish user
+@app.route("/api/greyfish/users/<user_id>/create_greyfish_key", methods=['POST'])
+def tmp_greyfish_key_for_user(user_id):
+
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "user"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    # Sets a greyfish key for the user for a maximum of 120 s
+    new_token = random_string(24)
+    greyfish_server.setex(new_token, 120, user_id)
+
+    return new_token
+
+
+
+
+
 if __name__ == '__main__':
     app.run()
