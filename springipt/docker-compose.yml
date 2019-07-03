@@ -10,36 +10,26 @@ services:
       - mysql_springipt:mysql_springipt
     ports: 
       - "9090:8080"
-    environment:
-      WETTY_SERVER: 149.165.156.207
     volumes:
       - ./target/springipt-0.0.1.war:/usr/local/tomcat/webapps/springipt.war
       - myvol:/home/term
       - ./ssh/id_rsa:/usr/local/tomcat/.ssh/PrivateKey.ppk
 
+
   mysql_springipt:
     image: mysql
     container_name: mysql_springipt
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: iptweb
-      MYSQL_USER: anubhaw
-      MYSQL_PASSWORD: anubhaw
-      MYSQL_SERVER: 149.165.156.207
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=iptweb
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_SERVER
     ports:
       - "6603:3306"
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
       - data:/var/lib/mysql
-
-  wetty:
-    build: ./wetty
-    container_name: wetty_springipt
-    ports:
-      - "3000:3000"
-    volumes:
-      - myvol:/home/term
-
 
 
 volumes:
