@@ -211,15 +211,13 @@ vector <string> file_into_lines(string filecontents, int chars_per_line) {
             int full_length_lines = base_lines[item].length() / chars_per_line;
 
             for (int subline_n=0; subline_n < full_length_lines; subline_n++){
-
-                lines.push_back(base_lines[item].substr(subline_n*chars_per_line, (subline_n+1)*chars_per_line));
+                lines.push_back(base_lines[item].substr(subline_n*chars_per_line, (subline_n+1)*chars_per_line ));
             }
 
             // Adds the last part of the line
             if ((base_lines[item].length() % chars_per_line) != 0) {
                 lines.push_back(base_lines[item].substr(full_length_lines*chars_per_line, base_lines[item].length()));
             }
-        
         }
     }
 
