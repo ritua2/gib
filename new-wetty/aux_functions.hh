@@ -4,6 +4,7 @@ BASICS
 Auxiliary functions
 */
 
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -134,6 +135,18 @@ vector<string> split(string str, string token){
 }
 
 
+// Replaces a substring within another
+// Based on: https://stackoverflow.com/questions/4643512/replace-substring-with-another-substring-c
+void ReplaceStringInPlace(string& subject, string& search,
+                          string& replace) {
+    size_t pos = 0;
+    while((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
+
+
 
 // Reads a file into a string
 string file_to_string(string filepath) {
@@ -147,6 +160,11 @@ string file_to_string(string filepath) {
 
     output_str.assign((std::istreambuf_iterator<char>(t)),
                 std::istreambuf_iterator<char>());
+
+    // Removes tabs
+    string tabs = "\t";
+    string four_spaces = "    ";
+    ReplaceStringInPlace(output_str, tabs, four_spaces);
 
     return output_str;
 }
