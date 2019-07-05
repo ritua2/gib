@@ -10,6 +10,9 @@
 
 <jsp:include page="base.jsp" />
 <div class="container">
+<h1>
+    Hello ${ip}
+</h1>
     <h1>Terminal</h1>
     <!-- This particular block template is only for a tab header.
     This block can be modified or removed completely, just be sure to remove the
@@ -27,7 +30,7 @@
         <%-- the ip address is different for each user --%>
         <c:set var="username" value="${pageContext.request.userPrincipal.name}" />
         <c:set var="path" value="${contextPath}" />
-        <%
+        <%--
           String username = (String)pageContext.getAttribute("username");
           String path =getServletContext().getRealPath("/");
           String result = "";
@@ -50,8 +53,9 @@
           }
           System.out.println("result is " + result);
           pageContext.setAttribute("UserRedirect", result);
-        %>
-          <iframe id="webterm" src=<%= pageContext.getAttribute("UserRedirect") %> style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+        --%>
+		<% out.println("http://"+request.getAttribute("ip")+"/wetty"); %>
+          <iframe id="webterm" src="http://<%= request.getAttribute("ip")%>/wetty" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
         <!-- {% else %} -->
     <%--     </c:if>
         <c:if test="url"> --%>
