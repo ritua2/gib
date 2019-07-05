@@ -48,6 +48,8 @@ public class LoginUserController {
 
         // Creates the user directory
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()).mkdirs();
+        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home").mkdirs();
+        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib").mkdirs();
 
         securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
 

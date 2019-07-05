@@ -18,6 +18,9 @@ docker volume create --name=greyfish
 # Modify the environment variables for the middle layer
 vi middle-layer/.env
 
+# Copy the environment variables file to springIPT directory
+cp middle-layer/.env springipt/envar.txt
+
 # Start the middle layer and springIPT
 cd middle-layer
 docker-compose up -d
