@@ -14,6 +14,7 @@ services:
       - ./target/springipt-0.0.1.war:/usr/local/tomcat/webapps/springipt.war
       - myvol:/home/term
       - ./ssh/id_rsa:/usr/local/tomcat/.ssh/PrivateKey.ppk
+      - greyfish:/home/greyfish/users
 
 
   mysql_springipt:
@@ -36,4 +37,6 @@ volumes:
   data:
     driver: local
   myvol:
+    external: true
+  greyfish:
     external: true

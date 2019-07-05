@@ -32,7 +32,7 @@ services:
         ports:
           - "2000-2004:2000-2004"
         volumes:
-          - "greyfish:/greyfish"
+          - greyfish:/greyfish
 
         environment:
             - greyfish_key
@@ -52,3 +52,8 @@ services:
         command: redis-server --requirepass $REDIS_AUTH
         ports:
             - '6379:6379'
+
+
+volumes:
+  greyfish:
+    external: true
