@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -40,7 +41,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Controller
 public class UploadController {
 
-	private static String UPLOADED_FOLDER = "/home/term/";
+	//private static String UPLOADED_FOLDER = "/home/term/";
+	private static String UPLOADED_FOLDER = "/home/greyfish/users/sandbox/DIR_";
 	private final Logger logger = LoggerFactory.getLogger(UploadController.class);
 
 	@GetMapping("/terminal/upload")
@@ -51,7 +53,9 @@ public class UploadController {
 	@RequestMapping(value = "/terminal/upload", method = RequestMethod.POST, produces = "application/json")
 	public String fileUpload(@RequestParam("filefolder") String filefolderselection,
 			@RequestParam("fileToUpload") MultipartFile file, @RequestParam("folderToUpload") MultipartFile[] files,
-			@RequestParam("hiddenInput") String jsonfilepath, RedirectAttributes redirectAttributes) {
+			@RequestParam("hiddenInput") String jsonfilepath, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+				
+				Principal principal = request.getUserPrincipal();
 
 		System.out.println("Inside the /terminal/upload");
 		String objectToReturn = "";
@@ -65,7 +69,7 @@ public class UploadController {
 			try {
 
 				byte[] bytes = file.getBytes();
-				Path path = Paths.get(UPLOADED_FOLDER + file.getOriginalFilename());
+				Path path = Paths.get(UPLOADED_FOLDER +principal.getName()+"/"+ file.getOriginalFilename());
 				Files.write(path, bytes);
 				Process p1 = Runtime.getRuntime().exec("chown -R 1001:1001 /home/term");
 
@@ -103,11 +107,13 @@ public class UploadController {
 				if (f.isEmpty()) {
 					continue; // next pls
 				}
+				
+				
 
 				try {
 					byte[] bytes = f.getBytes();
 					System.out.println("File PATH GETNAME =" + f.getName() + " Original path Name" + f.getOriginalFilename());
-					Path path = Paths.get(UPLOADED_FOLDER + map.get(f.getOriginalFilename()));
+					Path path = Paths.get(UPLOADED_FOLDER + principal.getName()+"/"+map.get(f.getOriginalFilename()));
 					Path parentDir = path.getParent();
 					if (!Files.exists(parentDir))
 						Files.createDirectories(parentDir);
