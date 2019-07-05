@@ -1,6 +1,9 @@
 ### Container orchestration for multiple *gateway-in-a-box* wetty instances
 
 
+**Deprecated instructions, [middle layer](./../middle-layer) includes both the manager node and greyfish storage**
+
+
 **Installation**  
 
 All setup is automatic after the repository has been initialized. User simply needs to specify the Redis key,
