@@ -1,5 +1,6 @@
 package com.ipt.web.controller;
 
+import java.io.File;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class LoginUserController {
 
         loginUserService.save(userForm);
 
+        // Creates the user directory
+        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()).mkdirs();
+
         securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
 
         return "redirect:/welcome";
@@ -73,7 +77,6 @@ public class LoginUserController {
 
         if (logout != null)
             model.addAttribute("message", "You have been logged out successfully.");*/
-    	
 
         return "terminal";
     }
