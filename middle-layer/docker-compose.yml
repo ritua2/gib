@@ -31,6 +31,7 @@ services:
         container_name: greyfish
         ports:
           - "2000-2004:2000-2004"
+          - "4646:4646"
         volumes:
           - greyfish:/greyfish
 
