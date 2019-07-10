@@ -11,6 +11,7 @@ COPY introduction.txt /etc/motd
 COPY main_daemon.sh    /bin/main_daemon
 COPY miniserver.cc     /gib/miniserver.cc
 COPY wetty             /gib/wetty
+COPY index_client.js   /gib/index_client.js
 
 
 WORKDIR /gib

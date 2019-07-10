@@ -2,17 +2,16 @@
 
 ------------
 
-# Prerequisites
+## Prerequisites
 
 * Docker and Docker-Compose
 
-Install the script below or using the following [file](./install_docker.sh):
+If using Ubuntu ≥ 16.04 install using the script below or using the following [file](./install_docker.sh):
 
 ```bash
 # Installs docker and erases the previous version
+# Valid for Ubuntu >= 16.04
 # ------------------------------------------------
-
-# Designed for programming convenience, should NOT be run otherwise
 
 apt-get remove docker docker-engine docker.io
 apt-get update
@@ -49,7 +48,7 @@ printf "Succesfully installed docker-compose\n"
 ```
 
 
-# Installation instructions
+## Installation instructions
 
 0. Download the gib repository:
 
@@ -63,7 +62,6 @@ cd gib/springipt
 1. Set the root, ipt user passwords, and the IP of the local machine:
 
 ```bash
-
 export MYSQL_ROOT_PASSWORD=root_passwd
 export MYSQL_USER=spring
 export MYSQL_PASSWORD=spring_passwd

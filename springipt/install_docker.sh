@@ -1,7 +1,6 @@
 # Installs docker and erases the previous version
+# Valid for Ubuntu >= 16.04
 # ------------------------------------------------
-
-# Designed for programming convenience, should NOT be run otherwise
 
 apt-get remove docker docker-engine docker.io
 apt-get update

@@ -73,5 +73,7 @@ cd /gib
 ./miniserver &
 
 
+cat /gib/index_client.js > /gib/wetty/dist/client/index.js
+
 cd /gib/wetty
 node index.js --bypasshelmet
