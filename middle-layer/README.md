@@ -22,9 +22,10 @@ To activate or switch off the cloud storage APIs, enter the greyfish docker cont
 # Enter container
 docker exec -it greyfish bash
 cd /grey
-# Activate (change the number of threads if needed, standard is 4)
+# Activate the APIs (change the number of threads if needed, standard is 4)
+# The ssh server is also activated, which allows rsync
 ./API_Daemon.sh -up
-# Deactivate
+# Deactivates the APIs and ssh server (disallows rsync)
 ./API_Daemon.sh -down
 ```
 
