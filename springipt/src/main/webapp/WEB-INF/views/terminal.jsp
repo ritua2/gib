@@ -107,7 +107,7 @@
     	</td>
     	<td align="right">
           <div class="text-right">
-              <button type="submit" class="btn btn-default">Download</button>
+              <button type="submit" id = "test" class="btn btn-default">Download</button>
           </div>
     	</td>
           </table>
@@ -122,6 +122,14 @@
 {% block scripts %} -->
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
   <script>
+	/*window.onload = function() { 
+		var frame = document.getElementById('webterm'); 
+		var doc = ''+document.getElementById('test'); 
+		frame.contentWindow.postMessage(doc, "*"); 
+		//frame.contentWindow.postMessage('test', "*"); 
+	}*/
+	  
+	
       $(document).ready(function(){
           src = document.getElementById('webterm').src;
           if (src === window.location.href){
@@ -143,7 +151,8 @@
   	    $.each( drpDwnValue, function( key, f ) {
                 $("#fileToDownload").append($('<option>', {
       		value: f +'/',
-      		text: f
+      		//text: f.substring(f.lastIndexOf("/"));
+			text: f
   		}));
   	    });	
 
@@ -200,7 +209,14 @@
       $('#downloadForm').on('submit', function(event){
           event.preventDefault();
           $('#errorMsg').text('');
-          $.ajax({
+		  //url=window.location.origin + '${contextPath}/terminal/download/' + $('#fileToDownload').val();
+		  //var newWindow = window.open();
+		  //newWindow.location = url;
+		  var frame = document.getElementById('webterm'); 
+		  //var doc = ''+document.getElementById('test'); 
+		  //frame.contentWindow.postMessage(doc, "*"); 
+		  frame.contentWindow.postMessage('test', "*"); 
+		  $.ajax({
             url: window.location.origin + '${contextPath}/terminal/download/' + $('#fileToDownload').val(),
             type: 'GET'
           }).fail(function(xhr) {

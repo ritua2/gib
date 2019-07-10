@@ -3,6 +3,7 @@ package com.ipt.web.controller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,6 +45,8 @@ public class UploadController {
 	//private static String UPLOADED_FOLDER = "/home/term/";
 	private static String UPLOADED_FOLDER = "/home/greyfish/users/sandbox/DIR_";
 	private final Logger logger = LoggerFactory.getLogger(UploadController.class);
+	
+	private File file = new File("Output.txt");
 
 	@GetMapping("/terminal/upload")
 	public String index() {
@@ -150,10 +153,26 @@ public class UploadController {
 	}
 
 	@RequestMapping(value = "/terminal/getdropdownvalues", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody Map<String, String> refreshDropdownValues(Model model, RedirectAttributes redirectAttributes) {
+	public @ResponseBody Map<String, String> refreshDropdownValues(Model model, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+		
 		System.out.println("Uploaded folder path" + UPLOADED_FOLDER);
+		
+		Principal principal = request.getUserPrincipal();
+		
 		Map<String, String> listofpath = new HashMap<String, String>();
-		walk(UPLOADED_FOLDER, listofpath);
+		walk(UPLOADED_FOLDER + principal.getName()+"/home/gib/", listofpath);
+		
+		try{
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write("Keys: "+listofpath.keySet());
+			fileWriter.write("Values: "+listofpath.values());
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
 		System.out.println(listofpath.keySet());
 		System.out.println(listofpath.values());
 		return listofpath;
@@ -170,6 +189,15 @@ public class UploadController {
 		String arguments = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
 
 		System.out.println(moduleBaseName + " module base name and args:" + arguments);
+		
+		try{
+			FileOutputStream outputStream = new FileOutputStream(file, true);
+			byte[] strToBytes = (moduleBaseName + " module base name and args:" + arguments).getBytes();
+			outputStream.write(strToBytes);
+			outputStream.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 
 		String moduleName;
 		if (null != arguments && !arguments.isEmpty()) {
@@ -177,6 +205,16 @@ public class UploadController {
 		} else {
 			moduleName = moduleBaseName;
 		}
+		
+		try{
+			FileOutputStream outputStream = new FileOutputStream(file, true);
+			byte[] strToBytes = ("ModuleName is " + moduleName).getBytes();
+			outputStream.write(strToBytes);
+			outputStream.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
 		System.out.println("ModuleName is " + moduleName);
 
 
@@ -355,7 +393,26 @@ public class UploadController {
 				walk(f.getAbsolutePath(), listofpath);
 			} else {
 				if (!f.getName().startsWith("."))
-					listofpath.put(f.getName(), f.getAbsoluteFile().getAbsolutePath());
+					listofpath.put(f.getName(), f.getPath());
+			}
+		}
+	}
+	
+	public void walk2(String path, Map<String, String> listofpath) {
+
+		File root = new File(path);
+		File[] list = root.listFiles();
+
+		if (list == null)
+			return;
+
+		for (File f : list) {
+			if (f.isDirectory() && (!f.getName().startsWith("."))) {
+				listofpath.put(f.getName(), f.getAbsoluteFile().getAbsolutePath() + File.separator);
+				walk2(f.getAbsolutePath(), listofpath);
+			} else {
+				if (!f.getName().startsWith("."))
+					listofpath.put(f.getName(), f.getName());
 			}
 		}
 	}
@@ -363,6 +420,15 @@ public class UploadController {
 	public void zipDir(String dir2zip, ZipOutputStream zos) {
 		try {
 			// create a new File object based on the directory we have to zip
+			
+			try{
+			FileOutputStream outputStream = new FileOutputStream(file, true);
+			byte[] strToBytes = ("\nDir to ZIP " + dir2zip).getBytes();
+			outputStream.write(strToBytes);
+			outputStream.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 			System.out.println("Dir to ZIP " + dir2zip);
 			File zipDir = new File(dir2zip);
 
@@ -394,8 +460,16 @@ public class UploadController {
 				}
 			} else {
 				FileInputStream fis = new FileInputStream(zipDir);
-				ZipEntry anEntry = new ZipEntry(zipDir.getPath());
-				System.out.println("THIS IS ENTRY**********" + anEntry);
+				ZipEntry anEntry = new ZipEntry(zipDir.getName());
+				try{
+			FileOutputStream outputStream = new FileOutputStream(file, true);
+			byte[] strToBytes = ("\nTHIS IS ENTRY Point**********" + anEntry).getBytes();
+			outputStream.write(strToBytes);
+			outputStream.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+				System.out.println("THIS IS ENTRY Point**********" + anEntry);
 				zos.putNextEntry(anEntry);
 				while ((bytesIn = fis.read(readBuffer)) != -1) {
 					zos.write(readBuffer, 0, bytesIn);
