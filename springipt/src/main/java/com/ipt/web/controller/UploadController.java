@@ -69,7 +69,7 @@ public class UploadController {
 			try {
 
 				byte[] bytes = file.getBytes();
-				Path path = Paths.get(UPLOADED_FOLDER +principal.getName()+"/"+ file.getOriginalFilename());
+				Path path = Paths.get(UPLOADED_FOLDER +principal.getName()+"/home/gib/"+ file.getOriginalFilename());
 				Files.write(path, bytes);
 				Process p1 = Runtime.getRuntime().exec("chown -R 1001:1001 /home/term");
 
@@ -113,7 +113,7 @@ public class UploadController {
 				try {
 					byte[] bytes = f.getBytes();
 					System.out.println("File PATH GETNAME =" + f.getName() + " Original path Name" + f.getOriginalFilename());
-					Path path = Paths.get(UPLOADED_FOLDER + principal.getName()+"/"+map.get(f.getOriginalFilename()));
+					Path path = Paths.get(UPLOADED_FOLDER + principal.getName()+"/home/gib/"+map.get(f.getOriginalFilename()));
 					Path parentDir = path.getParent();
 					if (!Files.exists(parentDir))
 						Files.createDirectories(parentDir);

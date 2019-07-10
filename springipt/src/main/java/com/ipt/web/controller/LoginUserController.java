@@ -97,7 +97,7 @@ public class LoginUserController {
 		StringBuilder result2 = new StringBuilder();
 
         URL url = null;
-		String okey=null, jsonInputString=null;
+		String okey=null, jsonInputString=null, baseIP=null;
 		
 		File file = new File("/usr/local/tomcat/webapps/envar.txt");
 		BufferedReader reader;
