@@ -421,12 +421,20 @@ def freeme(uf10):
     if err:
         return "INVALID: port not attached"
 
+    # Current username
+    current_wetty_user = r_occupied.hget(reqip, "current_user_"+pnn).decode("UTF-8")
+
     # Frees the instance
     r_occupied.hset(reqip, "Available_"+pnn, "Yes")
     r_occupied.hset(reqip, "current_user_"+pnn, "Empty")
     # Sets the instance as globaly available
     r_occupied.hset(reqip, "Available", "Yes")
     change_container_availability(1)
+
+    # Removes the user as occupying a VM
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+    r_user_to_.delete(current_wetty_user)
+
     return "Correctly freed instance"
 
 
@@ -463,8 +471,46 @@ def whoami(uf10):
     if len(empty_ports(reqip)) == 0:
         r_occupied.hset(reqip, "Available", "No")
     
+    # Sets the user as already occupying a container
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+    r_user_to_.set(expected_user.decode("UTF-8"), proper_location)
+
+
     change_container_availability(-1)
     return expected_user.decode("UTF-8")
+
+
+
+# Checks if a user is logged in 
+# Returns 'False' if not, and the IP:port if yes
+@app.route("/api/users/logged_in", methods=['POST'])
+def logged_in():
+
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "username"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    username = ppr["username"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    possible_address = r_user_to_.get(username)
+
+
+    # Checks all instances with at least one port open
+    if possible_address == None:
+        return "False"
+    else:
+        return possible_address.decode("UTF-8")
 
 
 
