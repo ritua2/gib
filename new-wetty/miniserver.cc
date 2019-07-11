@@ -168,6 +168,8 @@ int main(void) {
     });
 
 
+
+    // Leaves the container waiting
     svr.Post("/wait", [&](const auto& req, auto& res) {
 
         string provided_key = req.get_param_value("key");
@@ -179,7 +181,7 @@ int main(void) {
 
             // Creates a new file in /home/gib and adds a random string to it
             ofstream wait_file;
-            wait_file.open ("/home/gib/wait.key");
+            wait_file.open ("/etc/wait.key");
             wait_file <<  wait_key;
             wait_file << "\n";
             wait_file << username;
@@ -193,7 +195,12 @@ int main(void) {
     });
 
 
+    // Deletes the wait key
+    svr.Get("/delete_wait", [](const Request & /*req*/, Response &res) {
 
+        remove("/etc/wait.key");
+        res.set_content("", "text/plain");
+    });
 
 
 

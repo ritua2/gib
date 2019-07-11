@@ -565,6 +565,40 @@ def container_wait():
 
 
 
+# Returns the WAIT key for a user
+# Returns false if not
+@app.route("/api/users/wetty_wait_key", methods=['POST'])
+def wetty_wait_key():
+
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "username"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    username = ppr["username"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    # Checks all instances with at least one port open
+    if r_user_to_.exists(username) == 0:
+        return "False"
+    else:
+
+        if r_user_to_.hexists(username, "WAIT key"):
+            return r_user_to_.hget(username, "WAIT key").decode("UTF-8")
+        else:
+            return "User is logged in, no waiting containers"
+
+
+
 
 
 @app.route("/api/instance/whatsmyip", methods=['GET'])
