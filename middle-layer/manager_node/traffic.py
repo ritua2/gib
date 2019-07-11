@@ -555,7 +555,7 @@ def container_wait():
     miniserver_port = str(int(port_used) + 100)
 
     # Calls the miniserver
-    req = requests.post("http://"+ip_used+":"+miniserver_port+"/wait", data={"key": wetty_key})
+    req = requests.post("http://"+ip_used+":"+miniserver_port+"/wait", data={"key": wetty_key, "username":username})
     
     if req.text == "INVALID key":
         return "Could not set wetty terminal as WAIT"

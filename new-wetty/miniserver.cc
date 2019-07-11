@@ -171,6 +171,7 @@ int main(void) {
     svr.Post("/wait", [&](const auto& req, auto& res) {
 
         string provided_key = req.get_param_value("key");
+        string username = req.get_param_value("username");
 
         if (provided_key == NEW_UUID) {
 
@@ -180,6 +181,8 @@ int main(void) {
             ofstream wait_file;
             wait_file.open ("/home/gib/wait.key");
             wait_file <<  wait_key;
+            wait_file << "\n";
+            wait_file << username;
             wait_file.close();
 
             res.set_content(wait_key.c_str(), "text/plain");
