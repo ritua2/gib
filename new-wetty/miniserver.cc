@@ -1,5 +1,8 @@
+#include <algorithm>
+#include <functional>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 
 
@@ -69,6 +72,25 @@ string read_directory(const string& base_path, string &final_string)
     }
     closedir(dirp);
     return final_string;
+}
+
+
+
+// Generates a random string
+// Based on https://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c
+string random_string( size_t length ) {
+    auto randchar = []() -> char {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+
+    string str(length,0);
+    std::generate_n( str.begin(), length, randchar );
+    return str;
 }
 
 
@@ -144,6 +166,30 @@ int main(void) {
         }
 
     });
+
+
+    svr.Post("/wait", [&](const auto& req, auto& res) {
+
+        string provided_key = req.get_param_value("key");
+
+        if (provided_key == NEW_UUID) {
+            // Creates a new file in /home/gib and adds a random string to it
+            ofstream wait_file;
+            wait_file.open ("/home/gib/wait.key");
+            wait_file <<  random_string(32) ;
+            wait_file.close();
+
+            res.set_content("Container is now set as WAIT", "text/plain");
+
+        } else {
+            res.set_content("INVALID key", "text/plain");
+        }
+    });
+
+
+
+
+
 
     svr.listen("0.0.0.0", 3100);
 
