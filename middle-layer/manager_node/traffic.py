@@ -10,6 +10,7 @@ from flask import Flask, redirect, request, send_file
 import os
 import random
 import redis
+import requests
 
 
 
@@ -101,6 +102,15 @@ def empty_ports(vmip):
             ep.append(pn)
 
     return ep
+
+
+
+# Gets the long key of a wetty container
+# vmip (str): VM IPv4
+# port_used (str)
+def PK_32(vmip, port_used):
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    return r_occupied.hget(vmip, "id_"+port_used).decode("UTF-8")
 
 
 # Verifies that a port key key is valid
@@ -473,7 +483,7 @@ def whoami(uf10):
     
     # Sets the user as already occupying a container
     r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
-    r_user_to_.set(expected_user.decode("UTF-8"), proper_location)
+    r_user_to_.hset(expected_user.decode("UTF-8"), "IP:port", proper_location)
 
 
     change_container_availability(-1)
@@ -503,14 +513,57 @@ def logged_in():
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    possible_address = r_user_to_.get(username)
-
 
     # Checks all instances with at least one port open
-    if possible_address == None:
+    if r_user_to_.exists(username) == 0:
         return "False"
     else:
-        return possible_address.decode("UTF-8")
+        return r_user_to_.hget(username, "IP:port").decode("UTF-8")
+
+
+
+# Sets the container assigned to user X as waiting
+@app.route("/api/users/container_wait", methods=['POST'])
+def container_wait():
+
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "username"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    username = ppr["username"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    # Finds if the user is logged in
+    if r_user_to_.exists(username) == 0:
+        return "User is not available at any container"
+
+    user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
+    [ip_used, port_used] = user_ip_port_container.split(":")
+
+    wetty_key = PK_32(ip_used, port_used)
+
+    miniserver_port = str(int(port_used) + 100)
+
+    # Calls the miniserver
+    req = requests.post("http://"+ip_used+":"+miniserver_port+"/wait", data={"key": wetty_key})
+    
+    if req.text == "INVALID key":
+        return "Could not set wetty terminal as WAIT"
+
+    r_user_to_.hset(username, "WAIT key", req.text)
+    return "Set wetty at "+user_ip_port_container+" as WAIT"
+
+
 
 
 

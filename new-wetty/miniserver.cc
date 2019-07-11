@@ -173,13 +173,16 @@ int main(void) {
         string provided_key = req.get_param_value("key");
 
         if (provided_key == NEW_UUID) {
+
+            string wait_key = random_string(32);
+
             // Creates a new file in /home/gib and adds a random string to it
             ofstream wait_file;
             wait_file.open ("/home/gib/wait.key");
-            wait_file <<  random_string(32) ;
+            wait_file <<  wait_key;
             wait_file.close();
 
-            res.set_content("Container is now set as WAIT", "text/plain");
+            res.set_content(wait_key.c_str(), "text/plain");
 
         } else {
             res.set_content("INVALID key", "text/plain");
