@@ -63,5 +63,5 @@ This wetty image contains a miniature http server, that relies on the [cpp-httpl
 [yhirose](https://github.com/yhirose), released under the MIT license. A copy of the MIT license for this project is provided [here](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/LICENSE).
 
 
-The miniature server uploads files to an associated greyfish container using *curl/curl.h*, provided by the libCURL library. A copy of the libCURL license is available [here](./curl_LICENSE.txt) and also in their [main page](https://curl.haxx.se/docs/copyright.html). A copy of the MIT license for this project is provided [here](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/LICENSE).
+The miniature server uploads files to an associated greyfish container using *curl/curl.h*, provided by the libCURL library. A copy of the libCURL license is available [here](./curl_LICENSE.txt) and also in their [main page](https://curl.haxx.se/docs/copyright.html).
 

@@ -62,6 +62,8 @@ public class LoginUserController {
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()).mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home").mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib").mkdirs();
+        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home").mkdirs();
+        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home/gib").mkdirs();
 
         securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
 
