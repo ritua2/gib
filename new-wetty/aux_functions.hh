@@ -83,7 +83,7 @@ string read_directory(const string& base_path, string &final_string)
 
 
 
-// Same as abbove, but without checking subdirectories
+// Same as above, but without checking subdirectories
 string read_dir_no_subs(const string& base_path, string &final_string)
 {
     DIR* dirp = opendir(base_path.c_str());

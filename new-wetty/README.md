@@ -50,6 +50,9 @@ curl -X POST -d filepath="/home/gib/example/example1.c" http://$wetty_ip/$wetty_
 
 # Set the container as waiting
 curl -X POST -d key="$wetty_32" http://$wetty_ip/wait
+
+# Purge user data from /home/gib
+curl -X POST -d key="$wetty_32" -d gk=greyfish -d username=user1 -d greyfish_url=greyfish.example.com http://$wetty_ip/user/purge
 ```
 
 
@@ -57,7 +60,8 @@ curl -X POST -d key="$wetty_32" http://$wetty_ip/wait
 #### License
 
 This wetty image contains a miniature http server, that relies on the [cpp-httplib](https://github.com/yhirose/cpp-httplib) header only library developed by 
-[yhirose](https://github.com/yhirose), released under the MIT license.
+[yhirose](https://github.com/yhirose), released under the MIT license. A copy of the MIT license for this project is provided [here](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/LICENSE).
 
-A copy of the MIT license for this project is provided [here](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/LICENSE).
+
+The miniature server uploads files to an associated greyfish container using *curl/curl.h*, provided by the libCURL library. A copy of the libCURL license is available [here](./curl_LICENSE.txt) and also in their [main page](https://curl.haxx.se/docs/copyright.html). A copy of the MIT license for this project is provided [here](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/LICENSE).
 

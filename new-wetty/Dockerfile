@@ -6,7 +6,6 @@ ENV gib_user "gib"
 ENV gib_password "gib"
 
 COPY user_profile.sh /user_scripts/.profile
-COPY bash_logout.sh  /user_scripts/.bash_logout
 COPY introduction.txt /etc/motd
 COPY main_daemon.sh    /bin/main_daemon
 COPY miniserver.cc     /gib/miniserver.cc
@@ -25,7 +24,7 @@ RUN apt-get update && apt-get install -y netcat netcat-openbsd tree unzip vim zi
     chmod 000 /bin/su &&\
     # Sets up the miniature server for executing commands in terminals with users
     curl https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h > /gib/httplib.h &&\
-    cd /gib && g++ /gib/miniserver.cc -o miniserver -std=c++1y -pthread
+    cd /gib && g++ /gib/miniserver.cc -o miniserver -std=c++1y -pthread -lcurl
 
 
 

@@ -59,8 +59,7 @@ else
     # Checks that the previous data is actually tarred
     if { tar ztf "summary.tar.gz" || tar tf "summary.tar.gz"; } >/dev/null 2>&1; then
        tar -xzf summary.tar.gz
-       rm -f /home/gib/home/gib/.bash_logout
-       mv /home/gib/home/gib/* /home/gib
+       mv /home/gib/home/gib/home/gib/* /home/gib
        rm -rf /home/gib/home
     fi
 

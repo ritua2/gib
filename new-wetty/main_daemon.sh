@@ -17,13 +17,12 @@ sed -i '3s/.*/export UUID_f10='"\"$UUID_f10\""'/' /user_scripts/.profile
 sed -i '4s@.*@export SLURM='"\"$SLURM\""'@' /user_scripts/.profile
 
 
-# Adds the needed commands to global profile and logout
+# Adds the needed commands to global profile
 cat /user_scripts/.profile >> /etc/profile
-cat /user_scripts/.bash_logout >> /home/gib/.bash_logout
 
 
 # Deletes the old and unnecessary scripts
-rm /user_scripts/.profile /user_scripts/.bash_logout
+rm /user_scripts/.profile
 
 
 
