@@ -21,7 +21,6 @@ if [ -f "/etc/wait.key" ]; then
         # Deletes the wait file
         curl -s http://0.0.0.0:3100/delete_wait
         export GS=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/location)
-        GK2=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/new/single_use_token/$UUID_f10)
         printf "\n\033[0;32mWelcome back\033[0m\n\n"
 
     else
@@ -65,14 +64,29 @@ else
 
     rm -f summary.tar.gz
 
-
 fi
+
+
+
 
 # Gets the project
 export PROJECT=$(curl -s http://$MANAGER_NODE:5000/api/project/name)
 
 # Changes the terminal prompt to [/PROJECT/USERNAME: ~] $ 
 PS1="$USER@$PROJECT: $PWD \$ " 
+
+
+
+# Recovers ssh keys if they were lost
+function recover_ssh    {
+
+
+    if [ ! -d /home/gib/.ssh ]; then
+        mkdir /home/gib/.ssh
+    fi
+
+    curl -s http://$MANAGER_NODE:5000/api/manager_node/public_key > /home/gib/.ssh/authorized_keys
+}
 
 
 

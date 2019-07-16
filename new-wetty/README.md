@@ -1,15 +1,32 @@
 ### Simplified Wetty terminal
 
-**Note**  
-This image is not to be used in production, only for testing the production wetty terminals.  
 
 Actual production images will be called via container orchestration.
 
-Build the image
+Build the wetty and ssh server images
 ```bash
-docker build -t easy_wetty/standalone:latest .
+# ssh server
+docker build -f Dockerfile.ssh -t easy_wetty/ssh:latest .
+# Wetty image
+docker build -f Dockerfile.wetty -t easy_wetty/standalone:latest .
 ```
 
+
+* **ssh startup**
+
+```bash
+# Create shared volume for rsync
+docker volume create --name=rsync_data
+
+# Start image
+docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 4646:22 -v rsync_data:/home/rsync_user/data easy_wetty/ssh
+```
+
+
+
+* **Wetty startup**
+
+Requires the ssh server to be setup beforehand
 
 Modify *main_daemon.sh* with the necessary conductor IP and orchestra key.
 
@@ -20,7 +37,7 @@ conductor="example.com" orchestra_key="orchestra" docker-compose up -d
 Or, if using multiple containers:
 
 ```bash
-docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100  easy_wetty/standalone main_daemon
+docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data easy_wetty/standalone main_daemon
 ```
 
 

@@ -11,8 +11,12 @@
 
 #include <dirent.h>
 #include <fts.h>
+#include <grp.h>
+#include <pwd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+
 
 #include "httplib.h"
 
@@ -283,6 +287,26 @@ int post_file(string full_file_path, string url_to_post) {
      
     curl_formfree(post);
     curl_easy_cleanup(curl);
+}
+
+
+
+// chown, based on https://stackoverflow.com/questions/8778834/change-owner-and-group-in-c
+void easy_chown(const char *file_path, const char *user_name, const char *group_name) {
+    uid_t          uid;
+    gid_t          gid;
+    struct passwd *pwd;
+    struct group  *grp;
+
+    pwd = getpwnam(user_name);
+
+    uid = pwd->pw_uid;
+
+    grp = getgrnam(group_name);
+
+    gid = grp->gr_gid;
+
+    chown(file_path, uid, gid);
 }
 
 

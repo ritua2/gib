@@ -11,6 +11,8 @@ import os
 import random
 import redis
 import requests
+import signal
+import subprocess
 
 
 
@@ -151,6 +153,23 @@ def random_string(n):
     random.shuffle(A)
 
     return "".join(A)[:n]
+
+
+
+# Synchronizes an user local directory and a VM using rsync
+# Note: The synchronization is only with the VM, individual containers need to read this data at a later date
+# vm_ip (str): VM IP or URL without http:// or ending '/'
+def remote_synchronization(vm_ip):
+
+    cron_step = "*/5 * * * * " # Every 5 minutes
+
+    manager_node_to_wetty = "rsync -rvz -e 'ssh -o StrictHostKeyChecking=no -p 4646 -i /conductor/rsync_wetty.key' /greyfish/sandbox/ rsync_user@"+vm_ip+":/home/rsync_user/data"
+    wetty_to_manager_node = "rsync -rvz -e 'ssh -o StrictHostKeyChecking=no -p 4646 -i /conductor/rsync_wetty.key' rsync_user@"+vm_ip+":/home/rsync_user/data/ /greyfish/sandbox"
+
+    with open("/var/spool/cron/crontabs/root", "a") as cronfile:
+        cronfile.write("\n# VM: "+vm_ip+"\n")
+        cronfile.write(cron_step+manager_node_to_wetty+"\n")
+        cronfile.write(cron_step+wetty_to_manager_node)
 
 
 
@@ -325,6 +344,7 @@ def attachme():
 
         r_occupied.hmset(reqip, new_instance)
         change_container_availability(1)
+        remote_synchronization(reqip)
         return "Instance correctly attached"
 
 
@@ -627,6 +647,17 @@ def wetty_wait_key():
 @app.route("/api/instance/whatsmyip", methods=['GET'])
 def whatsmyip():
     return request.environ['REMOTE_ADDR']
+
+
+
+# Returns the server public key
+@app.route("/api/manager_node/public_key", methods=['GET'])
+def public_key():
+
+    with open("rsync_wetty.key.pub", "r") as rsync_pub:
+        pkey = rsync_pub.readline()
+
+    return pkey
 
 
 

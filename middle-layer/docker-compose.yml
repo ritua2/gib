@@ -15,6 +15,8 @@ services:
         container_name: manager_node
         ports:
             - "5000:5000"
+        volumes:
+          - greyfish:/greyfish
         environment:
             - REDIS_AUTH
             - orchestra_key
