@@ -77,19 +77,6 @@ PS1="$USER@$PROJECT: $PWD \$ "
 
 
 
-# Recovers ssh keys if they were lost
-function recover_ssh    {
-
-
-    if [ ! -d /home/gib/.ssh ]; then
-        mkdir /home/gib/.ssh
-    fi
-
-    curl -s http://$MANAGER_NODE:5000/api/manager_node/public_key > /home/gib/.ssh/authorized_keys
-}
-
-
-
 function slurm_submit     {
 
     # Requests a new greyfish key for the user
