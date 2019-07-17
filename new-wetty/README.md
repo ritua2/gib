@@ -70,6 +70,10 @@ curl -X POST -d key="$wetty_32" http://$wetty_ip/wait
 
 # Purge user data from /home/gib
 curl -X POST -d key="$wetty_32" -d gk=greyfish -d username=user1 -d greyfish_url=greyfish.example.com http://$wetty_ip/user/purge
+
+# Starts/stops synchronization between the user directory and the shared wetty volume
+curl -X POST -d key="$wetty_32" -d action=start -d username=user1 http://$wetty_ip/user/volume/sync
+curl -X POST -d key="$wetty_32" -d action=stop -d username=user1 http://$wetty_ip/user/volume/sync
 ```
 
 

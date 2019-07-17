@@ -38,13 +38,6 @@ docker exec -it manager_node bash
 # If first time, generate an ssh key to allow rsync
 ssh-keygen -t rsa -N ""  -f rsync_wetty.key
 
-# Add instructions to cron
-printf "\n\n#Automatically synchronizes users and their logged data in the VM very 5 min\n" >> /var/spool/cron/crontabs/root
-printf "\n*/5     *       *       *       *       python3 /conductor/connected_users.py | /conductor/synchronizer.sh\n" >> /var/spool/cron/crontabs/root
-
-# Start cron
-nohup /usr/sbin/crond -b -d 0
-
 # Activate (change the number of threads if needed with the -w flag, defined in .env)
 gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app &
 # Deactivate

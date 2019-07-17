@@ -156,20 +156,14 @@ def random_string(n):
 
 
 
-# Synchronizes an user local directory and a VM using rsync
-# Note: The synchronization is only with the VM, individual containers need to read this data at a later date
-# vm_ip (str): VM IP or URL without http:// or ending '/'
-def remote_synchronization(vm_ip):
+# Allows or disallows synchronization between the user and the shared wetty volume for a certain VM
+# Returns [Server str, Error]
+def sync_wetty_volume(vm_ip, vm_port, username, wetty_key, sync_action="start"):
 
-    cron_step = "*/5 * * * * " # Every 5 minutes
-
-    manager_node_to_wetty = "rsync -rvz -e 'ssh -o StrictHostKeyChecking=no -p 4646 -i /conductor/rsync_wetty.key' /greyfish/sandbox/ rsync_user@"+vm_ip+":/home/rsync_user/data"
-    wetty_to_manager_node = "rsync -rvz -e 'ssh -o StrictHostKeyChecking=no -p 4646 -i /conductor/rsync_wetty.key' rsync_user@"+vm_ip+":/home/rsync_user/data/ /greyfish/sandbox"
-
-    with open("/var/spool/cron/crontabs/root", "a") as cronfile:
-        cronfile.write("\n# VM: "+vm_ip+"\n")
-        cronfile.write(cron_step+manager_node_to_wetty+"\n")
-        cronfile.write(cron_step+wetty_to_manager_node)
+    miniserver_port = str(int(vm_port)+100)
+    req = requests.post("http://"+vm_ip+":"+miniserver_port+"/user/volume/sync", data={"key": wetty_key, "username":username,
+                                                                        "action":sync_action})
+    return req.text
 
 
 
@@ -344,7 +338,6 @@ def attachme():
 
         r_occupied.hmset(reqip, new_instance)
         change_container_availability(1)
-        remote_synchronization(reqip)
         return "Instance correctly attached"
 
 
@@ -475,6 +468,7 @@ def free_instance():
 
     # Issues a call to the wetty miniserver
     # The miniserver will then prepare the instance for a new user
+    sync_wetty_volume(reqip, port, current_wetty_user, wetty_key, "stop")
     req = requests.post("http://"+reqip+":"+miniserver_port+"/user/purge", data={"key": wetty_key, "username":current_wetty_user,
                                                                                 "greyfish_url":URL_BASE, "gk":new_token})
 
@@ -528,7 +522,8 @@ def whoami(uf10):
     r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
     r_user_to_.hset(expected_user.decode("UTF-8"), "IP:port", proper_location)
 
-
+    wetty_key = PK_32(reqip, user_port)
+    sync_wetty_volume(reqip, user_port, expected_user.decode("UTF-8"), wetty_key, "start")
     change_container_availability(-1)
     return expected_user.decode("UTF-8")
 
@@ -641,6 +636,45 @@ def wetty_wait_key():
             return "User is logged in, no waiting containers"
 
 
+
+
+# Synchronizes the user container to its attached 
+@app.route("/api/users/container_sync", methods=['POST'])
+def container_sync_volume():
+
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "username", "action"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    username = ppr["username"]
+    action = ppr["action"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    if action not in ["start", "stop"]:
+        return "INVALID action. Action '"+action+"' is not allowed. Allowed actions are: 'start', 'stop'."
+
+    # Finds if the user is logged in
+    if r_user_to_.exists(username) == 0:
+        return "User is not available at any container"
+
+    user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
+    [ip_used, port_used] = user_ip_port_container.split(":")
+
+    wetty_key = PK_32(ip_used, port_used)
+
+    server_response = sync_wetty_volume(ip_used, port_used, username, wetty_key, action)
+
+    return server_response
 
 
 

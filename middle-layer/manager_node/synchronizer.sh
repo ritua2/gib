@@ -23,5 +23,5 @@ function rsync_user_to_vm {
 
 while read line
 do
-  rsync_user_to_vm "$line"
+	rsync_user_to_vm "$line"
 done

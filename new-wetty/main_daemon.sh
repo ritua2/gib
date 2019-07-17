@@ -75,6 +75,9 @@ cd /gib
 cat /gib/index_client.js > /gib/wetty/dist/client/index.js
 
 
+# Disallows direct user data lookup
+chmod 700 -R /gib/global/
+
 
 cd /gib/wetty
 node index.js --bypasshelmet

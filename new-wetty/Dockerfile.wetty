@@ -16,7 +16,7 @@ COPY index_client.js   /gib/index_client.js
 WORKDIR /gib
 
 
-RUN apt-get update && apt-get install -y netcat netcat-openbsd rsync tree unzip vim zip &&\
+RUN apt-get update && apt-get install -y lsyncd netcat netcat-openbsd rsync tree unzip vim zip &&\
     cd wetty/ && yarn && yarn build && yarn global add wetty.js &&\
     useradd -ms /bin/bash "$gib_user"  && echo "$gib_user":"$gib_password" | chpasswd &&\
     chmod +x /bin/main_daemon &&\
@@ -24,7 +24,9 @@ RUN apt-get update && apt-get install -y netcat netcat-openbsd rsync tree unzip 
     chmod 000 /bin/su &&\
     # Sets up the miniature server for executing commands in terminals with users
     curl https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h > /gib/httplib.h &&\
-    cd /gib && g++ /gib/miniserver.cc -o miniserver -std=c++1y -pthread -lcurl
+    cd /gib && g++ /gib/miniserver.cc -o miniserver -std=c++1y -pthread -lcurl &&\
+    mkdir /var/log/lsyncd && touch /var/log/lsyncd/lsyncd.{log,status} &&\
+	mkdir /etc/lsyncd
 
 
 

@@ -472,11 +472,6 @@ int main(void) {
                 }
 
                 // For files
-                if ((data_in_question == "/home/gib/.bashrc") || (data_in_question == "/home/gib/.bash_logout") ||
-                                 (data_in_question == "/home/gib/.profile")) {
-
-                    continue;
-                }
                 remove(data_in_question.c_str());
             }
 
@@ -486,6 +481,72 @@ int main(void) {
             res.set_content("INVALID key", "text/plain");
         }
     });
+
+
+    // Starts or stops synchronizing the user the user data with the attached ontainer for safekeeping
+    // A call to stop synchronizing also deletes the user data in the shared volume 
+    svr.Post("/user/volume/sync", [&](const auto& req, auto& res) {
+
+        string provided_key = req.get_param_value("key");
+        string username     = req.get_param_value("username");
+        string action       = req.get_param_value("action");
+
+        if (provided_key == NEW_UUID) {
+
+            string user_dir_volume = "/gib/global/data/DIR_";
+            user_dir_volume.append(username);
+
+            // Starts rsync
+            if (action == "start") {
+
+                mkdir(user_dir_volume.c_str(), 0700);
+
+                string lsyncd_conf = "settings{\n    logfile = \"/var/log/lsyncd/lsyncd.log\",\n    statusFile = \"/var/log/lsyncd/lsyncd.status\",\n";
+                lsyncd_conf.append("    nodaemon = false\n}\n\n");
+                // /home/gib -> Wetty volume
+                lsyncd_conf.append("sync {\n");
+                lsyncd_conf.append("    default.rsync,\n        delete='running',\n    source = \"/home/gib\",\n    target = \"");
+                lsyncd_conf.append(user_dir_volume);
+                lsyncd_conf.append("\"\n}\n");
+                // Wetty volume -> /home/gib
+                lsyncd_conf.append("sync {\n    default.rsync,\n        delete='running',\n");
+                lsyncd_conf.append("    source = \"");
+                lsyncd_conf.append(user_dir_volume);
+                lsyncd_conf.append("\",\n    target = \"/home/gib\"\n}\n");
+
+                ofstream lsyncd_conf_file;
+                lsyncd_conf_file.open ("/etc/lsyncd/lsyncd.conf.lua");
+                lsyncd_conf_file <<  lsyncd_conf;
+                lsyncd_conf_file << "\n";
+                lsyncd_conf_file.close();
+
+                system("service lsyncd start");
+                res.set_content("Started sharing between local wetty volume and user data in /home/gib", "text/plain");
+
+
+            // User has exited, to be called before purge
+            } else if (action == "stop") {
+
+                system("service lsyncd stop");
+                remove("/etc/lsyncd/lsyncd.conf.lua");
+
+                recursive_delete(user_dir_volume.c_str());
+                res.set_content("Stopped sharing between local wetty volume and user data in /home/gib", "text/plain");
+
+            } else {
+
+                string emp = "action '";
+                emp.append(action);
+                emp.append("' is not an acceptable action.\nAcceptable actions are: 'start', 'stop'.");
+
+                res.set_content(emp.c_str(), "text/plain");
+            }
+
+        } else {
+            res.set_content("INVALID key", "text/plain");
+        }
+    });
+
 
 
 
