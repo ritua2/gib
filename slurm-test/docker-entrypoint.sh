@@ -49,8 +49,6 @@ fi
 
 chown slurm:slurm /var/spool/slurmd /var/run/slurmd /var/lib/slurmd /var/log/slurm
 
-# Starts the APIs to input zipfiles (4 threads)
-gunicorn -w 4 -b 0.0.0.0:5600 selector_API:app &
 mkdir $output_data_path
 
 echo "- Starting all Slurm processes under supervisord"
