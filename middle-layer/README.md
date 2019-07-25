@@ -11,8 +11,6 @@ Note: If any variable has the same value as another, the user must repeat them (
 
 
 ```bash
-source .env
-mkdir greyfish
 docker-compose up -d --build
 ```
 
