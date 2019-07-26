@@ -13,6 +13,7 @@ import redis
 import requests
 import signal
 import subprocess
+import uuid
 
 
 
@@ -798,6 +799,59 @@ def tmp_greyfish_key_for_user(user_id):
     greyfish_server.setex(new_token, 120, user_id)
 
     return new_token
+
+
+
+
+####################
+# JOB ACTIONS
+####################
+
+
+
+"""
+JOB TABLE STRUCTURE
+
+jobs (
+    id                      VARCHAR(255) UNIQUE NOT NULL, # UUID
+    username                VARCHAR(255)        NOT NULL,
+    commands                VARCHAR(10000)      NOT NULL,
+    type                    VARCHAR(255)        NOT NULL,
+    status                  VARCHAR(255)        NOT NULL,
+    date_submitted          DATETIME,
+    date_started            DATETIME,
+    date_sc_upload          DATETIME,
+    date_server_received    DATETIME,
+    sc_execution_time       DOUBLE, # seconds
+    submission_method       VARCHAR(255),
+    notes_user              VARCHAR(255),
+    notes_sc                VARCHAR(255),
+    notes_server            VARCHAR(255),
+    error                   VARCHAR(255),
+
+    PRIMARY KEY (id)
+)
+"""
+
+
+
+# Returns an UUID
+# Can only be called from wetty instances
+@app.route("/api/jobs/uuid", methods=['GET'])
+def get_uuid():
+
+    reqip = request.environ['REMOTE_ADDR']
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+
+    if reqip.encode("UTF-8") in r_occupied.keys():
+        return str(uuid.uuid4())
+    else:
+        return "INVALID, not a wetty container"
+
+
+# Receives a job either from wetty or the web interface
+
+
 
 
 

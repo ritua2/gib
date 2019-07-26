@@ -9,7 +9,7 @@ COPY synchronizer.sh            /conductor/synchronizer.sh
 
 
 
-RUN apk add --no-cache bash git openssh-client rsync && pip3 install Flask gunicorn redis requests &&\
+RUN apk add --no-cache bash git openssh-client rsync && pip3 install Flask gunicorn mysql-connector-python redis requests &&\
     chmod +x /conductor/synchronizer.sh
 
 

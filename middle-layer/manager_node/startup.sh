@@ -245,6 +245,9 @@ function slurm_submit     {
     esac
 
 
+    job_id=$(curl -s http://$MANAGER_NODE:5000/api/jobs/uuid)
+
+    printf "\"ID\":\"$job_id\",\n" >> $jfile
     printf "\"Unix_time\":\"$unix_time\",\n" >> $jfile
     printf "\"Date\":\"$YYYYMMDD\"\n}\n" >> $jfile
 
