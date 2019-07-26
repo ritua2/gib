@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -437,6 +438,32 @@ int main(void) {
 
         if (provided_key == NEW_UUID) {
 
+
+            // Gets a list of all files on /home/gib
+            string empty_str1 = "";
+            string home_gib_data = read_dir_no_subs("/home/gib/", empty_str1);
+
+            // Removes the last character (\n)
+            home_gib_data.pop_back();
+            vector <string> vec_home_gib_data = split(home_gib_data, "\n");
+
+            // Deletes data for jobs left mid-completion
+            string re_to_match = "^/home/gib/";
+            re_to_match.append(username);
+            re_to_match.append("_[a-zA-Z0-9]{8}/$");
+
+            std::regex b(re_to_match); 
+
+            for (int qq=0; qq < vec_home_gib_data.size(); qq++){
+                string data_in_question = vec_home_gib_data[qq];
+
+                if (regex_match(data_in_question, b)) {
+                    // Delete directories
+                    recursive_delete(data_in_question.c_str());
+                    continue;
+                }
+            }
+
             // Compresses the user data and pushes it to greyfish
             system("tar -zcf summary.tar.gz  /home/gib");
             
@@ -453,15 +480,6 @@ int main(void) {
 
             remove("summary.tar.gz");
 
-            // Gets a list of all files on /home/gib
-            string empty_str1 = "";
-            string home_gib_data = read_dir_no_subs("/home/gib/", empty_str1);
-
-            // Removes the last character (\n)
-            home_gib_data.pop_back();
-            vector <string> vec_home_gib_data = split(home_gib_data, "\n");
-
-            // Deletes every file and directory except: .bashrc, .bash_logout, .profile
             for (int qq=0; qq < vec_home_gib_data.size(); qq++){
                 string data_in_question = vec_home_gib_data[qq];
 
