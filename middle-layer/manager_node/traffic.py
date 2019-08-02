@@ -802,37 +802,46 @@ def tmp_greyfish_key_for_user(user_id):
 
 
 
+# Uploads a file to a given wetty
+@app.route("/api/greyfish/users/<user_id>/upload_file", methods=['POST'])
+def upload_file(user_id):
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "filepath", "IP", "Port"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    filepath = ppr["filepath"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    # Absolute path starting after username, not including username
+    if not os.path.exists("/greyfish/sandbox/DIR_"+user_id+"/"+filepath):
+        return "Error, file does not exist"
+
+    [ip_used, port_used] = [ppr["IP"], ppr["Port"]]
+
+    wetty_key = PK_32(ip_used, port_used)
+
+    miniserver_port = str(int(port_used) + 100)
+
+    # Calls the miniserver
+    req = requests.post("http://"+ip_used+":"+miniserver_port+"/"+wetty_key+"/upload",
+        files={"filename": open("/greyfish/sandbox/DIR_"+user_id+"/"+filepath, "rb")})
+
+    return "File uploaded to wetty"
+
+
 
 ####################
 # JOB ACTIONS
 ####################
-
-
-
-"""
-JOB TABLE STRUCTURE
-
-jobs (
-    id                      VARCHAR(255) UNIQUE NOT NULL, # UUID
-    username                VARCHAR(255)        NOT NULL,
-    commands                VARCHAR(10000)      NOT NULL,
-    type                    VARCHAR(255)        NOT NULL,
-    status                  VARCHAR(255)        NOT NULL,
-    date_submitted          DATETIME,
-    date_started            DATETIME,
-    date_sc_upload          DATETIME,
-    date_server_received    DATETIME,
-    sc_execution_time       DOUBLE, # seconds
-    submission_method       VARCHAR(255),
-    notes_user              VARCHAR(255),
-    notes_sc                VARCHAR(255),
-    notes_server            VARCHAR(255),
-    error                   VARCHAR(255),
-
-    PRIMARY KEY (id)
-)
-"""
-
 
 
 # Returns an UUID
