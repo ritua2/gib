@@ -61,6 +61,8 @@ curl http://$wetty_ip/$wetty_32/list_user_files
 
 # Upload a new file (test1.txt)
 curl -X POST -F filename=@test1.txt http://$wetty_ip/$wetty_32/upload
+# Upload a compressed directory, will be uncompressed and put in /home/gib
+curl -X POST -F dirname=@test.tar.gz http://$wetty_ip/$wetty_32/upload_dir
 
 # Download file /home/gib/example/example1.c
 curl -X POST -d filepath="/home/gib/example/example1.c" http://$wetty_ip/$wetty_32/download

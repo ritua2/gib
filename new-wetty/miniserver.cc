@@ -366,6 +366,43 @@ int main(void) {
 
 
 
+    // Uploads a directory
+    string dir_upload_loc = url_loc;
+    dir_upload_loc.append("/upload_dir");
+
+    svr.Post(dir_upload_loc.c_str(), [&](const auto& req, auto& res) {
+        auto size = req.files.size();
+        auto ret = req.has_file("dirname");
+
+        // Contains the name only
+        const auto& compressed_dirname = req.get_file_value("original_dir_name");
+        auto name_body = req.body.substr(compressed_dirname.offset, compressed_dirname.length);
+        string original_dir_name = "/home/gib/";
+        original_dir_name.append(name_body);
+
+        if (is_dir(original_dir_name.c_str())) {
+            recursive_delete(original_dir_name.c_str());
+        }
+
+        const auto& compressed_file = req.get_file_value("dirname");
+        string compressed_dir_path = compressed_file.filename;
+        auto body = req.body.substr(compressed_file.offset, compressed_file.length);
+
+        // Writes contents to the compressed file
+        ofstream written_file("/gib/tmp-upload-dir.tar.gz");
+        written_file << body;
+        written_file.close();
+
+        string chown_command = "chown gib:gib -R ";
+        chown_command.append(original_dir_name);
+
+        system("tar -xvzf /gib/tmp-upload-dir.tar.gz -C /home/gib/");
+        system(chown_command.c_str());
+        remove("/gib/tmp-upload-dir.tar.gz");
+    });
+
+
+
     // Downloads a file
     string download_loc = url_loc;
     download_loc.append("/download");

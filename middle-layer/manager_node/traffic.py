@@ -13,6 +13,7 @@ import redis
 import requests
 import signal
 import subprocess
+import tarfile
 import uuid
 
 
@@ -24,6 +25,7 @@ orchestra_key = os.environ["orchestra_key"]
 PROJECT = os.environ["PROJECT"]
 GREYFISH_URL = URL_BASE
 GREYFISH_REDIS_KEY = REDIS_AUTH
+CURDIR = os.path.dirname(os.path.realpath(__file__)) # Current directory
 
 
 
@@ -810,7 +812,7 @@ def upload_file(user_id):
         return "POST parameters could not be parsed"
 
     ppr = request.get_json()
-    check = l2_contains_l1(ppr.keys(), ["key", "filepath", "IP", "Port"])
+    check = l2_contains_l1(["key", "filepath", "IP", "Port"], ppr.keys())
 
     if check:
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
@@ -836,6 +838,60 @@ def upload_file(user_id):
         files={"filename": open("/greyfish/sandbox/DIR_"+user_id+"/"+filepath, "rb")})
 
     return "File uploaded to wetty"
+
+
+
+# Uploads a directory to a given wetty
+@app.route("/api/greyfish/users/<user_id>/upload_dir", methods=['POST'])
+def upload_dir(user_id):
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    # basepath: Where the dir is stored
+    # dirname: Directory in particular that must be uploaded
+    check = l2_contains_l1(["key", "basepath", "dirname", "IP", "Port"], ppr.keys())
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    dirname = ppr["dirname"]
+    greyfish_path = "/greyfish/sandbox/DIR_"+user_id+"/"+ppr["basepath"]+"/"
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    # Absolute path starting after username, not including username
+    if not os.path.isdir(greyfish_path+dirname):
+        return "Error, directory does not exist or is not a directory"
+
+    [ip_used, port_used] = [ppr["IP"], ppr["Port"]]
+
+    wetty_key = PK_32(ip_used, port_used)
+
+    miniserver_port = str(int(port_used) + 100)
+
+    # Creates a compressed file
+    os.chdir(greyfish_path)
+
+    tar = tarfile.open("tmp-dir-upload.tar.gz", "w:gz")
+    tar.add(dirname)
+    tar.close()
+    os.chdir(CURDIR)
+
+    with open(greyfish_path+"tmp-dirname.txt", "w") as tmp_dirname_file:
+        tmp_dirname_file.write(dirname)
+
+    # Calls the miniserver
+    req = requests.post("http://"+ip_used+":"+miniserver_port+"/"+wetty_key+"/upload_dir",
+        files={"dirname": open(greyfish_path+"tmp-dir-upload.tar.gz", "rb"),
+            "original_dir_name":open(greyfish_path+"tmp-dirname.txt", "rb")})
+    os.remove(greyfish_path+"/tmp-dir-upload.tar.gz")
+    os.remove(greyfish_path+"/tmp-dirname.txt")
+
+    return "Directory uploaded to wetty"
 
 
 
