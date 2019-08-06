@@ -85,6 +85,7 @@ string read_directory(const string& base_path, string &final_string)
 }
 
 
+
 // Same as above, but without checking subdirectories
 string read_dir_no_subs(const string& base_path, string &final_string)
 {
@@ -362,6 +363,7 @@ int main(void) {
         ofstream written_file(file_path_in_wetty);
         written_file << body;
         written_file.close();
+        easy_chown(file_path_in_wetty.c_str(), "gib", "gib");
     });
 
 
@@ -373,6 +375,8 @@ int main(void) {
     svr.Post(dir_upload_loc.c_str(), [&](const auto& req, auto& res) {
         auto size = req.files.size();
         auto ret = req.has_file("dirname");
+
+        cout << "Directory upload\n";
 
         // Contains the name only
         const auto& compressed_dirname = req.get_file_value("original_dir_name");
@@ -393,11 +397,11 @@ int main(void) {
         written_file << body;
         written_file.close();
 
-        string chown_command = "chown gib:gib -R ";
-        chown_command.append(original_dir_name);
-
         system("tar -xvzf /gib/tmp-upload-dir.tar.gz -C /home/gib/");
-        system(chown_command.c_str());
+
+        // Change ownership
+        system("chown gib:gib -R /home/gib");
+
         remove("/gib/tmp-upload-dir.tar.gz");
     });
 

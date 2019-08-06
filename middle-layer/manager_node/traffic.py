@@ -16,6 +16,8 @@ import subprocess
 import tarfile
 import uuid
 
+import mysql_interactions as mints
+
 
 
 
@@ -915,9 +917,109 @@ def get_uuid():
 
 
 # Receives a job either from wetty or the web interface
+# Requires the username and job ID
+# Uploads a directory to a given wetty
+@app.route("/api/jobs/new", methods=['POST'])
+def new_job():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    ppr_keys = ppr.keys()
+    check = l2_contains_l1(["key", "ID", "User", "origin", "Job"], ppr_keys)
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    username = ppr["User"]
+
+    # Allowed access for:
+    #   - Systems with orchestra key, springIPT mainly
+    #   - Calls from wetty
+
+    invalid_access = True
+
+    if valid_adm_passwd(key):
+        invalid_access = False
+    else:
+        reqip = request.environ['REMOTE_ADDR']
+        r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+
+        # Valid IP and user is in the IP
+        if (reqip in redkeys(r_occupied)) and (not (mints.get_ip_port(username, reqip)[1])):
+            invalid_access = False
+
+    if invalid_access:
+        return "INVALID: Access not allowed"
+
+    job_ID = ppr["ID"]
+    origin = ppr["origin"]
+    job_type = ppr["Job"]
+
+    if job_type not in ["Compile", "Run", "Both"]:
+        return "INVALID: Job type not accepted, must be 'Compile', 'Run', or 'Both'"
+
+    # Processes the commands
+    if job_type == "Compile":
+
+        check_compile = l2_contains_l1(["CC"], ppr_keys)
+        if check_compile:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile])
+
+        number_compile_instructions = int(ppr["CC"])
+        compile_instruction_tags = ["C"+str(c) for c in range(0, number_compile_instructions)]
+        check_compile2 = l2_contains_l1(compile_instruction_tags, ppr_keys)
+        if check_compile2:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile2])
+
+        compile_instructions = [ppr[c_tag] for c_tag in compile_instruction_tags]
+        run_instructions = None
+
+    elif job_type == "Run":
+        check_run = l2_contains_l1(["RC"], ppr_keys)
+        if check_run:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run])
+
+        number_run_instructions = int(ppr["RC"])
+        run_instruction_tags = ["R"+str(c) for c in range(0, number_run_instructions)]
+        check_run2 = l2_contains_l1(run_instruction_tags, ppr_keys)
+        if check_run2:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run2])
+
+        compile_instructions = None
+        run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
+
+    elif job_type == "Both":
+        check_compile = l2_contains_l1(["CC"], ppr_keys)
+        if check_compile:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile])
+
+        number_compile_instructions = int(ppr["CC"])
+        compile_instruction_tags = ["C"+str(c) for c in range(0, number_compile_instructions)]
+        check_compile2 = l2_contains_l1(compile_instruction_tags, ppr_keys)
+        if check_compile2:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile2])
+
+        compile_instructions = [ppr[c_tag] for c_tag in compile_instruction_tags]
+
+        check_run = l2_contains_l1(["RC"], ppr_keys)
+        if check_run:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run])
+
+        number_run_instructions = int(ppr["RC"])
+        run_instruction_tags = ["R"+str(c) for c in range(0, number_run_instructions)]
+        check_run2 = l2_contains_l1(run_instruction_tags, ppr_keys)
+        if check_run2:
+            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run2])
+
+        run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
 
 
+    mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin)
 
+    return "New job added to database"
 
 
 

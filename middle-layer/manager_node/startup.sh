@@ -226,7 +226,6 @@ function slurm_submit     {
             if [ "$compile_commands" -ne "0" ]; then
                 printf "\"CC\":\"$compile_commands\",\n" >> $jfile
                 printf "\"Job\":\"Compile\",\n" >> $jfile
-
             fi
 
             if [ "$run_commands" -ne "0" ]; then
@@ -248,6 +247,8 @@ function slurm_submit     {
     job_id=$(curl -s http://$MANAGER_NODE:5000/api/jobs/uuid)
 
     printf "\"ID\":\"$job_id\",\n" >> $jfile
+    printf "\"origin\":\"wetty\",\n" >> $jfile
+    printf "\"key\":\"wetty\",\n" >> $jfile
     printf "\"Unix_time\":\"$unix_time\",\n" >> $jfile
     printf "\"Date\":\"$YYYYMMDD\"\n}\n" >> $jfile
 
@@ -259,6 +260,9 @@ function slurm_submit     {
 
     # Uploads the result to Greyfish
     curl -s -F file=@"$newdir".zip http://$GS:2000/grey/upload/$GK_slurm/commonuser/jobs_left
+
+    # Uploads job to history tab
+    curl -s -X POST -H "Content-Type: application/json" -d @$jfile http://$MANAGER_NODE:5000/api/jobs/new
 
     rm -rf "$newdir"*
 
