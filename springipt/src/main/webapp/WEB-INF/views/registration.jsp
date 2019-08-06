@@ -56,8 +56,8 @@
         </spring:bind>
 
         <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
-        <br />
-        <p>already have an account? <a href="${contextPath}/login" class="login_section">login here</a></p>
+	<br />
+        <p>Already have an account? <a href="${contextPath}/login" class="login_section">Login Here</a></p>
     </form:form>
 
 </div>

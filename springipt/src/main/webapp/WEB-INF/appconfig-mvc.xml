@@ -7,6 +7,11 @@
     <mvc:annotation-driven/>
 
     <mvc:resources mapping="/resources/**" location="/resources/"/>
+	
+	<mvc:interceptors>
+		<bean class="com.ipt.web.service.SessionHandler" />
+	</mvc:interceptors>
+
 
     <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
         <property name="basenames">

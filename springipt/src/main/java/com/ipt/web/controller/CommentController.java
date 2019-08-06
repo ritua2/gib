@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.context.annotation.Scope;
 
 import com.ipt.web.model.Comment;
 import com.ipt.web.model.Reply;
@@ -177,7 +178,7 @@ public class CommentController {
 	}
 	
 	// show reply comment form
-	@RequestMapping(value = "/comments/{id}/reply", method = RequestMethod.POST)
+	@RequestMapping(value = "/comments/{id}/reply", method = RequestMethod.GET)
 	public String showAddReplyForm(@PathVariable("id") Long id, Model model) {
 
 		logger.debug("showAddReplyForm() : {}", id);
@@ -199,7 +200,7 @@ public class CommentController {
 	
 	
 	// delete comment
-	@RequestMapping(value = "/comments/{id}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/comments/{id}/delete", method = RequestMethod.GET)
 	public String deleteComment(@PathVariable("id") Long id, final RedirectAttributes redirectAttributes) {
 
 		logger.debug("deleteComment() : {}", id);
