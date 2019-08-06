@@ -6,15 +6,22 @@
 <spring:url value="/resources/css/hello.css" var="coreCss" />
 <spring:url value="/resources/css/bootstrap.min.css"
 	var="bootstrapCss" />
-<link href="${bootstrapCss}" rel="stylesheet" />
-<link href="${coreCss}" rel="stylesheet" />
+	
+<!--<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">-->
+<link rel="stylesheet"
+	href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<!--<link href="${bootstrapCss}" rel="stylesheet" />
+<!--<link href="${coreCss}" rel="stylesheet" />-->
 </head>
 
 <spring:url value="/" var="urlHome" />
 <spring:url value="/users/add" var="urlAddUser" />
 <spring:url value="/template/addcomment" var="urlAddComment" />
 
-<nav class="navbar navbar-inverse ">
+<nav class="navbar navbar-inverse " style="background:#222;">
 	<div class="container">
 		<div class="navbar-header">
 			<a class="navbar-brand" href="${urlHome}">Spring MVC Form</a>

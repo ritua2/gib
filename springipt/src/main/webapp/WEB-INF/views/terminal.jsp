@@ -122,12 +122,19 @@
 {% block scripts %} -->
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
   <script>
-	/*window.onload = function() { 
-		var frame = document.getElementById('webterm'); 
-		var doc = ''+document.getElementById('test'); 
-		frame.contentWindow.postMessage(doc, "*"); 
-		//frame.contentWindow.postMessage('test', "*"); 
-	}*/
+	window.onload = function(){		
+									var frame = document.getElementById('webterm'); 
+									var key = "<%=session.getAttribute("key")%>";
+									var key1 = "<%=session.getAttribute("key1")%>";
+									
+									if(key!==key1){	
+									console.log("Sending:"+key1);
+									var stop = setInterval(function(){frame.contentWindow.postMessage(key1, "*");},100);
+									setTimeout(function( ) { clearInterval( stop ); }, 1000);
+									 }
+										
+									   };
+		
 	  
 	
       $(document).ready(function(){
@@ -215,7 +222,7 @@
 		  var frame = document.getElementById('webterm'); 
 		  //var doc = ''+document.getElementById('test'); 
 		  //frame.contentWindow.postMessage(doc, "*"); 
-		  frame.contentWindow.postMessage('test', "*"); 
+		  
 		  $.ajax({
             url: window.location.origin + '${contextPath}/terminal/download/' + $('#fileToDownload').val(),
             type: 'GET'

@@ -3,8 +3,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
+<!DOCTYPE html>
+<html lang="en">
 <jsp:include page="../base.jsp" />
 <jsp:include page="../fragments/header.jsp" />
+
+<body>
 
 	<div class="container">
 
@@ -46,9 +50,9 @@
 						<button class="btn btn-primary"
 							onclick="location.href='${updateUrl}'">Update</button>
 						<button class="btn btn-danger"
-							onclick="this.disabled=true;post('${deleteUrl}')">Delete</button>
+							onclick="this.disabled=true;location.href='${deleteUrl}'">Delete</button>
 						<button class="btn btn-success"
-							onclick="this.disabled=true;post('${replyUrl}')">Reply</button></td>
+							onclick="this.disabled=true;location.href='${replyUrl}'">Reply</button></td>
 				</tr>
 				<c:forEach var="reply" items="${comment.replies}">
 					<tr>
@@ -64,4 +68,7 @@
 
 	</div>
 
-<jsp:include page="footer.jsp" />
+	<jsp:include page="../fragments/footer.jsp" />
+
+</body>
+</html>
