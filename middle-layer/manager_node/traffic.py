@@ -927,7 +927,7 @@ def new_job():
 
     ppr = request.get_json()
     ppr_keys = ppr.keys()
-    check = l2_contains_l1(["key", "ID", "User", "origin", "Job"], ppr_keys)
+    check = l2_contains_l1(["key", "ID", "User", "origin", "Job", "modules", "output_files", "dirname"], ppr_keys)
 
     if check:
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
@@ -957,6 +957,9 @@ def new_job():
     job_ID = ppr["ID"]
     origin = ppr["origin"]
     job_type = ppr["Job"]
+    modules = ppr["modules"]
+    output_files = ppr["output_files"]
+    dirname = ppr["dirname"]
 
     if job_type not in ["Compile", "Run", "Both"]:
         return "INVALID: Job type not accepted, must be 'Compile', 'Run', or 'Both'"
@@ -1017,7 +1020,7 @@ def new_job():
         run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
 
 
-    mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin)
+    mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin, modules, output_files, dirname)
 
     return "New job added to database"
 

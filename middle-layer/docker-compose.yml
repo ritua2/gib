@@ -22,6 +22,9 @@ services:
             - URL_BASE
             - PROJECT
             - gthreads
+            - MYSQL_DATABASE
+            - MYSQL_USER
+            - MYSQL_PASSWORD
         command: "tail -F anything"
 
 

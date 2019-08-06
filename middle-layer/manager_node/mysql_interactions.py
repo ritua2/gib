@@ -25,15 +25,18 @@ def timnow():
 # compile_commands, run_commands (arr) (str): Contains a list of commands
 # job_type (str)
 # location (str)
+# modules (str): Space separated
+# output_files (str): Space separated
+# directory_location (str): Zipped directory name without .zip, always located at DIR_commonuser/jobs_left
 
-def add_job(ID, username, compile_commands, run_commands, job_type, location):
+def add_job(ID, username, compile_commands, run_commands, job_type, location, modules, output_files, directory_location):
     springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
                     password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
     cursor = springIPT_db.cursor(buffered=True)
 
     insert_new_job = (
-        "INSERT INTO jobs (id, username, compile_commands, run_commands, type, date_submitted, submission_method, status) "
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)")
+        "INSERT INTO jobs (id, username, compile_commands, run_commands, type, date_submitted, submission_method, status, modules, output_files, directory_location) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
 
     [compile_commands_str, run_commands_str] = [None, None]
@@ -43,7 +46,7 @@ def add_job(ID, username, compile_commands, run_commands, job_type, location):
     if run_commands != None:
         run_commands_str = ";".join(run_commands)
 
-    cursor.execute(insert_new_job, (ID, username, compile_commands_str, run_commands_str, job_type, timnow(), location, "Received by server") )
+    cursor.execute(insert_new_job, (ID, username, compile_commands_str, run_commands_str, job_type, timnow(), location, "Received by server", modules, output_files, directory_location) )
     springIPT_db.commit()
     cursor.close()
     springIPT_db.close()

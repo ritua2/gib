@@ -102,6 +102,14 @@ function slurm_submit     {
 
 
     ###############
+    # Modules
+    ###############
+    printf "${BLUEBLUE}  Enter the list of modules as you would in a terminal, space separated${NCNC}\n"
+    printf "${BLUEBLUE}  Press enter to finish ${NCNC}\n"
+    read modules_used
+
+
+    ###############
     # Commands
     ###############
 
@@ -202,6 +210,27 @@ function slurm_submit     {
     done
 
 
+    ###############
+    # Output files and directories
+    ###############
+    printf "${BLUEBLUE}  Enter the list of output files and directories, files may not have spaces in them, space separated${NCNC}\n"
+    printf "${BLUEBLUE}  Press enter to finish ${NCNC}\n"
+    read output_files
+
+    for possible_output in $output_files
+    do
+
+        # Problematic characters
+        if [[ ! "$possible_output" =~ ^[a-zA-Z0-9\._\-]+$  ]]; then
+            printf "Error in filename ${REDRED}$possible_output${NCNC}\n"
+            printf "${REDRED}Invalid character detected, only alphanumeric, _, - characters are allowed${NCNC}\n"
+            return 1
+        fi
+
+    done
+
+
+
     ##########################
     # Zip and metadata
     ##########################
@@ -239,7 +268,7 @@ function slurm_submit     {
             # No commands submitted
             printf "${REDRED}INVALID job, no commands provided${NCNC}\n\n"
             rm -rf "$newdir"*
-            exit
+            return 2
             ;;
     esac
 
@@ -249,6 +278,9 @@ function slurm_submit     {
     printf "\"ID\":\"$job_id\",\n" >> $jfile
     printf "\"origin\":\"wetty\",\n" >> $jfile
     printf "\"key\":\"wetty\",\n" >> $jfile
+    printf "\"modules\":\"$modules_used\",\n" >> $jfile
+    printf "\"dirname\":\"$newdir\",\n" >> $jfile
+    printf "\"output_files\":\"$output_files\",\n" >> $jfile
     printf "\"Unix_time\":\"$unix_time\",\n" >> $jfile
     printf "\"Date\":\"$YYYYMMDD\"\n}\n" >> $jfile
 
