@@ -19833,11 +19833,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _favicon_ico__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_favicon_ico__WEBPACK_IMPORTED_MODULE_5__);
 var userRegex=new RegExp('ssh/[^/]+$');var trim=function trim(str){return str.replace(/\/*$/,'');};var socketBase=trim(window.location.pathname).replace(userRegex,'');var socket=socket_io_client__WEBPACK_IMPORTED_MODULE_2__(window.location.origin,{path:"".concat(trim(socketBase),"/socket.io")});socket.on('connect',function(){var term=new xterm__WEBPACK_IMPORTED_MODULE_1__["Terminal"]();term.open(document.getElementById('terminal'));var defaultOptions={fontSize:14};var options;try{if(localStorage.options===undefined){options=defaultOptions;}else{options=JSON.parse(localStorage.options);}}catch(_unused){options=defaultOptions;}Object.keys(options).forEach(function(key){var value=options[key];term.setOption(key,value);});var code=JSON.stringify(options,null,2);var editor=document.querySelector('#options .editor');editor.value=code;editor.addEventListener('keyup',function(e){try{var updated=JSON.parse(editor.value);var updatedCode=JSON.stringify(updated,null,2);editor.value=updatedCode;editor.classList.remove('error');localStorage.options=updatedCode;Object.keys(updated).forEach(function(key){var value=updated[key];term.setOption(key,value);});resize();}catch(_unused2){// skip
 editor.classList.add('error');}});document.getElementById('overlay').style.display='none';document.querySelector('#options .toggler').addEventListener('click',function(e){document.getElementById('options').classList.toggle('opened');e.preventDefault();});
-window.addEventListener('message', receiveMessage, false);
-window.addEventListener('beforeunload',handler,false);/*
+
+/*window.addEventListener('beforeunload',handler,false);*/
+window.addEventListener('unload',handler2,false);/*
     term.scrollPort_.screen_.setAttribute('contenteditable', 'false');
-  */term.attachCustomKeyEventHandler(function(e){// Ctrl + Shift + C
-if(e.ctrlKey&&e.shiftKey&&e.keyCode===67){e.preventDefault();document.execCommand('copy');return false;}return true;});function resize(){Object(xterm_lib_addons_fit_fit__WEBPACK_IMPORTED_MODULE_3__["fit"])(term);socket.emit('resize',{cols:term.cols,rows:term.rows});}window.onresize=resize;resize();term.focus();function kill(data){disconnect(data);}term.on('data',function(data){socket.emit('input',data);});term.on('resize',function(size){socket.emit('resize',size);});socket.on('data',function(data){term.write(data);if (!socket.sentMyUser) {socket.emit('input', 'gib'+'\n');socket.sentMyUser = true;}}).on('login',function(){term.writeln('');if (!socket.sentMydata2) {socket.emit('input', 'gib'+'\n');socket.sentMydata2 = true;}resize();}).on('logout',kill).on('disconnect',kill).on('error',function(err){if(err)disconnect(err);});});function disconnect(reason){document.getElementById('overlay').style.display='block';if(!lodash_isUndefined__WEBPACK_IMPORTED_MODULE_0___default()(reason))document.getElementById('msg').innerHTML=reason;window.removeEventListener('beforeunload',handler,false);}
+  */
+//  window.onload= function () {
+  window.addEventListener('message', receiveMessage); //}
+var tempKey='abc';
+function receiveMessage(e1) {
+	console.log(e1.data);
+	console.log("Message received.");
+	tempKey=e1.data	
+	}  
+  
+term.attachCustomKeyEventHandler(function(e){// Ctrl + Shift + C
+if(e.ctrlKey&&e.shiftKey&&e.keyCode===67){e.preventDefault();document.execCommand('copy');return false;}return true;});function resize(){Object(xterm_lib_addons_fit_fit__WEBPACK_IMPORTED_MODULE_3__["fit"])(term);socket.emit('resize',{cols:term.cols,rows:term.rows});}window.onresize=resize;resize();term.focus();function kill(data){disconnect(data);}term.on('data',function(data){socket.emit('input',data);});term.on('resize',function(size){socket.emit('resize',size);});socket.on('data',function(data){term.write(data);if (!socket.sentMyUser) {socket.emit('input', 'gib'+'\n');socket.sentMyUser = true;}if (!socket.sentMydata3 && tempKey!=='abc') {socket.emit('input', tempKey+'\n');socket.sentMydata3 = true;}}).on('login',function(){term.writeln('');if (!socket.sentMydata2) {socket.emit('input', 'gib'+'\n');socket.sentMydata2 = true;}resize();}).on('logout',kill).on('disconnect',kill).on('error',function(err){if(err)disconnect(err);});
+	function handler2(e) {
+		console.log("Here");
+		socket.emit('input', 'exit'+'\n');
+	}
+	function sleep(miliseconds) {
+   var currentTime = new Date().getTime();
+
+   while (currentTime + miliseconds >= new Date().getTime()) {
+	}
+	}
+
+
+});function disconnect(reason){document.getElementById('overlay').style.display='block';if(!lodash_isUndefined__WEBPACK_IMPORTED_MODULE_0___default()(reason))document.getElementById('msg').innerHTML=reason;window.removeEventListener('beforeunload',handler,false);}
 var messageEle='abc';
 function handler(e){
 	if(messageEle!=='test'){
@@ -19845,9 +19869,7 @@ function handler(e){
 	return e.returnValue;}
 	else
 		messageEle='abc';}
-	function receiveMessage(e1) {
-		messageEle = e1.data;
-	}
+	
 /***/ }),
 
 /***/ "./src/client/wetty.scss":
