@@ -325,98 +325,83 @@ function slurm_submit     {
             if [ "$compile_commands" -ne "0" ]; then
                 printf "\"CC\":\"$compile_commands\",\n" >> $jfile
                 printf "\"Job\":\"Compile\",\n" >> $jfile
-
-                # Selects the system
-                declare -A available_systems=( ["1"]="Comet" ["2"]="Stampede2" ["3"]="Lonestar5")
-                printf "Select system:\n"
-                printf "  [1] Comet\n  [2] Stampede2\n  [3] Lonestar5\n\n"
-                read selected_system
-
-                if [[ ! $selected_system =~ ^(1|2|3)$  ]]; then
-                    printf "${REDRED}Please enter '1', '2', or '3'${NCNC}\n"
-                    return 1
-                fi
-
-                system_to_be_used=${available_systems["$selected_system"]}
-                printf "\"sc_system\":\"$system_to_be_used\",\n" >> $jfile
             fi
 
 
             if [ "$run_commands" -ne "0" ]; then
                 printf "\"RC\":\"$compile_commands\",\n" >> $jfile
                 printf "\"Job\":\"Run\",\n" >> $jfile
-
-                # Selects the system
-                declare -A available_systems=( ["1"]="Comet" ["2"]="Stampede2" ["3"]="Lonestar5")
-                printf "Select system:\n"
-                printf "  [1] Comet\n  [2] Stampede2\n  [3] Lonestar5\n\n"
-                read selected_system
-
-                if [[ ! $selected_system =~ ^(1|2|3)$  ]]; then
-                    printf "${REDRED}Please enter '1', '2', or '3'${NCNC}\n"
-                    return 1
-                fi
-
-                system_to_be_used=${available_systems["$selected_system"]}
-                printf "\"sc_system\":\"$system_to_be_used\",\n" >> $jfile
-
-                # Selects the queues
-                # Marked as system,number. i.e. : Stampede2 normal = 2,1
-
-                declare -A queues=(["1,1"]="gpu-shared" ["1,2"]="gpu" ["1,3"]="debug" ["1,4"]="compute"
-                                    ["2,1"]="normal" ["2,2"]="development" ["2,3"]="flat-quadrant" ["2,4"]="skx-dev" ["2,5"]="skx-normal"
-                                    ["3,1"]="normal" ["3,2"]="development" ["3,3"]="gpu" ["3,4"]="vis"
-                                    )
-
-                printf "Select queue:\n"
-                valid_queues=""
-
-                for k in "${!queues[@]}"
-                do
-                    if [[ ! "$k" =~ ^"$selected_system""," ]]; then
-                        continue
-                    fi
-
-                    numbered_queue=${k/$selected_system,/}
-                    valid_queues="$valid_queues""  [$numbered_queue] ${queues[$k]}\n"
-                done
-
-                printf "$valid_queues\n" | sort
-
-                read user_chosen_queue
-
-                if [ -z ${queues["$selected_system,$user_chosen_queue"]} ]; then
-                    printf "${REDRED}INVALID queue${NCNC}\n"
-                    return 3
-                fi
-
-                queue_to_be_used=${queues["$selected_system,$user_chosen_queue"]}
-                printf "\"sc_queue\":\"$queue_to_be_used\",\n" >> $jfile
-
-
-                # Select nodes and cores
-                printf "Select number of nodes: "
-                read n_nodes
-
-                if [[ ! "$n_nodes" =~ ^[1-9][0-9]*$ ]]; then
-                    printf "${REDRED}INVALID number of nodes, must be integer${NCNC}\n"
-                    return 3
-                fi
-
-                printf "\"n_nodes\":\"$n_nodes\",\n" >> $jfile
-
-                printf "Select number of cores: "
-                read n_cores
-
-                if [[ ! "$n_cores" =~ ^[1-9][0-9]*$ ]]; then
-                    printf "${REDRED}INVALID number of cores, must be integer${NCNC}\n"
-                    return 3
-                fi
-
-                printf "\"n_cores\":\"$n_cores\",\n" >> $jfile
-
-
             fi
+
+            # Selects the system
+            declare -A available_systems=( ["1"]="Comet" ["2"]="Stampede2" ["3"]="Lonestar5")
+            printf "Select system:\n"
+            printf "  [1] Comet\n  [2] Stampede2\n  [3] Lonestar5\n\n"
+            read selected_system
+
+            if [[ ! $selected_system =~ ^(1|2|3)$  ]]; then
+                printf "${REDRED}Please enter '1', '2', or '3'${NCNC}\n"
+                return 1
+            fi
+
+            system_to_be_used=${available_systems["$selected_system"]}
+            printf "\"sc_system\":\"$system_to_be_used\",\n" >> $jfile
+
+            # Selects the queues
+            # Marked as system,number. i.e. : Stampede2 normal = 2,1
+
+            declare -A queues=(["1,1"]="gpu-shared" ["1,2"]="gpu" ["1,3"]="debug" ["1,4"]="compute"
+                                ["2,1"]="normal" ["2,2"]="development" ["2,3"]="flat-quadrant" ["2,4"]="skx-dev" ["2,5"]="skx-normal"
+                                ["3,1"]="normal" ["3,2"]="development" ["3,3"]="gpu" ["3,4"]="vis"
+                                )
+
+            printf "Select queue:\n"
+            valid_queues=""
+
+            for k in "${!queues[@]}"
+            do
+                if [[ ! "$k" =~ ^"$selected_system""," ]]; then
+                    continue
+                fi
+
+                numbered_queue=${k/$selected_system,/}
+                valid_queues="$valid_queues""  [$numbered_queue] ${queues[$k]}\n"
+            done
+
+            printf "$valid_queues\n" | sort
+
+            read user_chosen_queue
+
+            if [ -z ${queues["$selected_system,$user_chosen_queue"]} ]; then
+                printf "${REDRED}INVALID queue${NCNC}\n"
+                return 3
+            fi
+
+            queue_to_be_used=${queues["$selected_system,$user_chosen_queue"]}
+            printf "\"sc_queue\":\"$queue_to_be_used\",\n" >> $jfile
+
+
+            # Select nodes and cores
+            printf "Select number of nodes: "
+            read n_nodes
+
+            if [[ ! "$n_nodes" =~ ^[1-9][0-9]*$ ]]; then
+                printf "${REDRED}INVALID number of nodes, must be integer${NCNC}\n"
+                return 3
+            fi
+
+            printf "\"n_nodes\":\"$n_nodes\",\n" >> $jfile
+
+            printf "Select number of cores: "
+            read n_cores
+
+            if [[ ! "$n_cores" =~ ^[1-9][0-9]*$ ]]; then
+                printf "${REDRED}INVALID number of cores, must be integer${NCNC}\n"
+                return 3
+            fi
+
+            printf "\"n_cores\":\"$n_cores\",\n" >> $jfile
+
             ;;
 
 
