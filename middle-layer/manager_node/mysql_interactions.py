@@ -53,6 +53,69 @@ def add_job(ID, username, compile_commands, run_commands, job_type, location, mo
 
 
 
+# Returns a list of job IDs and directory locations that have a certain status
+# Default is available for processing
+# max_jobs_wanted (int)
+
+# Returns (arr) [id (str), directory location (str)]
+def jobs_with_status(max_jobs_wanted, sc_system, status="Received by server"):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    query = ("SELECT id, directory_location FROM jobs WHERE status=%s AND sc_system=%s LIMIT %s")
+    cursor.execute(query, (status, sc_system, max_jobs_wanted))
+
+    B = [[job_id, dir_loc] for (job_id, dir_loc) in cursor]
+
+    springIPT_db.commit()
+    cursor.close()
+    springIPT_db.close()
+
+    return B
+
+
+
+# Given a list of job IDs, returns a list of their directory locations
+# job_ids (arr) (str)
+def directory_locations_from_job_ids(job_ids):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    A = []
+
+    for jid in job_ids:
+        query = "SELECT directory_location FROM jobs WHERE id=%s LIMIT 1"
+        cursor.execute(query, (jid,))
+        for a in cursor:
+            A.append(a[0])
+
+    springIPT_db.commit()
+    cursor.close()
+    springIPT_db.close()
+
+    return A
+
+
+
+# Updates the status of a job
+def update_job_status(job_ID, new_status, error=None):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    cursor.execute("UPDATE jobs SET status = %s, error = %s WHERE id = %s", (new_status, error, job_ID))
+
+    springIPT_db.commit()
+    cursor.close()
+    springIPT_db.close()
+
+
+
 # Gets the IP:Port information given the username and IP
 def get_ip_port(username, IP):
 
@@ -77,3 +140,4 @@ def get_ip_port(username, IP):
     springIPT_db.commit()
     cursor.close()
     springIPT_db.close()
+

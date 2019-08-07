@@ -6,7 +6,9 @@ Checks that a user is valid after login into wetty
 """
 
 
-from flask import Flask, redirect, request, send_file
+from flask import after_this_request, Flask, jsonify, redirect, request, send_file
+import hashlib
+import json
 import os
 import random
 import redis
@@ -17,6 +19,8 @@ import tarfile
 import uuid
 
 import mysql_interactions as mints
+
+
 
 
 
@@ -170,6 +174,16 @@ def sync_wetty_volume(vm_ip, vm_port, username, wetty_key, sync_action="start"):
                                                                         "action":sync_action})
     return req.text
 
+
+
+# Computes the SHA 256 checksum of a file given its name
+# Based on https://gist.github.com/rji/b38c7238128edf53a181
+def sha256_checksum(filename, block_size=65536):
+    sha256 = hashlib.sha256()
+    with open(filename, 'rb') as f:
+        for block in iter(lambda: f.read(block_size), b''):
+            sha256.update(block)
+    return sha256.hexdigest()
 
 
 
@@ -1030,6 +1044,129 @@ def new_job():
                     sc_system, sc_queue, n_cores, n_nodes)
 
     return "New job added to database"
+
+
+# Returns a list of N jobs
+# IDs and directory locations, to be requested later
+@app.route("/api/jobs/request", methods=['POST'])
+def request_N_jobs():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    ppr_keys = ppr.keys()
+    check = l2_contains_l1(["key", "number", "sc_system"], ppr_keys)
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    number_requested = int(ppr["number"])
+    sc_system = ppr["sc_system"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID: Access not allowed"
+
+    job_list = mints.jobs_with_status(number_requested, sc_system, status="Received by server")
+
+    job_IDs = []
+    job_dir_locations = []
+
+    for a_job_info in job_list:
+        job_IDs.append(a_job_info[0])
+        job_dir_locations.append(a_job_info[1])
+
+    return jsonify({"IDs":job_IDs, "directory_locations":job_dir_locations})
+
+
+
+# Requests a list of jobs in bulk
+# Returns a tar file containing all the jobs
+# For each job, there will be a JSON file as well which contains the checksums of all files
+@app.route("/api/jobs/request/data/bulk", methods=['POST'])
+def bulk_data_request():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    ppr_keys = ppr.keys()
+    check = l2_contains_l1(["key", "IDs"], ppr_keys)
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    job_IDs = ppr["IDs"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID: Access not allowed"
+
+    # Gets the directory locations
+    dirlocs = mints.directory_locations_from_job_ids(job_IDs)
+    GREYFISH_DIR = "/greyfish/sandbox/DIR_commonuser/jobs_left/"
+
+    os.chdir(GREYFISH_DIR)
+    tar_name = "tmp-"+random_string(5)+".checksum.tar.gz"
+    tar = tarfile.open(tar_name, "w:gz")
+
+    checksum_dict = {}
+
+    for job_data in dirlocs:
+        tar.add(job_data+".zip")
+        checksum_dict[job_data+".zip"] = sha256_checksum(job_data+".zip")[:8]
+
+    with open("checksums.json", "w") as jfil:
+        jfil.write(json.dumps(checksum_dict))
+
+    tar.add("checksums.json")
+    tar.close()
+
+    os.remove("checksums.json")
+
+    os.chdir(CURDIR)
+
+    # Removes the temporary file
+    @after_this_request
+    def remove_files(response):
+
+        # Deletes the file
+        os.remove(GREYFISH_DIR+tar_name)
+        return response
+
+    return send_file(GREYFISH_DIR+tar_name, as_attachment=True)
+
+
+
+# Updates the status of a job
+@app.route("/api/jobs/status/update", methods=['POST'])
+def status_update():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    ppr_keys = ppr.keys()
+    check = l2_contains_l1(["key", "job_ID", "status", "error"], ppr_keys)
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    job_ID = ppr["job_ID"]
+    status = ppr["status"]
+    error = ppr["error"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID: Access not allowed"
+
+    if error == "":
+        error = None
+
+    mints.update_job_status(job_ID, status, error)
+
+    return "Updated job status"
 
 
 
