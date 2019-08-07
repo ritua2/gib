@@ -967,7 +967,7 @@ def new_job():
     # Processes the commands
     if job_type == "Compile":
 
-        check_compile = l2_contains_l1(["CC"], ppr_keys)
+        check_compile = l2_contains_l1(["CC", "sc_system"], ppr_keys)
         if check_compile:
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile])
 
@@ -979,9 +979,11 @@ def new_job():
 
         compile_instructions = [ppr[c_tag] for c_tag in compile_instruction_tags]
         run_instructions = None
+        sc_system = ppr["sc_system"]
+        [sc_queue, n_cores, n_nodes] = [None, None, None]
 
     elif job_type == "Run":
-        check_run = l2_contains_l1(["RC"], ppr_keys)
+        check_run = l2_contains_l1(["RC", "sc_system", "sc_queue", "n_cores", "n_nodes"], ppr_keys)
         if check_run:
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run])
 
@@ -993,10 +995,14 @@ def new_job():
 
         compile_instructions = None
         run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
+        sc_system = ppr["sc_system"]
+        sc_queue = ppr["sc_queue"]
+        n_cores = ppr["n_cores"]
+        n_nodes = ppr["n_nodes"]
 
     elif job_type == "Both":
-        check_compile = l2_contains_l1(["CC"], ppr_keys)
-        if check_compile:
+        check_both = l2_contains_l1(["CC", "RC", "sc_system", "sc_queue", "n_cores", "n_nodes"], ppr_keys)
+        if check_both:
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile])
 
         number_compile_instructions = int(ppr["CC"])
@@ -1007,10 +1013,6 @@ def new_job():
 
         compile_instructions = [ppr[c_tag] for c_tag in compile_instruction_tags]
 
-        check_run = l2_contains_l1(["RC"], ppr_keys)
-        if check_run:
-            return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run])
-
         number_run_instructions = int(ppr["RC"])
         run_instruction_tags = ["R"+str(c) for c in range(0, number_run_instructions)]
         check_run2 = l2_contains_l1(run_instruction_tags, ppr_keys)
@@ -1018,9 +1020,14 @@ def new_job():
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run2])
 
         run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
+        sc_system = ppr["sc_system"]
+        sc_queue = ppr["sc_queue"]
+        n_cores = ppr["n_cores"]
+        n_nodes = ppr["n_nodes"]
 
 
-    mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin, modules, output_files, dirname)
+    mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin, modules, output_files, dirname,
+                    sc_system, sc_queue, n_cores, n_nodes)
 
     return "New job added to database"
 
