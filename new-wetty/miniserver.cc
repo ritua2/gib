@@ -566,12 +566,8 @@ int main(void) {
                 lsyncd_conf.append("sync {\n");
                 lsyncd_conf.append("    default.rsync,\n        delete='running',\n    source = \"/home/gib\",\n    target = \"");
                 lsyncd_conf.append(user_dir_volume);
-                lsyncd_conf.append("\"\n}\n");
-                // Wetty volume -> /home/gib
-                lsyncd_conf.append("sync {\n    default.rsync,\n        delete='running',\n");
-                lsyncd_conf.append("    source = \"");
-                lsyncd_conf.append(user_dir_volume);
-                lsyncd_conf.append("\",\n    target = \"/home/gib\"\n}\n");
+                lsyncd_conf.append("\"\n");
+                lsyncd_conf.append("}\n");
 
                 ofstream lsyncd_conf_file;
                 lsyncd_conf_file.open ("/etc/lsyncd/lsyncd.conf.lua");
