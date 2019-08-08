@@ -9,7 +9,7 @@ Checks that a user is valid after login into wetty
 from flask import after_this_request, Flask, jsonify, redirect, request, send_file
 import hashlib
 import json
-import os
+import os, shutil
 import random
 import redis
 import requests
@@ -18,9 +18,10 @@ import subprocess
 import tarfile
 import uuid
 from werkzeug.utils import secure_filename
+import zipfile
 
 import mysql_interactions as mints
-
+import web_data_to_json_file
 
 
 
@@ -970,6 +971,7 @@ def new_job():
     if invalid_access:
         return "INVALID: Access not allowed"
 
+
     job_ID = ppr["ID"]
     origin = ppr["origin"]
     job_type = ppr["Job"]
@@ -1034,6 +1036,34 @@ def new_job():
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run2])
 
         run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
+
+
+    # Adds the data to a json file if using the web interface
+    # Warning, only the directory with same name will be added
+    if origin == "web":
+        GREYFISH_DIR = "/greyfish/sandbox/DIR_commonuser/jobs_left/"
+        zip_location = GREYFISH_DIR+dirname+".zip"
+
+        os.mkdir(GREYFISH_DIR+dirname)
+        os.chdir(GREYFISH_DIR+dirname)
+
+        with zipfile.ZipFile(zip_location, 'r') as zf:
+            zf.extractall(".")
+
+        # Must have a directory with the same name as the zipfile
+        if not os.path.isdir(GREYFISH_DIR+dirname+"/"+dirname):
+            os.remove(zip_location)
+            os.chdir(CURDIR)
+            shutil.rmtree(GREYFISH_DIR+dirname)
+            return "INVALID: The directory does not have the same name as the zip file"
+
+        web_data_to_json_file.json_to_file(dirname, ppr)
+
+        os.remove(zip_location)
+        shutil.make_archive(GREYFISH_DIR+dirname, "zip", ".")
+
+        os.chdir(CURDIR)
+        shutil.rmtree(GREYFISH_DIR+dirname)
 
 
     mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin, modules, output_files, dirname,
@@ -1237,6 +1267,10 @@ def upload_results(username, job_ID, key):
         return "Could not open tar file" 
 
     mints.update_results_received(job_ID)
+
+    # Now that the job is complete, remove the job files
+    location_of_job = mints.directory_locations_from_job_ids([job_ID])[0]
+    os.remove("/greyfish/sandbox/DIR_commonuser/jobs_left/"+location_of_job+".zip")
 
     return "Updated job results"
 
