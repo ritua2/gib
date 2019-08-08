@@ -131,6 +131,20 @@ def update_job_execution_time(job_ID, sc_execution_time, notes_sc=None):
 
 
 
+# Updates the execution time of a job
+def update_results_received(job_ID):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    cursor.execute("UPDATE jobs SET date_server_received = %s WHERE id = %s", (timnow(), job_ID))
+
+    springIPT_db.commit()
+    cursor.close()
+    springIPT_db.close()
+
+
 
 # Gets the IP:Port information given the username and IP
 def get_ip_port(username, IP):

@@ -17,6 +17,7 @@ import signal
 import subprocess
 import tarfile
 import uuid
+from werkzeug.utils import secure_filename
 
 import mysql_interactions as mints
 
@@ -1193,6 +1194,52 @@ def update_execution_time():
     mints.update_job_execution_time(job_ID, sc_execution_time, notes_sc)
 
     return "Updated job execution time"
+
+
+# Uploads a tar file containing the job data
+@app.route("/api/jobs/upload_results/user/<username>/<job_ID>/key=<key>", methods=['POST'])
+def upload_results(username, job_ID, key):
+
+    if not valid_adm_passwd(key):
+        return "INVALID: Access not allowed"
+
+    # Checks if the user directory exists
+    GREYFISH_DIR = "/greyfish/sandbox/DIR_"+username+"/"
+    if not os.path.isdir(GREYFISH_DIR):
+        return "INVALID: User does exist"
+
+    user_results_dir = GREYFISH_DIR+"results/"
+    if not os.path.isdir(user_results_dir):
+        os.mkdir(user_results_dir)
+
+    os.mkdir(user_results_dir+job_ID)
+
+    file = request.files['file']
+    fnam = file.filename
+
+    # Avoids empty filenames and those with commas
+    if fnam == '':
+        return 'INVALID, no file uploaded'
+
+    try:
+
+        tar_location = user_results_dir+job_ID+"/data.tar.gz"
+
+        file.save(tar_location)
+        tar = tarfile.open(tar_location)
+        tar.extractall(user_results_dir+job_ID)
+        tar.close()
+
+    except:
+        tar.close()
+        os.remove(tar_location)
+
+        return "Could not open tar file" 
+
+    mints.update_results_received(job_ID)
+
+    return "Updated job results"
+
 
 
 

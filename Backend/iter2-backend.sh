@@ -272,6 +272,23 @@ for filename in ./*.zip; do
 
     sc_queue=$(jparser meta.json sc_queue)
 
+    # User information
+    # Queue information
+    if [[ $(soft_enforce_json_field meta.json User) = "False" ]]; then
+
+        printf "${PURPLE}Error in $current_jobID. Missing 'User' key in meta.json${NC}\n"
+
+        update_job_status "$current_jobID" "Finished" "Missing 'User' key in meta.json"
+        printf "\n"
+        cd ..
+        rm -rf "$dirloc_name"
+        rm "$just_the_filename"
+        continue
+    fi
+
+    job_user=$(jparser meta.json User)
+
+
 
     # Creates the slurm file
     slurm_file="$current_jobID".slurm
@@ -519,9 +536,7 @@ for filename in ./*.zip; do
             ;;
 
     esac
-
       
-    # TODO
     # Compute total time and upload it to server
     printf 'export execution_ended=$(date +%%s)'"\n" >> "$slurm_file"
     printf 'export execution_time=$(($execution_ended - $unix_started))'"\n" >> "$slurm_file"
@@ -531,24 +546,26 @@ for filename in ./*.zip; do
     # Read output_files
     output_files=$(jparser meta.json output_files)
 
-    if [ -z "$output_files" ]; then
-
-        tar -cvzf tmp-outfiles.tar.gz "$output_files"
-        # TODO
-        # Upload results to server
-
-    fi
-
     # Notify server of completed job
     update_job_status "$current_jobID" "Submitted for Slurm processing" ""
 
-    printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "status":"Finished", "error":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update\n" >> "$slurm_file"
+    # Uploads the results
+    cp $currentdir/upload_job_files.sh .
 
+    # Files with information
+    printf "$orchestra_key" > orchestra_file
+    printf "$manager_node_ip" > manager_node_file
+    printf "$job_user" > User_file
+    printf "$current_jobID" > jobID_file
+
+    printf "bash upload_job_files.sh $output_files""\n" >> "$slurm_file"
+
+
+    printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "status":"Finished", "error":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update\n" >> "$slurm_file"
     printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "sc_execution_time":"'"'"'"$execution_time"'"'"'", "notes_sc":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update_execution_time\n" >> "$slurm_file"
 
-    cat "$slurm_file"
+    sbatch "$slurm_file"
 
-    #sbatch "$slurm_file"
     cd ..
 
     # Delete the zip from local storage
