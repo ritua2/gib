@@ -941,7 +941,8 @@ def new_job():
 
     ppr = request.get_json()
     ppr_keys = ppr.keys()
-    check = l2_contains_l1(["key", "ID", "User", "origin", "Job", "modules", "output_files", "dirname"], ppr_keys)
+    check = l2_contains_l1(["key", "ID", "User", "origin", "Job", "modules", "output_files", "dirname", "sc_system",
+                            "sc_queue", "n_cores", "n_nodes"], ppr_keys)
 
     if check:
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
@@ -974,6 +975,10 @@ def new_job():
     modules = ppr["modules"]
     output_files = ppr["output_files"]
     dirname = ppr["dirname"]
+    sc_system = ppr["sc_system"]
+    sc_queue = ppr["sc_queue"]
+    n_cores = ppr["n_cores"]
+    n_nodes = ppr["n_nodes"]
 
     if job_type not in ["Compile", "Run", "Both"]:
         return "INVALID: Job type not accepted, must be 'Compile', 'Run', or 'Both'"
@@ -981,7 +986,7 @@ def new_job():
     # Processes the commands
     if job_type == "Compile":
 
-        check_compile = l2_contains_l1(["CC", "sc_system"], ppr_keys)
+        check_compile = l2_contains_l1(["CC"], ppr_keys)
         if check_compile:
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile])
 
@@ -993,11 +998,9 @@ def new_job():
 
         compile_instructions = [ppr[c_tag] for c_tag in compile_instruction_tags]
         run_instructions = None
-        sc_system = ppr["sc_system"]
-        [sc_queue, n_cores, n_nodes] = [None, None, None]
 
     elif job_type == "Run":
-        check_run = l2_contains_l1(["RC", "sc_system", "sc_queue", "n_cores", "n_nodes"], ppr_keys)
+        check_run = l2_contains_l1(["RC"], ppr_keys)
         if check_run:
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run])
 
@@ -1009,13 +1012,9 @@ def new_job():
 
         compile_instructions = None
         run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
-        sc_system = ppr["sc_system"]
-        sc_queue = ppr["sc_queue"]
-        n_cores = ppr["n_cores"]
-        n_nodes = ppr["n_nodes"]
 
     elif job_type == "Both":
-        check_both = l2_contains_l1(["CC", "RC", "sc_system", "sc_queue", "n_cores", "n_nodes"], ppr_keys)
+        check_both = l2_contains_l1(["CC", "RC"], ppr_keys)
         if check_both:
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_compile])
 
@@ -1034,10 +1033,6 @@ def new_job():
             return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check_run2])
 
         run_instructions = [ppr[r_tag] for r_tag in run_instruction_tags]
-        sc_system = ppr["sc_system"]
-        sc_queue = ppr["sc_queue"]
-        n_cores = ppr["n_cores"]
-        n_nodes = ppr["n_nodes"]
 
 
     mints.add_job(job_ID, username, compile_instructions, run_instructions, job_type, origin, modules, output_files, dirname,
@@ -1168,6 +1163,36 @@ def status_update():
 
     return "Updated job status"
 
+
+
+# Updates the execution time of a job
+@app.route("/api/jobs/status/update_execution_time", methods=['POST'])
+def update_execution_time():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    ppr_keys = ppr.keys()
+    check = l2_contains_l1(["key", "job_ID", "sc_execution_time", "notes_sc"], ppr_keys)
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    job_ID = ppr["job_ID"]
+    sc_execution_time = ppr["sc_execution_time"]
+    notes_sc = ppr["notes_sc"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID: Access not allowed"
+
+    if notes_sc == "":
+        notes_sc = None
+
+    mints.update_job_execution_time(job_ID, sc_execution_time, notes_sc)
+
+    return "Updated job execution time"
 
 
 

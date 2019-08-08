@@ -83,3 +83,12 @@ function update_job_status {
     curl -s -X POST -H "Content-Type: application/json" -d '{"key":"'"$orchestra_key"'", "job_ID":"'"$1"'", "status":"'"$2"'", "error":"'"$3"'"}' \
         http://$manager_node_ip:5000/api/jobs/status/update
 }
+
+
+# Updates the execution time of a job on the server
+function update_job_execution_time {
+
+
+    curl -s -X POST -H "Content-Type: application/json" -d '{"key":"'"$orchestra_key"'", "job_ID":"'"$1"'", "sc_execution_time":"'"$2"'", "notes_sc":"'"$3"'"}' \
+        http://$manager_node_ip:5000/api/jobs/status/update_execution_time
+}

@@ -139,6 +139,7 @@ for filename in ./*.zip; do
         # Notify server about erroneous job
         update_job_status "$current_jobID" "Finished" "Data not present in checksum"
         printf "\n"
+        rm "$just_the_filename"
         continue
     fi
 
@@ -150,6 +151,7 @@ for filename in ./*.zip; do
         # Notify server about erroneous job
         update_job_status "$current_jobID" "Finished" "Incorrect checksum"
         printf "\n"
+        rm "$just_the_filename"
         continue
     fi
 
@@ -167,13 +169,12 @@ for filename in ./*.zip; do
         # Notify server of faulty job
         cd ..
         rm -rf "$dirloc_name"
+        rm "$just_the_filename"
         continue
     fi
 
     # Gets the date in format YYYY-MM-DD hh:mm:ss 
     date_sc_received="$(date +%F) $(date +%H):$(date +%M):$(date +%S)" 
-    # TODO
-    # Notify server of receival
 
     # Important only for compute jobs
     if [[ $(soft_enforce_json_field meta.json n_nodes) = "False" ]]; then
@@ -184,6 +185,7 @@ for filename in ./*.zip; do
         printf "\n"
         cd ..
         rm -rf "$dirloc_name"
+        rm "$just_the_filename"
         continue
     fi
 
@@ -197,6 +199,7 @@ for filename in ./*.zip; do
         printf "\n"
         cd ..
         rm -rf "$dirloc_name"
+        rm "$just_the_filename"
         continue
     fi
 
@@ -208,6 +211,7 @@ for filename in ./*.zip; do
         printf "\n"
         cd ..
         rm -rf "$dirloc_name"
+        rm "$just_the_filename"
         continue
     fi
 
@@ -218,26 +222,83 @@ for filename in ./*.zip; do
         printf "\n"
         cd ..
         rm -rf "$dirloc_name"
+        rm "$just_the_filename"
         continue
     fi
+
+
+    # Enforce output_files
+    if [[ $(soft_enforce_json_field meta.json output_files) = "False" ]]; then
+
+        printf "${PURPLE}Error in $current_jobID. Missing 'output_files' key in meta.json${NC}\n"
+
+        update_job_status "$current_jobID" "Finished" "Missing 'output_files' key in meta.json"
+        printf "\n"
+        cd ..
+        rm -rf "$dirloc_name"
+        rm "$just_the_filename"
+        continue
+    fi
+
+
+    # Check modules
+    if [[ $(soft_enforce_json_field meta.json modules) = "False" ]]; then
+
+        printf "${PURPLE}Error in $current_jobID. Missing 'modules' key in meta.json${NC}\n"
+
+        update_job_status "$current_jobID" "Finished" "Missing 'modules' key in meta.json"
+        printf "\n"
+        cd ..
+        rm -rf "$dirloc_name"
+        rm "$just_the_filename"
+        continue
+    fi
+
+    modules_used=$(jparser meta.json modules)
+
+
+    # Queue information
+    if [[ $(soft_enforce_json_field meta.json sc_queue) = "False" ]]; then
+
+        printf "${PURPLE}Error in $current_jobID. Missing 'sc_queue' key in meta.json${NC}\n"
+
+        update_job_status "$current_jobID" "Finished" "Missing 'sc_queue' key in meta.json"
+        printf "\n"
+        cd ..
+        rm -rf "$dirloc_name"
+        rm "$just_the_filename"
+        continue
+    fi
+
+    sc_queue=$(jparser meta.json sc_queue)
+
 
     # Creates the slurm file
     slurm_file="$current_jobID".slurm
     printf "#!/bin/bash\n\n" > "$slurm_file"
 
     printf "#SBATCH --job-name=\"$current_jobID\"\n" >> "$slurm_file"
-    printf "#SBATCH --output=\"$current_jobID\".%j.%N.out\n" >> "$slurm_file"
-    printf "#SBATCH --partition=compute\n" >> "$slurm_file"
+    printf "#SBATCH --output=\"$current_jobID\".%%j.%%N.out\n" >> "$slurm_file"
+    printf "#SBATCH --partition=$sc_queue\n" >> "$slurm_file"
     printf "#SBATCH --nodes=$n_nodes\n" >> "$slurm_file"
     printf "#SBATCH --ntasks-per-nod=$n_cores\n" >> "$slurm_file"
     printf "#SBATCH --export=ALL\n" >> "$slurm_file"
+    printf "$allocation_instructions\n" >> "$slurm_file"
 
+    # TODO
+    # Requires changes in wetty
     # Expected time is not handled yet, let's assume 10 min
     printf "#SBATCH -t 00:10:00\n\n" >> "$slurm_file"
 
 
+    if [ ! -z "$modules_used" ]; then
+        printf "module load $modules_used\n" >> "$slurm_file"
+    fi
+
+
+
     printf 'export date_started="'"$date_sc_received""\"\n" >> "$slurm_file"
-    printf 'unix_started=$(date +%s)'"\n" >> "$slurm_file"
+    printf -- 'unix_started=$(date +%%s)'"\n" >> "$slurm_file"
 
     # Ensures the existance of basic information
     job_type=$(jparser meta.json Job)
@@ -260,6 +321,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -272,6 +334,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -296,6 +359,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -311,6 +375,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -336,6 +401,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
             ;;
@@ -353,6 +419,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -365,6 +432,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -389,6 +457,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -406,6 +475,7 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
 
@@ -431,36 +501,55 @@ for filename in ./*.zip; do
                 printf "\n"
                 cd ..
                 rm -rf "$dirloc_name"
+                rm "$just_the_filename"
                 continue
             fi
             ;;
 
 
         *)
-            printf "${RED}Job $job_dir cannot be processed, job type not specified${NC}"
-            
-            # TODO
-            # Call server and specify faulty job
+            printf "${PURPLE}Job type is not accepted${NC}\n"
+
+            update_job_status "$current_jobID" "Finished" "Job type is not accepted"
+            printf "\n"
+            cd ..
+            rm -rf "$dirloc_name"
+            rm "$just_the_filename"
+            continue
             ;;
 
     esac
 
-    
-    printf 'export execution_ended=$(date +%s)'"\n" >> "$slurm_file"
-
-    printf 'export execution_time=$(($execution_ended - $unix_started))'
-
-
+      
     # TODO
-    # Upload results to server
+    # Compute total time and upload it to server
+    printf 'export execution_ended=$(date +%%s)'"\n" >> "$slurm_file"
+    printf 'export execution_time=$(($execution_ended - $unix_started))'"\n" >> "$slurm_file"
 
-    # TODO
-    # Compute total time to server
+
+
+    # Read output_files
+    output_files=$(jparser meta.json output_files)
+
+    if [ -z "$output_files" ]; then
+
+        tar -cvzf tmp-outfiles.tar.gz "$output_files"
+        # TODO
+        # Upload results to server
+
+    fi
 
     # Notify server of completed job
-    update_job_status "$current_jobID" "Finished" ""
+    update_job_status "$current_jobID" "Submitted for Slurm processing" ""
 
+    printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "status":"Finished", "error":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update\n" >> "$slurm_file"
 
+    printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "sc_execution_time":"'"'"'"$execution_time"'"'"'", "notes_sc":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update_execution_time\n" >> "$slurm_file"
+
+    cat "$slurm_file"
+
+    #sbatch "$slurm_file"
+    cd ..
 
     # Delete the zip from local storage
     rm "$just_the_filename"
