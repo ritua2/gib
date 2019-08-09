@@ -52,8 +52,8 @@ else
     GK2=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/new/single_use_token/$UUID_f10)
 
 
-    # Gets all the user files
-    curl -s http://$GS:2001/grey/get_all/$GK1/$USER > summary.tar.gz
+    # Gets all the user files and results
+    curl -s http://$GS:2000/grey/grey_dir/$GK1/$USER/home++gib++home++gib > summary.tar.gz
 
     # Checks that the previous data is actually tarred
     if { tar ztf "summary.tar.gz" || tar tf "summary.tar.gz"; } >/dev/null 2>&1; then
@@ -64,6 +64,19 @@ else
 
     rm -f summary.tar.gz
 
+    # Gets the results
+    curl -s http://$GS:2000/grey/grey_dir/$GK2/$USER/results > results.tar.gz
+
+    if [ ! -d /home/gib/results ]; then
+        mkdir /home/gib/results
+    fi
+
+
+    if { tar ztf "results.tar.gz" || tar tf "results.tar.gz"; } >/dev/null 2>&1; then
+       tar -xzf results.tar.gz -C /home/gib/results/
+    fi
+
+    rm -f results.tar.gz
 fi
 
 
@@ -329,7 +342,7 @@ function slurm_submit     {
 
 
             if [ "$run_commands" -ne "0" ]; then
-                printf "\"RC\":\"$compile_commands\",\n" >> $jfile
+                printf "\"RC\":\"$run_commands\",\n" >> $jfile
                 printf "\"Job\":\"Run\",\n" >> $jfile
             fi
 
@@ -413,6 +426,26 @@ function slurm_submit     {
             ;;
     esac
 
+
+    # Asks the user for a time estimate in the form HH:MM:SS
+    if [ "$run_commands" -ne "0" ]; then
+
+        printf "What is the time estimate for the job (HH:MM:SS): "
+        read runtime
+
+        if [[ ! "$runtime" =~ [0-9]{2}:[0-5][0-9]:[0-5][0-9] ]]; then
+
+            printf "${REDRED}INVALID expected runtime, must be in the format HH:MM:SS${NCNC}\n"
+            return 3
+        fi
+
+        printf "\"runtime\":\"$runtime\",\n" >> $jfile
+
+    else
+        # Only compile job, placeholder of 10:00
+        # Does not matter, since compile jobs are run in login nodes
+        printf "\"runtime\":\"00:10:00\",\n" >> $jfile
+    fi
 
 
     job_id=$(curl -s http://$MANAGER_NODE:5000/api/jobs/uuid)
