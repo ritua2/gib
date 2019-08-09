@@ -273,7 +273,6 @@ for filename in ./*.zip; do
     sc_queue=$(jparser meta.json sc_queue)
 
     # User information
-    # Queue information
     if [[ $(soft_enforce_json_field meta.json User) = "False" ]]; then
 
         printf "${PURPLE}Error in $current_jobID. Missing 'User' key in meta.json${NC}\n"
@@ -287,6 +286,22 @@ for filename in ./*.zip; do
     fi
 
     job_user=$(jparser meta.json User)
+
+
+    # expected runtime information
+    if [[ $(soft_enforce_json_field meta.json runtime) = "False" ]]; then
+
+        printf "${PURPLE}Error in $current_jobID. Missing 'runtime' key in meta.json${NC}\n"
+
+        update_job_status "$current_jobID" "Finished" "Missing 'runtime' key in meta.json"
+        printf "\n"
+        cd ..
+        rm -rf "$dirloc_name"
+        rm "$just_the_filename"
+        continue
+    fi
+
+    expected_runtime=$(jparser meta.json runtime)
 
 
 
@@ -305,7 +320,7 @@ for filename in ./*.zip; do
     # TODO
     # Requires changes in wetty
     # Expected time is not handled yet, let's assume 10 min
-    printf "#SBATCH -t 00:10:00\n\n" >> "$slurm_file"
+    printf "#SBATCH -t $expected_runtime\n\n" >> "$slurm_file"
 
 
     if [ ! -z "$modules_used" ]; then

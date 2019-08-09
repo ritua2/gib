@@ -164,10 +164,35 @@ def get_ip_port(username, IP):
 
         return [[obtained_user, obtained_ip_port], False]
     else:
+        springIPT_db.commit()
+        cursor.close()
+        springIPT_db.close()
+
         return ["User not present", True]
 
 
-    springIPT_db.commit()
-    cursor.close()
-    springIPT_db.close()
 
+
+# Returns the VM:port associated with a username
+def user_to_ip_port(username):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    query = ("SELECT user, ip FROM assignment WHERE user=%s")
+    cursor.execute(query, (username, ))
+
+    for (obtained_user, obtained_ip_port) in cursor:
+
+        springIPT_db.commit()
+        cursor.close()
+        springIPT_db.close()
+
+        return [[obtained_user, obtained_ip_port], False]
+    else:
+        springIPT_db.commit()
+        cursor.close()
+        springIPT_db.close()
+
+        return ["User not present", True]

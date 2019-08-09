@@ -11,6 +11,7 @@ import hashlib
 import json
 import os, shutil
 import random
+import re
 import redis
 import requests
 import signal
@@ -34,6 +35,10 @@ PROJECT = os.environ["PROJECT"]
 GREYFISH_URL = URL_BASE
 GREYFISH_REDIS_KEY = REDIS_AUTH
 CURDIR = os.path.dirname(os.path.realpath(__file__)) # Current directory
+
+
+
+hhmmss_pattern = re.compile("^[0-9]{2}:[0-5][0-9]:[0-5][0-9]$")
 
 
 
@@ -944,7 +949,7 @@ def new_job():
     ppr = request.get_json()
     ppr_keys = ppr.keys()
     check = l2_contains_l1(["key", "ID", "User", "origin", "Job", "modules", "output_files", "dirname", "sc_system",
-                            "sc_queue", "n_cores", "n_nodes"], ppr_keys)
+                            "sc_queue", "n_cores", "n_nodes", "runtime"], ppr_keys)
 
     if check:
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
@@ -982,6 +987,11 @@ def new_job():
     sc_queue = ppr["sc_queue"]
     n_cores = ppr["n_cores"]
     n_nodes = ppr["n_nodes"]
+    runtime = ppr["runtime"]
+
+
+    if hhmmss_pattern.match(runtime) == None:
+        return "INVALID: time mut be specified as HH:MM:SS"
 
     if job_type not in ["Compile", "Run", "Both"]:
         return "INVALID: Job type not accepted, must be 'Compile', 'Run', or 'Both'"
@@ -1051,11 +1061,25 @@ def new_job():
             zf.extractall(".")
 
         # Must have a directory with the same name as the zipfile
-        if not os.path.isdir(GREYFISH_DIR+dirname+"/"+dirname):
-            os.remove(zip_location)
-            os.chdir(CURDIR)
-            shutil.rmtree(GREYFISH_DIR+dirname)
-            return "INVALID: The directory does not have the same name as the zip file"
+        dirs_inside = [adir for adir in os.listdir('.') if os.path.isdir(GREYFISH_DIR+dirname+"/"+adir)]
+
+        if len(dirs_inside) != 1:
+            return "INVALID: "+str(len(dirs_inside)+" were provided, only one directory containing all the necessary data can be inside the zip file")
+
+        only_dir_with_info = dirs_inside[0]
+        os.rename(only_dir_with_info, dirname)
+
+        for item in os.listdir('.'):
+
+            if item == dirname:
+                continue
+
+            if os.path.isdir(item):
+                shutil.rmtree(item)
+            else:
+                # for files
+                os.remove(item)
+
 
         web_data_to_json_file.json_to_file(dirname, ppr)
 
@@ -1271,6 +1295,18 @@ def upload_results(username, job_ID, key):
     # Now that the job is complete, remove the job files
     location_of_job = mints.directory_locations_from_job_ids([job_ID])[0]
     os.remove("/greyfish/sandbox/DIR_commonuser/jobs_left/"+location_of_job+".zip")
+
+    # If the user is already in a wetty image, it adds the result there
+    # The wetty may be active or in WAIT status
+    user_is_in_wetty = mints.user_to_ip_port(username)
+    if not user_is_in_wetty[1]:
+        [ip_used, port_used] = user_is_in_wetty[0][1].split(":")
+
+        miniserver_port = str(int(port_used)+100)
+        wetty_key = PK_32(ip_used, port_used)
+
+        req = requests.post("http://"+ip_used+":"+miniserver_port+"/"+wetty_key+"/upload_dir",
+            files={"dirname": open(tar_location, "rb")})
 
     return "Updated job results"
 

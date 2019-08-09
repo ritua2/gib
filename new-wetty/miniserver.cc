@@ -406,6 +406,34 @@ int main(void) {
     });
 
 
+    // Uploads a resultdirectory
+    string result_dir_upload = url_loc;
+    result_dir_upload.append("/upload_result_dir");
+
+    svr.Post(result_dir_upload.c_str(), [&](const auto& req, auto& res) {
+        auto size = req.files.size();
+        auto ret = req.has_file("dirname");
+
+        cout << "Directory upload\n";
+
+        const auto& compressed_file = req.get_file_value("dirname");
+        string compressed_dir_path = compressed_file.filename;
+        auto body = req.body.substr(compressed_file.offset, compressed_file.length);
+
+        // Writes contents to the compressed file
+        ofstream written_file("/gib/tmp-upload-result-dir.tar.gz");
+        written_file << body;
+        written_file.close();
+
+        system("tar -xvzf /gib/tmp-upload-result-dir.tar.gz -C /home/gib/results/");
+
+        // Change ownership
+        system("chown gib:gib -R /home/gib");
+
+        remove("/gib/tmp-upload-result-dir.tar.gz");
+    });
+
+
 
     // Downloads a file
     string download_loc = url_loc;
