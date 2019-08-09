@@ -479,7 +479,6 @@ int main(void) {
 
         if (provided_key == NEW_UUID) {
 
-
             // Gets a list of all files on /home/gib
             string empty_str1 = "";
             string home_gib_data = read_dir_no_subs("/home/gib/", empty_str1);
@@ -505,6 +504,10 @@ int main(void) {
                 }
             }
 
+
+            // Ignores the results, since they are already present in Greyfish
+            recursive_delete("/home/gib/results/");
+
             // Compresses the user data and pushes it to greyfish
             system("tar -zcf summary.tar.gz  /home/gib");
             
@@ -517,8 +520,6 @@ int main(void) {
             greyfish_url.append("/home++gib");
 
             post_file("summary.tar.gz", greyfish_url);
-            download_loc.append("/download");
-
             remove("summary.tar.gz");
 
             for (int qq=0; qq < vec_home_gib_data.size(); qq++){
