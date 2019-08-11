@@ -313,7 +313,7 @@ for filename in ./*.zip; do
     printf "#SBATCH --output=\"$current_jobID\".%%j.%%N.out\n" >> "$slurm_file"
     printf "#SBATCH --partition=$sc_queue\n" >> "$slurm_file"
     printf "#SBATCH --nodes=$n_nodes\n" >> "$slurm_file"
-    printf "#SBATCH --ntasks-per-nod=$n_cores\n" >> "$slurm_file"
+    printf "#SBATCH --ntasks-per-node=$n_cores\n" >> "$slurm_file"
     printf "#SBATCH --export=ALL\n" >> "$slurm_file"
     printf "$allocation_instructions\n" >> "$slurm_file"
 
