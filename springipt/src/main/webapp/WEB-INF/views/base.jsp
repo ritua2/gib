@@ -1,8 +1,7 @@
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,11 +19,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src='https://www.google.com/recaptcha/api.js'></script>
 </head>
-<%--
+<%-- 
 <spring:url value="/" var="urlHome" />
 <spring:url value="terminal" var="urlTerminal" />
  --%>
-<body>
+<body >
 	<!-- Navbar -->
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
@@ -35,39 +34,17 @@
 			</div>
 
 			<ul class="nav navbar-nav navbar-right">
-
-
-					<c:if test="${pageContext.request.userPrincipal.name != null}">
-						<!--<form id="logoutForm" method="POST" action="${contextPath}/perform_logout">
-							<input type="hidden" name="${_csrf.parameterName}"
-								value="${_csrf.token}" />-->
-						</form>
-
+				<c:if test="${pageContext.request.userPrincipal.name != null}">
 						
-							Welcome ${pageContext.request.userPrincipal.name} | <!--<a
-								onclick="document.forms['logoutForm'].submit()"><span
-						class="glyphicon glyphicon-log-out">Logout</span></a>-->
+						</form>
+								Welcome ${pageContext.request.userPrincipal.name} | 
 						<a
 								href="${contextPath}/perform_logout"><span
 						class="glyphicon glyphicon-log-out">Logout</span></a>
-
-
-					</c:if>
-
-
-				<!-- <li><a href="{% url 'logout' %}"><span
-						class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-
-				<li><a href="{% url 'login' %}"><span
-						class="glyphicon glyphicon-log-out"></span> Login</a></li> -->
-
+				</c:if>
 			</ul>
 		</div>
-
 	</nav>
-	<!-- End of Navbar -->
-
-	<!-- IPT Banner -->
 	<div class="main-banner">
 		<p>
 			<img src="${contextPath}/resources/images/IPT-Banner.jpg"
@@ -80,6 +57,7 @@
 	<!--Tabs-->
 	<div class="container">
 		<ul class="nav nav-tabs">
+			<c:if test="${pageContext.request.userPrincipal.name != null}">
 			<li id='terminal-tab'><a href="${contextPath}/terminal">Terminal</a></li>
 			<li id='compile-tab'><a href="${contextPath}/compile">Compile</a></li>
 			<li id='run-tab'><a href="${contextPath}/run">Run</a></li>
@@ -89,17 +67,23 @@
 
 			<li id='admin-tab'><a href="${contextPath}/admin">Admin</a></li>
 			<li id='compile-tab'><a href="${contextPath}/comments">Messageboard</a></li>
+			</c:if>
+			<c:if test="${pageContext.request.userPrincipal.name == null}">
+			<li>	</li>
+			<li>	</li>
+			<li>	</li>
+			<li>	</li>
+
+			<li id='help-tab'><a href="${contextPath}/help">Help</a></li>
+			<li id='compile-tab'><a href="${contextPath}/comments">Messageboard</a></li> 
+			</c:if>
 		</ul>
 		<!-- End Tabs -->
 
-			<div class="tab-content">
+		<div class="tab-content">
 
 
-				<!-- <div class="messages">
-	        {% for message in messages %}
-	          <p{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</p>
-	        {% endfor %}
-	      	</div> -->
+		
 
 		</div>
 	</div>

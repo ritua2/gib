@@ -11,7 +11,9 @@
                     <h5>Get started</h5>
                     <ul>
                         <li><a href="${contextPath}/welcome">Home</a></li>
+						<c:if test="${pageContext.request.userPrincipal.name == null}">
                         <li><a href="${contextPath}/login">Sign up</a></li>
+						</c:if>
                     </ul>
                 </div>
                 <div class="col-sm-3">
@@ -28,10 +30,7 @@
                         <li><a href="${contextPath}/comments">Forums</a></li>
                     </ul>
                 </div>
-                <div class="col-sm-3 info">
-                    <h5>What is IPT?</h5>
-                    <p> IPT is a semi-automatic tool that converts a C/C++ serial program into an efficient parallel program by parsing the specification by the users. </p>
-                </div>
+                
             </div>
         </div>
         <div class="second-bar">

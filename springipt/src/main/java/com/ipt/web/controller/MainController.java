@@ -1,6 +1,6 @@
 package com.ipt.web.controller;
 
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -21,9 +21,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.context.annotation.Scope;
 
 import com.ipt.web.model.Comment;
+import com.ipt.web.model.Job;
 import com.ipt.web.model.MappedUser;
 import com.ipt.web.model.Reply;
-import com.ipt.web.repository.MappingRepository;
+import com.ipt.web.repository.JobHistoryRepository;
 import com.ipt.web.service.CommentService;
 import com.ipt.web.service.ReplyService;
 
@@ -32,13 +33,17 @@ public class MainController {
 
 		
 	@Autowired
-    private MappingRepository mappingRepository;
+    private JobHistoryRepository jobHistoryRepository;
 	
-	//Under construction
+		//Under construction
 		@RequestMapping(value = "/jobHistory", method = RequestMethod.GET)
-		public String showJobHistory(Model model) {
+		public String showJobHistory(Model model, HttpServletRequest request) {
 
-			
+			//List<Job> jobs = jobHistoryRepository.findAll();
+			List<Job> jobs = jobHistoryRepository.findByUserName(request.getUserPrincipal().getName());
+			//List<MappedUser> jobs = jobHistoryRepository.findAll();
+			//List<Job> jobs = new ArrayList<Job>();
+			model.addAttribute("jobs", jobs);
 			return "jobHistory";
 
 		}

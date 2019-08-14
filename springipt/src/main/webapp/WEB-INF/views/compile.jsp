@@ -9,7 +9,6 @@
 <div class="container">
     <h1>Launching a Compile Job</h1>
     <p>This form will guide you towards composing the command for compiling your serial or parallel programs on TACC/XSEDE resources. Please upload all the files that are external to your program but are required for compiling it successfully, such as, header files and other C/C++ program files.</p>
-    <p> The output from your jobs can be found in <strong>/home/ipt/jobs/{date}/compile-{system}-{job-id}</strong></p>
 
     <div id="compile" class="tab-pane fade in active">
         <div class="container">
@@ -19,8 +18,8 @@
                     <label for="system">*System:</label>
                     <select class="form-control" id="system" name="system">
                     <option value="Comet">Comet</option>
-                    <option value="Stampede">Stampede</option>
-                    <option value="ls5">LoneStar</option>
+                    <option value="Stampede2">Stampede2</option>
+                    <option value="Lonestar5">LoneStar5</option>
                     <%-- <c:forEach var="sys" items="${systems.items}">
                       <option value=${sys} <c:if test="system == sys">selected</c:if>>{{val.display_name}}</option>
                     </c:forEach> --%>
@@ -33,63 +32,49 @@
                     </c:if>
                 </div>
                 <div class="form-group">
-                    <label for="ccommand">*Command:</label>
-                    <input type="ccommand" class="form-control" id="ccommand" placeholder="Enter $command"
-                           name="ccommand" required>
-                    <!-- Table to display command input options -->
-                    <table class="table-condensed">
-                        <thead>
-                        <tr>
-                            <th>If using</th>
-                            <th>Enter</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>serial, C:</td>
-                            <td>icc</td>
-                        </tr>
-                        <tr>
-                            <td>serial, C++:</td>
-                            <td>icpc</td>
-                        </tr>
-                        <tr>
-                            <td>MPI, C:</td>
-                            <td>mpicc</td>
-                        </tr>
-                        <tr>
-                            <td>MPI, C++:</td>
-                            <td>mpicxx</td>
-                        </tr>
-                        <tr>
-                            <td>Open MP, C:</td>
-                            <td>icc -qopenmp</td>
-                        </tr>
-                        <tr>
-                            <td>Open MP, C++:</td>
-                            <td>icpc -qopenmp</td>
-                        </tr>
-                        <tr>
-                            <td>CUDA:</td>
-                            <td>nvcc</td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-                    <!-- Error handling -->
-                    <c:if test="command_error">
+				 <!-- Dropdown to display command input options -->
+                    <label for="compiler">Select Compiler:</label>
+					<select class="form-control" id="compiler" name="compiler" >
+                    <option value="icc ">Serial, C:	icc</option>
+                    <option value="icpc ">Serial, C++:	icpc</option>
+                    <option value="mpicc ">MPI, C:	mpicc</option>
+					<option value="mpicxx ">MPI, C:	mpicxx</option>
+					<option value="icc -qopenmp ">Open MP, C:	icc -qopenmp</option>
+					<option value="icpc -qopenmp ">Open MP, C++:	icpc -qopenmp</option>
+					<option value="nvcc ">CUDA:	nvcc</option>
+					<option value="gcc -fopenmp ">Open MP, GNU C:	gcc -fopenmp</option>
+					<option value="g++ -fopenmp ">Open MP, GNU C++:	g++ -fopenmp</option>
+					<option value="gcc ">GNU C:	gcc</option>
+					<option value="g++ ">GNU C++:	g++</option>
+                    </select>
+                    
                    
+                    
+                    <!-- Error handling -->
+                    <c:if test="compiler_error">
+                   
+                    <div class="error">  
+                        <p>There was an error: ${ compiler_error }</p>
+                    </div>
+                    </c:if> 
+                </div> 
+				<div class="form-group">
+                    <label for="ccommand">Command:</label>
+                    <input type="ccommand" class="form-control" id="ccommand" placeholder="Enter $command"
+                           name="ccommand" >
+						                       <c:if test="command_error">
+
                     <div class="error">
                         <p>There was an error: ${ command_error }</p>
                     </div>
                     </c:if>
-                    
+
                     <c:if test="compile_error">
                     <div class="error">
                         <p>There was an error: ${ compile_error }</p>
                     </div>
                     </c:if>
-                </div>
+					</div>
                 <div class="form-group">
                     <label for="driver">*Driver:</label>
     	        	<input type="file" class="form-control" id="driver" name="driver" required />
@@ -127,15 +112,7 @@
                    
                    </c:if>
                 </div>
-                <div class="form-group">
-                    <label for="commargs">Command Args:</label>
-                    <input type="commargs" class="form-control" id="commargs" placeholder="$args" name="commargs">
-                    <c:if test="commargs_error">
-                    <div class="error">
-                        <p>There was an error: ${ commargs_error }</p>
-                    </div>
-                    </c:if>
-                </div>
+                
                 <!-- <h4>This is your command:</h4>
                 <p id="compileFullCommand"></p> -->
 

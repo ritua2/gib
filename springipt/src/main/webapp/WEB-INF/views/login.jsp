@@ -25,6 +25,11 @@
 
 <div class="container">
 
+<div class="col-sm-3 info">
+                    <h4>What is IPT?</h4>
+                    <p> IPT is a semi-automatic tool that converts a C/C++ serial program into an efficient parallel program by parsing the specification by the users. </p>
+                </div>
+
     <form method="POST" action="${contextPath}/login" class="form-signin">
         <h2 class="form-heading">Log in</h2>
 
