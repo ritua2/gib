@@ -18,6 +18,7 @@ docker volume create --name=myvol
 docker volume create --name=greyfish
 
 # Modify the environment variables for the middle layer
+cd gib
 vi middle-layer/.env
 
 # Copy the environment variables file to springIPT directory
