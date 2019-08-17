@@ -49,10 +49,6 @@ Notes:
 
 This should be done on a different VM than the one on which the middle-layer and front-end are installed.
 
-Next, download the repo
-
-git clone https://github.com/ritua2/gib
-
 *conductor* refers to the IP or URL (without http://, https://, or the ending /) where springIPT is located at.
 
 *orchestra_key* refers to the manager's node key, declared in gib/middle-layer/.env
@@ -60,7 +56,9 @@ git clone https://github.com/ritua2/gib
 
 1. Build the wetty and ssh server images
 ```bash
-cd ../new-wetty
+git clone https://github.com/ritua2/gib
+
+cd gib/new-wetty
 
 # ssh server
 docker build -f Dockerfile.ssh -t easy_wetty/ssh:latest .
