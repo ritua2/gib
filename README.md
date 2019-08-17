@@ -39,6 +39,16 @@ vi .env
 mvn clean package
 (if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt)
 docker-compose up -d --build
+
+# Enter container
+docker exec -it manager_node bash
+
+# If first time, generate an ssh key to allow rsync
+ssh-keygen -t rsa -N ""  -f rsync_wetty.key
+
+# Activate (change the number of threads if needed with the -w flag, defined in .env)
+gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app &
+
 ```
 
 
