@@ -28,6 +28,7 @@ cp middle-layer/.env springipt/envar.txt
 cd middle-layer
 docker-compose up -d
 cd ../springipt
+mvn clean package
 docker-compose up -d
 ```
 
