@@ -47,6 +47,11 @@ docker-compose up -d --build
 
 Notes:
 
+This should be done on a different VM than the one on which the middle-layer and front-end are installed.
+
+# Download the git repository
+git clone https://github.com/ritua2/gib
+
 *conductor* refers to the IP or URL (without http://, https://, or the ending /) where springIPT is located at.
 
 *orchestra_key* refers to the manager's node key, declared in gib/middle-layer/.env
