@@ -31,6 +31,14 @@ cd ../springipt
 mvn clean package
 (if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt)
 docker-compose up -d
+
+vi .env
+(add the following to the .env file)
+  MYSQL_ROOT_PASSWORD=Root_Password
+  MYSQL_USER=Create_User_Name
+  MYSQL_PASSWORD=Your_password
+  MYSQL_SERVER=IP_ADDRESS
+
 ```
 
 
