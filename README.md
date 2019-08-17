@@ -29,6 +29,7 @@ cd middle-layer
 docker-compose up -d
 cd ../springipt
 mvn clean package
+(if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt)
 docker-compose up -d
 ```
 
