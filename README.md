@@ -57,7 +57,7 @@ docker build -f Dockerfile.wetty -t easy_wetty/standalone:latest .
 ```
 
 
-2. Start the ssh server for a temporary voluem for local storage
+2. Start the ssh server for a temporary volume for local storage
 
 ```bash
 # Create shared volume for rsync
