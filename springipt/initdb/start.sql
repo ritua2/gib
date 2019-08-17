@@ -1,10 +1,10 @@
 
 
-CREATE USER IF NOT EXISTS 'anubhaw'@'localhost';
-ALTER USER 'anubhaw'@'localhost' IDENTIFIED WITH mysql_native_password BY 'anubhaw';
+CREATE USER IF NOT EXISTS 'spring'@'localhost';
+ALTER USER 'spring'@'localhost' IDENTIFIED WITH mysql_native_password BY 'spring';
 
 CREATE DATABASE  IF NOT EXISTS `iptweb`;
-GRANT ALL PRIVILEGES ON iptweb.* to 'anubhaw'@'localhost';
+GRANT ALL PRIVILEGES ON iptweb.* to 'spring'@'localhost';
 
 use iptweb;
 
@@ -57,6 +57,42 @@ CREATE TABLE `user_role` (
   CONSTRAINT `fk_user_role_roleid` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_user_role_userid` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `assignment`;	
+CREATE TABLE `assignment` (
+  `user` varchar(255) NOT NULL,
+  `ip` varchar(255) NOT NULL,
+  PRIMARY KEY (`ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS jobs;
+CREATE TABLE IF NOT EXISTS jobs (
+    id                      VARCHAR(255) UNIQUE NOT NULL, # UUID
+    username                VARCHAR(255)        NOT NULL,
+    compile_commands        VARCHAR(3000),
+    run_commands            VARCHAR(3000),
+    modules                 VARCHAR(3000)       NOT NULL,
+    type                    VARCHAR(255)        NOT NULL,
+    status                  VARCHAR(255)        NOT NULL,
+    output_files            VARCHAR(1000)       NOT NULL,
+    directory_location      VARCHAR(255)        NOT NULL,
+    sc_system               VARCHAR(255),
+    sc_queue                VARCHAR(255),
+    n_cores                 INT,
+    n_nodes                 INT,
+    date_submitted          DATETIME,
+    date_started            DATETIME,
+    date_sc_upload          DATETIME,
+    date_server_received    DATETIME,
+    sc_execution_time       DOUBLE, # seconds
+    submission_method       VARCHAR(255),
+    notes_user              VARCHAR(255),
+    notes_sc                VARCHAR(255),
+    notes_server            VARCHAR(255),
+    error                   VARCHAR(255),
+
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (1, 'ROLE_USER');
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (2, 'ROLE_ADMIN');
