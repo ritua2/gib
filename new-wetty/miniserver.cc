@@ -406,7 +406,7 @@ int main(void) {
     });
 
 
-    // Uploads a resultdirectory
+    // Uploads a results directory
     string result_dir_upload = url_loc;
     result_dir_upload.append("/upload_result_dir");
 

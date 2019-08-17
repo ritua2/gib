@@ -43,7 +43,40 @@ docker-compose up -d --build
 
 
 
+* **Installing the wetty terminal**
 
+
+1. Build the wetty and ssh server images
+```bash
+cd ../new-wetty
+
+# ssh server
+docker build -f Dockerfile.ssh -t easy_wetty/ssh:latest .
+# Wetty image
+docker build -f Dockerfile.wetty -t easy_wetty/standalone:latest .
+```
+
+
+2. Start the ssh server for a temporary voluem for local storage
+
+```bash
+# Create shared volume for rsync
+docker volume create --name=rsync_data
+
+# Start image
+docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 4646:22 -v rsync_data:/home/rsync_user/data easy_wetty/ssh
+```
+
+
+
+3. Wetty startup
+
+Requires the ssh server to be setup beforehand
+
+
+```bash
+docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data easy_wetty/standalone main_daemon
+```
 
 
 
