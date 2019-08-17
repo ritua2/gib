@@ -38,7 +38,7 @@ vi .env
   
 mvn clean package
 (if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt)
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 
