@@ -49,7 +49,8 @@ Notes:
 
 This should be done on a different VM than the one on which the middle-layer and front-end are installed.
 
-# Download the git repository
+Next, download the repo
+
 git clone https://github.com/ritua2/gib
 
 *conductor* refers to the IP or URL (without http://, https://, or the ending /) where springIPT is located at.
