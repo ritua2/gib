@@ -156,10 +156,14 @@
               success: function(data){
   	    drpDwnValue=data;
   	    $.each( drpDwnValue, function( key, f ) {
+			var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+				function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
                 $("#fileToDownload").append($('<option>', {
       		value: f +'/',
       		//text: f.substring(f.lastIndexOf("/"));
-			text: f
+			text: abc
   		}));
   	    });	
 
@@ -242,9 +246,13 @@
   	    $('#fileToDownload').html('');
   	    $('#fileToDownload').append('<option value="">--Select--</option>');
   	    $.each( drpDwnValue, function( key, f ) {
+				var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+				function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
                 $("#fileToDownload").append($('<option>', {
       		value: f + '/',
-      		text: f
+      		text: abc
   		}));
   	    });	
 
