@@ -569,6 +569,51 @@ int main(void) {
             res.set_content("INVALID key", "text/plain");
         }
     });
+	
+	//To get the latest image of wetty volume. 
+	svr.Post("/get/latest", [&](const auto& req, auto& res) {
+
+        string provided_key = req.get_param_value("key");
+        string greyfish_key = req.get_param_value("gk");
+        string username     = req.get_param_value("username");
+        string gf_url       = req.get_param_value("greyfish_url");
+
+        if (provided_key == NEW_UUID) { 
+
+            
+
+            
+
+            // Compresses the user data and pushes it to greyfish
+            system("tar -zcf summary1.tar.gz  /home/gib");
+            
+            string greyfish_url = "http://";
+            greyfish_url.append(gf_url);
+            greyfish_url.append(":2000/grey/upload_dir/");
+            greyfish_url.append(greyfish_key);
+            greyfish_url.append("/");
+            greyfish_url.append(username);
+            greyfish_url.append("/home++gib");
+
+            post_file("summary1.tar.gz", greyfish_url);
+            
+
+            res.set_content("Succesfully sent user data", "text/plain");
+
+        } else {
+            res.set_content("INVALID key", "text/plain");
+        }
+    });
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
     // Starts or stops synchronizing the user the user data with the attached ontainer for safekeeping

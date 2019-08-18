@@ -509,6 +509,60 @@ def free_instance():
     r_user_to_.delete(current_wetty_user)
 
     return "Correctly freed instance"
+	
+	
+	
+# Called when "Refresh" is clicked, to get the latest image of wetty folder.
+# Must be called from springIPT
+@app.route("/api/instance/get_latest", methods=['POST'])
+def get_instance():
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
+    
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    check = l2_contains_l1(ppr.keys(), ["key", "IP", "Port"])
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    reqip = ppr["IP"]
+    port = str(ppr["Port"])
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    if not r_occupied.hexists(reqip, "Available_"+port):
+        return "INVALID, port not attached"
+
+    if r_occupied.hget(reqip, "Available_"+port).decode("UTF-8") != "No":
+        return "INVALID, wetty instance is empty at the moment"
+
+    current_wetty_user = r_occupied.hget(reqip, "current_user_"+port).decode("UTF-8")
+    miniserver_port = str(int(port) + 100)
+
+    # Generates a single-use greyfish token
+    new_token = random_string(24)
+    greyfish_server.setex(new_token, 60, current_wetty_user)
+
+    wetty_key = PK_32(reqip, port)
+
+    # Issues a call to the wetty miniserver
+    # The miniserver will then prepare the instance for a new user
+    #sync_wetty_volume(reqip, port, current_wetty_user, wetty_key, "stop")
+    req = requests.post("http://"+reqip+":"+miniserver_port+"/get/latest", data={"key": wetty_key, "username":current_wetty_user,
+                                                                                "greyfish_url":URL_BASE, "gk":new_token})
+
+    return "Correctly sent data"
+	
+	
+	
+	
+	
 
 
 

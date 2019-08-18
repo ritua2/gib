@@ -51,6 +51,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class UploadController {
+	
+	private static String keyReader(){
+		String okey=null, baseIP=null;
+		File file = new File("/usr/local/tomcat/webapps/envar.txt");
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String line = reader.readLine();
+			while (line != null) {
+				if(line.contains("orchestra_key"))
+					okey=line.substring(line.indexOf("=")+1);
+				else if(line.contains("URL_BASE"))
+					baseIP=line.substring(line.indexOf("=")+1);
+				
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return okey;
+	}
+	
+	private static String IPReader(){
+		String baseIP=null;
+		File file = new File("/usr/local/tomcat/webapps/envar.txt");
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String line = reader.readLine();
+			while (line != null) {
+				if(line.contains("URL_BASE"))
+					baseIP=line.substring(line.indexOf("=")+1);
+				
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return baseIP;
+	}
 
 	//private static String UPLOADED_FOLDER = "/home/term/";
 	private static String UPLOADED_FOLDER = "/home/greyfish/users/sandbox/DIR_";
@@ -274,9 +316,60 @@ public class UploadController {
 	@RequestMapping(value = "/terminal/getdropdownvalues", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody Map<String, String> refreshDropdownValues(Model model, RedirectAttributes redirectAttributes, HttpServletRequest request) {
 		
+		URL url = null;
+		String jsonInputString=null, key=null;
+		StringBuilder result = new StringBuilder();
+		
 		System.out.println("Uploaded folder path" + UPLOADED_FOLDER);
 		
 		Principal principal = request.getUserPrincipal();
+		
+		try{
+			url = new URL("http://"+IPReader()+":5000/api/instance/get_latest");
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json; utf-8");
+			conn.setDoOutput(true);
+			
+			jsonInputString = "{\"key\":\""+keyReader()+"\", \"IP\":\""+request.getSession().getAttribute("mySessionAttribute").toString().substring(0,request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":"))+"\",\"Port\":\""+request.getSession().getAttribute("mySessionAttribute").toString().substring(request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":")+1)+"\"}";
+			try(OutputStream os = conn.getOutputStream()) {
+				byte[] input = jsonInputString.getBytes("utf-8");
+				os.write(input, 0, input.length);           
+			}
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			//curl_output=abc;
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			rd.close();
+			if(result!=null){
+			try{
+			File file1 = new File("GetLatestFiles.txt");
+			FileWriter fileWriter = new FileWriter(file1);
+			fileWriter.write("Result: "+result.toString());
+			fileWriter.write("\n");
+			fileWriter.write("User: "+request.getUserPrincipal().getName());
+			fileWriter.write("\n");
+			fileWriter.write("JSON: "+jsonInputString);
+			fileWriter.write("\n");
+			fileWriter.write("IP: "+request.getSession().getAttribute("mySessionAttribute").toString().substring(0,request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":")));
+			fileWriter.write("\n");
+			fileWriter.write("Port: "+request.getSession().getAttribute("mySessionAttribute").toString().substring(request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":")+1));
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+			}}
+			
+		}catch(MalformedURLException e){
+			e.printStackTrace();
+		}catch(ProtocolException e){
+			e.printStackTrace();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 		
 		Map<String, String> listofpath = new HashMap<String, String>();
 		walk(UPLOADED_FOLDER + principal.getName()+"/home/gib/home/gib/", listofpath);
