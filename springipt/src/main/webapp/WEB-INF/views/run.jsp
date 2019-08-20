@@ -9,10 +9,10 @@
 
 <div class="container">
 
-<h1>Launching a Run Job</h1>
+<h1>Execute a Run Job</h1>
 
 <p>This form will guide you towards composing the command for running your serial or parallel programs on TACC/XSEDE resources. Please upload all the input or data files required by your executable/binary.</p>
-<p> The output from your jobs can be found in <strong>/home/ipt/jobs/{date}/run-{system}-{job-id}</strong></p>
+
 
   <div id="run" class="tab-pane fade in active">
     <div class="container">
@@ -22,8 +22,8 @@
                 <label for="system">System:</label>
                 <select class="form-control" id="system" name="system" onchange="updateQueues()">
 	                <option value="comet">Comet</option>
-	                <option value="stampede">Stampede</option>
-	                <option value="ls5">Lonestar</option>
+	                <option value="stampede2">Stampede2</option>
+	                <option value="Lonestar5">Lonestar5</option>
                 </select>
                 
                  <c:if test="system_error">
@@ -90,13 +90,32 @@
                 </c:if>
 
 
-                <label for="binary">Binary:</label>
-                <input type="file" class="form-control" id="binary" name="binary" required>
+                <label for="binary">Zipped File:</label>
+                <input type="file" class="form-control" id="binary" name="binary" >
                 <c:if test="binary_error">
                 <div class="error">
                     <p>There was an error: ${ binary_error }</p>
                 </div>
                 </c:if>
+				<div class="form-group">
+                    <label for="outfiles">Zipped file from wetty:</label>
+                    <select id=fileToDownload  name="fileToDownload"> 
+						<option value="">--Select--</option>
+					</select>
+					
+          
+                </div>
+				<div class="form-group">
+                    <label for="outfiles">*Output File(s):</label>
+                    <input type="outfiles" class="form-control" id="outfiles" placeholder="a.out" name="outfiles"
+                           required>
+                    <c:if test="outfiles_error">
+                    <div class="error">
+                        <p>There was an error: {{ outfiles_error }}</p>
+                    </div>
+                    
+                    </c:if>
+                </div>
                 <div class="form-group">
                     <label for="addfiles">Additional Files:</label>
                     <input value="${addfiles}" type="addfiles" class="form-control" id="addfiles"
@@ -113,19 +132,16 @@
                    </c:if>
                 </div>
                 <div class="form-group">
-                    <label for="rcommandargs">Command Args:</label>
-                    <input value="${rcommandargs}" type="text" class="form-control" id="rcommandargs" placeholder="args"
-                           name="rcommandargs">
+                    <label for="rcommandargs">Runtime:</label>
+                    <input value="${rtime}" type="text" class="form-control" id="rtime" placeholder="Please enter the time in format: HH:MM:ss"
+                           name="rtime" required>
                     <c:if test="run_command_args_error">
                     <div class="error">
                         <p>There was an error: ${ run_command_args_error }</p>
                     </div>
                     </c:if>
                 </div>
-                <!-- <div>
-                  <h4>This is your command:</h4>
-                  <p id="fullCommand"></p>
-                </div> -->
+                
                 <div class="text-right">
                     <button type="submit" class="btn btn-default">Launch Run Job</button>
                 </div>
@@ -136,21 +152,21 @@
 <br/>
 <br/>
 </div>
-
+  <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
   <script>
     function updateQueues(){
       var system = $('#system').val();
       var queues = $('#jobq')
       queues.empty()
 
-      if (system == 'stampede') {
+      if (system == 'stampede2') {
           queues.append('<option value="normal" {% if jobq == "normal" %}selected{% endif %}>normal</option>')
           queues.append('<option value="development" {% if jobq == "development" %}selected{% endif %}>development</option>')
           queues.append('<option value="flat-quadrant" {% if jobq == "flat-quadrant" %}selected{% endif %}>flat-quadrant</option>')
           queues.append('<option value="skx-dev" {% if jobq == "skx-dev" %}selected{% endif %}>skx-dev</option>')  
           queues.append('<option value="skx-normal" {% if jobq == "skx-normal" %}selected{% endif %}>skx-normal</option>')  
       
-      } else if (system == 'ls5') {
+      } else if (system == 'Lonestar5') {
           queues.append('<option value="normal" {% if jobq == "normal" %}selected{% endif %}>normal</option>')
           queues.append('<option value="development" {% if jobq == "development" %}selected{% endif %}>development</option>')
           queues.append('<option value="gpu" {% if jobq == "gpu" %}selected{% endif %}>gpu</option>')
@@ -164,6 +180,34 @@
       }
     }
     updateQueues();
+	
+	
+	$(document).ready(function(){
+          
+          $.ajax({
+              url: '${contextPath}/terminal/getdropdownvalues',
+              type: 'GET',
+  	    dataType: "json",
+              success: function(data){
+  	    drpDwnValue=data;
+  	    $.each( drpDwnValue, function( key, f ) {
+			var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+				function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
+                $("#fileToDownload").append($('<option>', {
+      		value: f +'/',
+      		//text: f.substring(f.lastIndexOf("/"));
+			text: abc
+  		}));
+  	    });	
+
+             },
+              error: function(){
+                  console.log("error in ajax call");
+              }
+          });
+      });
   </script>
 
   <jsp:include page="footer.jsp" />

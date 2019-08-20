@@ -27,6 +27,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -314,7 +315,7 @@ public class UploadController {
 	}
 
 	@RequestMapping(value = "/terminal/getdropdownvalues", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody Map<String, String> refreshDropdownValues(Model model, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+	public @ResponseBody Map<String, String> refreshDropdownValues(Model model, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpSession session) {
 		
 		URL url = null;
 		String jsonInputString=null, key=null;
@@ -324,6 +325,7 @@ public class UploadController {
 		
 		Principal principal = request.getUserPrincipal();
 		
+		if(session.getAttribute("mySessionAttribute")!=null){
 		try{
 			url = new URL("http://"+IPReader()+":5000/api/instance/get_latest");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -370,7 +372,7 @@ public class UploadController {
 		}catch(IOException e){
 			e.printStackTrace();
 		}
-		
+		}
 		Map<String, String> listofpath = new HashMap<String, String>();
 		walk(UPLOADED_FOLDER + principal.getName()+"/home/gib/home/gib/", listofpath);
 		
@@ -470,50 +472,10 @@ public class UploadController {
 	
 	@RequestMapping(value = "/compilejob", method = RequestMethod.POST, produces = "application/json")
 	public String compilejob(@RequestParam("system") String system, @RequestParam("driver") MultipartFile driver,
-			@RequestParam("compiler") String compiler, @RequestParam("ccommand") String ccommand, @RequestParam("outfiles") String outFileName, @RequestParam("modules") String modulesName, RedirectAttributes redirectAttributes, HttpServletRequest request) {
-		//System.out.println(system + ",  " + ccommand);
-
-		/*if (driver.isEmpty()) {
-			redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
-			// return "redirect:/compile";
-		}*/
-
-
-		/*try {
-			File f = new File("compile01.zip");
-			ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(f));
-			
-			String inputFileName=driver.getOriginalFilename();
-			ZipEntry e = new ZipEntry(inputFileName);
-			zipOutputStream.putNextEntry(e);
-			zipOutputStream.write(driver.getBytes(), 0, driver.getBytes().length);
-			zipOutputStream.closeEntry();
-            
-			
-			ZipEntry e1 = new ZipEntry("command.sh");
-			zipOutputStream.putNextEntry(e1);
-			StringBuilder sb = new StringBuilder();
-			sb.append("#!/bin/bash\r\n\n");
-			String cmdLine=ccommand+" -o "+outFileName+" "+inputFileName;
-			sb.append(cmdLine);
-			byte[] data = sb.toString().getBytes();
-			zipOutputStream.write(data, 0, data.length);
-			zipOutputStream.closeEntry();
-			
-			zipOutputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-
-		/*try {
-			Process p = Runtime.getRuntime().exec("scp -i /usr/local/tomcat/.ssh/PrivateKey.ppk /usr/local/tomcat/compile01.zip akn752@comet.sdsc.edu:/home/akn752");
-			int exitCode = p.waitFor();
-            System.out.println("File transferred ExitCode=" + exitCode);
-		}catch (IOException e) {
-			e.printStackTrace();
-		}catch (InterruptedException e) {
-			e.printStackTrace();
-		}*/
+			@RequestParam("compiler") String compiler, @RequestParam("ccommand") String ccommand, @RequestParam("outfiles") String outFileName, @RequestParam("modules") String modulesName,
+			@RequestParam("fileToDownload") String fileSelected,
+			RedirectAttributes redirectAttributes, HttpServletRequest request) {
+		
 		
 		String jsonInputString=null, okey=null, baseIP=null, queue = null;
 		BufferedReader reader=null;
@@ -523,6 +485,14 @@ public class UploadController {
         StringBuilder salt = new StringBuilder();
 		StringBuilder randomFileName = new StringBuilder();
         Random rnd = new Random();
+		
+		try{
+		File file4 = new File("Run_submit.txt");
+		FileWriter fileWriter = new FileWriter(file4);
+		
+		
+		fileWriter.write("Selected File: "+ fileSelected);
+		fileWriter.write("\n");
 		
 		while (salt.length() < 32) { // length of the random string.
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
@@ -535,21 +505,36 @@ public class UploadController {
         }
         String saltStr = salt.toString();
 		
+		File file = new File(fileSelected);
+		
+		if(!file.exists()){
+		
 		if (driver.isEmpty()) {
 				redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
 				// return "redirect:/terminal";
 		}
+		}
 		
 		try {
-
-				byte[] bytes = driver.getBytes();
+				if(!file.exists()){
+					byte[] bytes = driver.getBytes();
 				Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ driver.getOriginalFilename());
 				Files.write(path, bytes);
+				}
+				else{
+					byte[] bytes = Files.readAllBytes(file.toPath());
+					Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
+				Files.write(path, bytes);
+				}
 				
 		}catch (IOException e) {
 				e.printStackTrace();
-		}		
-				File f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ driver.getOriginalFilename());
+		}	
+			File f1 = null;
+		if(!file.exists())
+				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ driver.getOriginalFilename());
+			else
+				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
 				File f2 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ randomFileName.toString()+".zip");
 				boolean b = f1.renameTo(f2);
 		
@@ -593,9 +578,7 @@ public class UploadController {
 			conn.setRequestProperty("Content-Type", "application/json; utf-8");
 			conn.setDoOutput(true);
 			
-			try{
-			File file4 = new File("Run_submit.txt");
-			FileWriter fileWriter = new FileWriter(file4);
+			
 			fileWriter.write("\n");
 			fileWriter.write("Base IP: "+ baseIP);
 			fileWriter.write("\n");
@@ -607,9 +590,7 @@ public class UploadController {
 			fileWriter.write("\n");
 			fileWriter.flush();
 			fileWriter.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}	
+		
 		
 		
 		
@@ -627,11 +608,11 @@ public class UploadController {
 			
 			try{
 			File file3 = new File("RunResult.txt");
-			FileWriter fileWriter = new FileWriter(file3);
-			fileWriter.write(result.toString());
-			fileWriter.write("\n");
-			fileWriter.flush();
-			fileWriter.close();
+			FileWriter fileWriter2 = new FileWriter(file3);
+			fileWriter2.write(result.toString());
+			fileWriter2.write("\n");
+			fileWriter2.flush();
+			fileWriter2.close();
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -642,7 +623,9 @@ public class UploadController {
 			e.printStackTrace();
 		}
 				
-				
+		}catch(IOException e){
+			e.printStackTrace();
+		}		
 				
 				
 		return "compile";
@@ -666,58 +649,12 @@ public class UploadController {
 			@RequestParam("numnodes") String numnodes, 
 			@RequestParam("modules") String modulesName, 
 			@RequestParam("binary") MultipartFile binary,
+			@RequestParam("fileToDownload") String fileSelected,
 			RedirectAttributes redirectAttributes,
 			HttpServletRequest request) {
 		System.out.println(system + ",  " + rcommand);
 
-		/*if (binary.isEmpty()) {
-			redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
-			// return "redirect:/compile";
-		}
-
-
-		try {
-			File f = new File("run01.zip");
-			ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(f));
-			
-			String inputFileName=binary.getOriginalFilename();
-			ZipEntry e = new ZipEntry(inputFileName);
-			zipOutputStream.putNextEntry(e);
-			zipOutputStream.write(binary.getBytes(), 0, binary.getBytes().length);
-			zipOutputStream.closeEntry();
-            
-			
-			ZipEntry e1 = new ZipEntry("run.sh");
-			zipOutputStream.putNextEntry(e1);
-			StringBuilder sb = new StringBuilder();
-			sb.append("#!/bin/bash\r\n\n");
-			String cmdLine=rcommand;
-			sb.append(cmdLine);
-			byte[] data = sb.toString().getBytes();
-			zipOutputStream.write(data, 0, data.length);
-			zipOutputStream.closeEntry();
-			
-			
-			ZipEntry e2 = new ZipEntry("username.txt");
-			zipOutputStream.putNextEntry(e2);
-			StringBuilder sb2 = new StringBuilder();
-			String cmdLine2="This run job is being submitted on behalf of user \"abc012\".";
-			sb2.append(cmdLine2);
-			byte[] data2 = sb2.toString().getBytes();
-			zipOutputStream.write(data2, 0, data2.length);
-			zipOutputStream.closeEntry();
-			
-			zipOutputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			Process p = Runtime.getRuntime().exec("scp -i /usr/local/tomcat/.ssh/PrivateKey.ppk /usr/local/tomcat/run01.zip akn752@comet.sdsc.edu:/home/akn752");
-		}catch (IOException e) {
-			e.printStackTrace();
-		}*/
-		
+	
 		String jsonInputString=null, okey=null, baseIP=null, queue = null;
 		BufferedReader reader=null;
 		URL url = null;
@@ -741,10 +678,12 @@ public class UploadController {
         }
         String saltStr = salt.toString();
 		
-		if (binary.isEmpty()) {
+			File file = new File(fileSelected);
+		
+		/*if (binary.isEmpty()) {
 				redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
 				// return "redirect:/terminal";
-		}
+		}*/
 		
 		/*if (!matcher.matches()) {
 				redirectAttributes.addFlashAttribute("msg", "Please enter time in correct format");
@@ -752,15 +691,26 @@ public class UploadController {
 		}*/
 		
 		try {
-
+				
+				if(!file.exists()){
 				byte[] bytes = binary.getBytes();
 				Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ binary.getOriginalFilename());
 				Files.write(path, bytes);
+				}
+				else{
+					byte[] bytes = Files.readAllBytes(file.toPath());
+					Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
+				Files.write(path, bytes);
+				}
 				
 		}catch (IOException e) {
 				e.printStackTrace();
 		}		
-				File f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ binary.getOriginalFilename());
+				File f1 = null;
+			if(!file.exists())
+				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ binary.getOriginalFilename());
+			else
+				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
 				File f2 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ randomFileName.toString()+".zip");
 				boolean b = f1.renameTo(f2);
 		

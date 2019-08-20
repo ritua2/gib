@@ -77,7 +77,7 @@
 					</div>
                 <div class="form-group">
                     <label for="driver">*Driver:</label>
-    	        	<input type="file" class="form-control" id="driver" name="driver" required />
+    	        	<input type="file" class="form-control" id="driver" name="driver"  />
                     
                     <c:if test="driver_error">
                     <div class="error">
@@ -85,6 +85,15 @@
                     </div>
                     </c:if>
                 </div>
+				<div class="form-group">
+                    <label for="outfiles">Driver file from wetty:</label>
+                    <select id=fileToDownload  name="fileToDownload"> 
+						<option value="">--Select--</option>
+					</select>
+					
+          
+                </div>
+				
                 <div class="form-group">
                     <label for="outfiles">*Output File(s):</label>
                     <input type="outfiles" class="form-control" id="outfiles" placeholder="a.out" name="outfiles"
@@ -128,3 +137,33 @@
 <br/>
 </div>
 <jsp:include page="footer.jsp" />
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script>
+	$(document).ready(function(){
+          
+          $.ajax({
+              url: '${contextPath}/terminal/getdropdownvalues',
+              type: 'GET',
+  	    dataType: "json",
+              success: function(data){
+  	    drpDwnValue=data;
+  	    $.each( drpDwnValue, function( key, f ) {
+			var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+				function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
+                $("#fileToDownload").append($('<option>', {
+      		value: f +'/',
+      		//text: f.substring(f.lastIndexOf("/"));
+			text: abc
+  		}));
+  	    });	
+
+             },
+              error: function(){
+                  console.log("error in ajax call");
+              }
+          });
+      });
+
+</script>
