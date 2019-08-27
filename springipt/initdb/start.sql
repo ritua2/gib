@@ -66,7 +66,7 @@ CREATE TABLE `assignment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS jobs;
-CREATE TABLE IF NOT EXISTS jobs (
+CREATE TABLE jobs (
     id                      VARCHAR(255) UNIQUE NOT NULL, # UUID
     username                VARCHAR(255)        NOT NULL,
     compile_commands        VARCHAR(3000),
@@ -96,3 +96,18 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (1, 'ROLE_USER');
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (2, 'ROLE_ADMIN');
+
+
+# Adds column to user table
+ALTER TABLE user ADD COLUMN email VARCHAR(255);
+
+# Email validation table
+CREATE TABLE prevalidation (
+    id                      int(11)      UNIQUE NOT NULL,
+    username                VARCHAR(255)        NOT NULL,
+    password                VARCHAR(255),
+    email                   VARCHAR(255),
+    validation_key          VARCHAR(255),
+
+    PRIMARY KEY (id)
+);
