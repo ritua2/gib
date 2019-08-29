@@ -803,6 +803,264 @@ public class UploadController {
 		return "run";
 		
 	}
+	
+	@GetMapping("/compileRun")
+	public String compileRunStatus() {
+		//logger.info("Rendering run page");
+		return "compileRun_v4";
+	}
+	
+	@RequestMapping(value = "/compileRunJob", method = RequestMethod.POST, produces = "application/json")
+	public String compileRunJob(@RequestParam("system") String system,
+	@RequestParam("radios") String radios,
+	@RequestParam("ccommand") String ccommand,
+	@RequestParam("modules1") String modules1,
+	@RequestParam("jobq") String jobq,
+	@RequestParam("numcores") String numcores,
+	@RequestParam("numnodes") String numnodes,
+	@RequestParam("rtime") String rtime,
+	@RequestParam("rcommand") String rcommand,
+	@RequestParam("modules2") String modules2,
+	@RequestParam("jobq2") String jobq2,
+	@RequestParam("numcores2") String numcores2,
+	@RequestParam("numnodes2") String numnodes2,
+	@RequestParam("rtime2") String rtime2,
+	@RequestParam("crcommand1") String crcommand1,
+	@RequestParam("crcommand2") String crcommand2,
+	@RequestParam("modules3") String modules3,
+	@RequestParam("files") String files,
+	@RequestParam("fileToUpload") String fileToUpload,
+	@RequestParam("localFiles") MultipartFile localFiles,
+			RedirectAttributes redirectAttributes, HttpServletRequest request)
+	{
+		try{
+			File file = new File("CompileRun_submit.txt");
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write("\n");
+			fileWriter.write("System: "+ system);
+			fileWriter.write("\n");
+			fileWriter.write("Op: "+ radios);
+			fileWriter.write("\n");
+			fileWriter.write("CCom: "+ ccommand);
+			fileWriter.write("\n");
+			fileWriter.write("CMod: "+ modules1);
+			fileWriter.write("\n");
+			fileWriter.write("Jobq: "+ jobq);
+			fileWriter.write("\n");
+			fileWriter.write("Ncores: "+ numcores);
+			fileWriter.write("\n");
+			fileWriter.write("NNodes: "+ numnodes);
+			fileWriter.write("\n");
+			fileWriter.write("Rtime: "+ rtime);
+			fileWriter.write("\n");
+			fileWriter.write("RCom: "+ rcommand);
+			fileWriter.write("\n");
+			fileWriter.write("RMod: "+ modules2);
+			fileWriter.write("\n");
+			fileWriter.write("BJobq: "+ jobq2);
+			fileWriter.write("\n");
+			fileWriter.write("BNcores: "+ numcores2);
+			fileWriter.write("\n");
+			fileWriter.write("BNNodes: "+ numnodes2);
+			fileWriter.write("\n");
+			fileWriter.write("BRtime: "+ rtime2);
+			fileWriter.write("\n");
+			fileWriter.write("BCCom: "+ crcommand1);
+			fileWriter.write("\n");
+			fileWriter.write("BRCom: "+ crcommand2);
+			fileWriter.write("\n");
+			fileWriter.write("BRMod: "+ modules3);
+			fileWriter.write("\n");
+			fileWriter.write("FilesSelect: "+ files);
+			fileWriter.write("\n");
+			fileWriter.write("Wetty: "+ fileToUpload);
+			fileWriter.write("\n");
+			fileWriter.write("Local: "+ localFiles.getOriginalFilename());
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}	
+		
+		String jsonInputString=null, okey=null, baseIP=null, queue = null;
+		BufferedReader reader=null;
+		URL url = null;
+		StringBuilder result = new StringBuilder();
+		String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+		StringBuilder randomFileName = new StringBuilder();
+        Random rnd = new Random();
+		
+		try{
+		File file4 = new File("CompileRun_submit.txt");
+		FileWriter fileWriter = new FileWriter(file4);
+		
+		
+		fileWriter.write("Selected File: "+ fileToUpload);
+		fileWriter.write("\n");
+		
+		while (salt.length() < 32) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+		
+		while (randomFileName.length() < 16) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            randomFileName.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+		
+		File file = new File(fileToUpload);
+		
+		if(!file.exists()){
+		
+		if (localFiles.isEmpty()) {
+				redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
+				// return "redirect:/terminal";
+		}
+		}
+		
+		try {
+				if(!file.exists()){
+					byte[] bytes = localFiles.getBytes();
+				Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ localFiles.getOriginalFilename());
+				Files.write(path, bytes);
+				}
+				else{
+					byte[] bytes = Files.readAllBytes(file.toPath());
+					Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
+				Files.write(path, bytes);
+				}
+				
+				
+		}catch (IOException e) {
+				e.printStackTrace();
+		}	
+			File f1 = null;
+		if(!file.exists())
+				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ localFiles.getOriginalFilename());
+			else
+				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
+				File f2 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ randomFileName.toString()+".zip");
+				boolean b = f1.renameTo(f2);
+		
+		try {
+					File envar = new File("/usr/local/tomcat/webapps/envar.txt");
+					reader = new BufferedReader(new FileReader(envar));
+					String line = reader.readLine();
+					while (line != null) {
+						if(line.contains("orchestra_key"))
+							okey=line.substring(line.indexOf("=")+1);
+						else if(line.contains("URL_BASE"))
+							baseIP=line.substring(line.indexOf("=")+1);
+						line = reader.readLine();
+					}
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+		if(system.equals("Stampede2")||system.equals("Lonestar2"))
+			queue="normal";
+		else
+			queue="compute";
+		
+		String[] fragments = crcommand1.split(" ");
+		StringBuilder crcommand1_new = new StringBuilder("");
+		StringBuilder crcommand2_new = new StringBuilder("");
+		crcommand1_new.append(fragments[0]);
+		crcommand2_new.append(crcommand2.replace(".",".."));
+		for(int i=1; i<fragments.length;i++){
+			if(!fragments[i].contains("-"))
+				crcommand1_new.append(" ../"+fragments[i]);
+			else
+				crcommand1_new.append(" "+fragments[i]);
+		}
+			
+		
+		try{
+			//set the JSON based on operation chosen
+			if(radios.equals("radio1")){
+				jsonInputString = "{\"key\":\""+okey+"\",\"User\":\""+request.getUserPrincipal().getName()+"\", \"origin\":\"web\", \"Job\":\"Compile\", \"CC\": \"1\", \"C0\": \""+ccommand+"\", \"modules\":\""+modules1+"\", \"sc_system\":\""+system+"\",\"ID\":\""+saltStr+"\",\"output_files\":\""+"Fixed_Dummy"+"\", \"dirname\":\""+f2.getName().toString().substring(0,f2.getName().toString().indexOf("."))+"\",\"sc_queue\":\""+queue+"\",\"n_nodes\":\"1\",\"n_cores\":\"1\", \"runtime\": \"00:10:00\"}";
+			}else if(radios.equals("radio2")){
+				jsonInputString = "{\"key\":\""+okey+"\",\"User\":\""+request.getUserPrincipal().getName()+"\", \"origin\":\"web\", \"Job\":\"Run\", \"RC\": \"1\", \"R0\": \""+rcommand+"\", \"modules\":\""+modules2+"\", \"sc_system\":\""+system+"\",\"ID\":\""+saltStr+"\",\"output_files\":\""+"Fixed_Dummy"+"\", \"dirname\":\""+f2.getName().toString().substring(0,f2.getName().toString().indexOf("."))+"\",\"sc_queue\":\""+jobq+"\",\"n_nodes\":\""+numnodes+"\",\"n_cores\":\""+numcores+"\", \"runtime\": \""+rtime+"\"}";
+			}else{
+				jsonInputString = "{\"key\":\""+okey+"\",\"User\":\""+request.getUserPrincipal().getName()+"\", \"origin\":\"web\", \"Job\":\"Both\", \"CC\": \"1\", \"RC\": \"1\",\"C0\": \""+crcommand1+"\", \"R0\": \""+crcommand2+"\", \"modules\":\""+modules3+"\", \"sc_system\":\""+system+"\",\"ID\":\""+saltStr+"\",\"output_files\":\""+"Fixed_Dummy"+"\", \"dirname\":\""+f2.getName().toString().substring(0,f2.getName().toString().indexOf("."))+"\",\"sc_queue\":\""+jobq+"\",\"n_nodes\":\""+numnodes2+"\",\"n_cores\":\""+numcores2+"\", \"runtime\": \""+rtime2+"\"}";
+				
+				//jsonInputString = "{\"key\":\""+okey+"\",\"User\":\""+request.getUserPrincipal().getName()+"\", \"origin\":\"web\", \"Job\":\"Both\", \"CC\": \"1\", \"RC\": \"1\",\"C0\": \""+crcommand1_new.toString()+"\", \"R0\": \""+crcommand2_new.toString()+"\", \"modules\":\""+modules3+"\", \"sc_system\":\""+system+"\",\"ID\":\""+saltStr+"\",\"output_files\":\""+"Fixed_Dummy"+"\", \"dirname\":\""+f2.getName().toString().substring(0,f2.getName().toString().indexOf("."))+"\",\"sc_queue\":\""+jobq+"\",\"n_nodes\":\""+numnodes2+"\",\"n_cores\":\""+numcores2+"\", \"runtime\": \""+rtime2+"\"}";
+			}
+				url = new URL("http://"+baseIP+":5000/api/jobs/new");
+				
+			} catch(MalformedURLException e){
+				e.printStackTrace();
+			}catch (IOException e) {
+				e.printStackTrace();
+			} 	
+				
+			try{
+			
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json; utf-8");
+			conn.setDoOutput(true);
+			
+			
+			fileWriter.write("\n");
+			fileWriter.write("Base IP: "+ baseIP);
+			fileWriter.write("\n");
+			fileWriter.write("URL: "+ url.toString());
+			fileWriter.write("\n");
+			fileWriter.write(request.getUserPrincipal().getName());
+			fileWriter.write("\n");
+			fileWriter.write(jsonInputString);
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		
+		
+		
+		
+		try(OutputStream os = conn.getOutputStream()) {
+				byte[] input = jsonInputString.getBytes("utf-8");
+				os.write(input, 0, input.length);           
+			}
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			//curl_output=abc;
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			rd.close();
+			
+			try{
+			File file3 = new File("CompileRunResult.txt");
+			FileWriter fileWriter2 = new FileWriter(file3);
+			fileWriter2.write(result.toString());
+			fileWriter2.write("\n");
+			fileWriter2.flush();
+			fileWriter2.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+				
+		}catch(ProtocolException e){
+			e.printStackTrace();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+				
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		
+		return "compileRun_v4";
+		
+	}
 
 	@GetMapping("/uploadMultiPage")
 	public String uploadMultiPage() {
