@@ -126,6 +126,10 @@ cd $execution_directory
 
 for filename in ./*.zip; do
 
+
+    # Removes all current modules
+    module unload
+
     just_the_filename=${filename/'./'/}
     dirloc_name=${just_the_filename/'.zip'/}
 
@@ -578,6 +582,18 @@ for filename in ./*.zip; do
 
     printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "status":"Finished", "error":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update\n" >> "$slurm_file"
     printf 'curl -s -X POST -H "Content-Type: application/json" -d '"'"'{"key":"'"$orchestra_key"'", "job_ID":"'"$current_jobID"'", "sc_execution_time":"'"'"'"$execution_time"'"'"'", "notes_sc":""}'"'    http://$manager_node_ip:5000/api/jobs/status/update_execution_time\n" >> "$slurm_file"
+
+
+    # Compile jobs are run diretcly on the login nodes
+    if [ "$job_type" = "Compile" ]; then
+
+        bash "$slurm_file"
+
+        cd ..
+        rm "$just_the_filename"
+        continue
+    fi
+
 
     sbatch "$slurm_file"
 
