@@ -2,11 +2,10 @@
 
 mkdir tmp-store-results
 
-# Loops through the provided inputs
-for file_or_dir in "$@"
-do
-    mv "$file_or_dir" tmp-store-results/
-done
+
+# Move all files
+cp -r ./* tmp-store-results
+rm tmp-store-results/tmp-store-results
 
 
 cd tmp-store-results
