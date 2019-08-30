@@ -347,6 +347,14 @@ for filename in ./*.zip; do
     case "$job_type" in
         "Both")
 
+
+
+            # All files can be executed since the user may run any of them
+            chmod -R +x .
+            chmod -x "$slurm_file"
+            chmod -x meta.json
+
+
             # Gets the number of compiled instructions
 
             if [[ $(soft_enforce_json_field meta.json CC) = "False" ]]; then
@@ -501,6 +509,13 @@ for filename in ./*.zip; do
 
 
         "Run")
+
+            # All files can be executed since the user may run any of them
+            chmod -R +x .
+            chmod -x "$slurm_file"
+            chmod -x meta.json
+
+
             # Gets the number of run instructions
             n_run_instructions=$(jparser meta.json RC)
 
