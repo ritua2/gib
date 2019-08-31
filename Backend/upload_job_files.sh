@@ -5,6 +5,13 @@ mkdir tmp-store-results
 
 # Move all files
 cp -r ./* tmp-store-results
+rm tmp-store-results/*.slurm
+rm tmp-store-results/meta.json
+rm tmp-store-results/orchestra_file
+rm tmp-store-results/manager_node_file
+rm tmp-store-results/User_file
+rm tmp-store-results/jobID_file
+
 rm tmp-store-results/tmp-store-results
 
 
