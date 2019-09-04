@@ -44,7 +44,8 @@ vi ../springipt/src/main/resources/application.properties
   
 
 # Start the middle layer
-cd middle-layer
+# if not already in the directory named, middle-layer then:
+#cd middle-layer
 docker-compose up -d
 
 # Enter manager node container
