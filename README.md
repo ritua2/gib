@@ -12,7 +12,7 @@ GIB is a reusable and a portable framework for building web portals that support
 The process may take up to six minutes, particularly the tomcat_springipt container.
 
 The middle-layer contains:
-1. Manager node:
+1. Manager node
 2. Greyfish, cloud storage. More information about greyfish can be obtained on its README, both for [this project](https://github.com/ritua2/gib/tree/master/middle-layer/greyfish_storage) or in its [original repository](https://github.com/noderod/greyfish).
 
 
