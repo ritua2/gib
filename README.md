@@ -51,12 +51,17 @@ ssh-keygen -t rsa -N ""  -f rsync_wetty.key
 # Activate (change the number of threads if needed with the -w flag, defined in .env)
 gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app &
 
+# Leave container
+exit
+
 # Enter greyfish (storage) container
 docker exec -it greyfish bash
 cd /grey
 # Activate the APIs (change the number of threads if needed, standard is 4)
 ./API_Daemon.sh -up
 
+# Leave container
+exit
 
 
 # Start springIPT and MySQL containers
