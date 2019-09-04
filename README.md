@@ -44,7 +44,7 @@ vi ../springipt/src/main/resources/application.properties
   
 
 # Start the middle layer
-# if not already in the directory named, middle-layer then:
+# if not already in the directory named middle-layer then switch to it - uncomment the command below
 #cd middle-layer
 docker-compose up -d
 
