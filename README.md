@@ -9,6 +9,8 @@ GIB is a reusable and a portable framework for building web portals that support
 
 * **Installing the front-end and middle layer**
 
+The process may take up to six minutes, particularly the tomcat_springipt container.
+
 ```bash
 # Download the git repository
 git clone https://github.com/ritua2/gib
@@ -18,29 +20,29 @@ docker volume create --name=myvol
 docker volume create --name=greyfish
 
 # Modify the environment variables for the middle layer
-cd gib
-vi middle-layer/.env
+cd gib/middle-layer
 
-# Copy the environment variables file to springIPT directory
-cp middle-layer/.env springipt/envar.txt
-
-# Start the middle layer and springIPT
-cd middle-layer
-docker-compose up -d
-cd ../springipt
 
 vi .env
-(add the following to the .env file)
-  MYSQL_ROOT_PASSWORD=Root_Password
-  MYSQL_USER=Create_User_Name
-  MYSQL_PASSWORD=Your_password
-  MYSQL_SERVER=IP_ADDRESS
-  
-mvn clean package
-(if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt)
-docker-compose up -d --build
+# add the following to the .env file, similar as those in springipt/docker-compose.yml
+MYSQL_ROOT_PASSWORD=Root_Password
+MYSQL_USER=Create_User_Name
+MYSQL_PASSWORD=Your_password
+MYSQL_SERVER=IP_ADDRESS
 
-# Enter container
+# Copy the environment variables file to springIPT directory
+cp .env ../springipt/envar.txt
+cp .env ../springipt/.env
+
+# Modify the springIPT variables to be the same as above, including the VM IP
+vi ../springipt/src/resources/application.properties
+  
+
+# Start the middle layer
+cd middle-layer
+docker-compose up -d
+
+# Enter manager node container
 docker exec -it manager_node bash
 
 # If first time, generate an ssh key to allow rsync
@@ -49,6 +51,19 @@ ssh-keygen -t rsa -N ""  -f rsync_wetty.key
 # Activate (change the number of threads if needed with the -w flag, defined in .env)
 gunicorn -w $gthreads -b 0.0.0.0:5000 traffic:app &
 
+# Enter greyfish (storage) container
+docker exec -it greyfish bash
+cd /grey
+# Activate the APIs (change the number of threads if needed, standard is 4)
+./API_Daemon.sh -up
+
+
+
+# Start springIPT and MySQL containers
+cd ../springipt
+mvn clean package
+# if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt
+docker-compose up -d --build
 ```
 
 
