@@ -29,7 +29,7 @@ docker volume create --name=greyfish
 cd gib/middle-layer
 
 vi .env
-# add the following to the .env file
+# Set the following in the .env file
 MYSQL_ROOT_PASSWORD=Root_Password
 MYSQL_USER=Create_User_Name
 MYSQL_PASSWORD=Your_password
