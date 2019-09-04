@@ -25,8 +25,8 @@ docker volume create --name=myvol
 docker volume create --name=greyfish
 
 # Modify the environment variables for the middle layer
+# The variale values  are used for setting up the credentails and using them later
 cd gib/middle-layer
-
 
 vi .env
 # add the following to the .env file, similar as those in springipt/docker-compose.yml
