@@ -137,7 +137,9 @@ docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra
 
 
 
-
+* **Testing the installation**
+The front-end would be accessible at the IP address associated with the VM on which the installation was done. For example:
+http://129.114.17.20:9090/springipt/login
 
 
 
