@@ -127,12 +127,12 @@ docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:30
 4. Run the commands below to start 6 instances of the Wetty container on the VM (each VM will support 6 Wetty instances - additional Wetty instances for this project could be provisioned on new VMs - Docker Swarm cluster)
 
 ```
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="9r0gefnipw8eujf9438huycdh7" -p 7000:3000 -p 7100:3100 -v rsync_data:/gib/global/data --name w0 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="9r0gefnipw8eujf9438huycdh7" -p 7001:3000 -p 7101:3100 -v rsync_data:/gib/global/data --name w1 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="9r0gefnipw8eujf9438huycdh7" -p 7002:3000 -p 7102:3100 -v rsync_data:/gib/global/data --name w2 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="9r0gefnipw8eujf9438huycdh7" -p 7003:3000 -p 7103:3100 -v rsync_data:/gib/global/data --name w3 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="9r0gefnipw8eujf9438huycdh7" -p 7004:3000 -p 7104:3100 -v rsync_data:/gib/global/data --name w4 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="9r0gefnipw8eujf9438huycdh7" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data --name w5 easy_wetty/standalone main_daemon
+docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7000:3000 -p 7100:3100 -v rsync_data:/gib/global/data --name w0 easy_wetty/standalone main_daemon
+docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7001:3000 -p 7101:3100 -v rsync_data:/gib/global/data --name w1 easy_wetty/standalone main_daemon
+docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7002:3000 -p 7102:3100 -v rsync_data:/gib/global/data --name w2 easy_wetty/standalone main_daemon
+docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7003:3000 -p 7103:3100 -v rsync_data:/gib/global/data --name w3 easy_wetty/standalone main_daemon
+docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7004:3000 -p 7104:3100 -v rsync_data:/gib/global/data --name w4 easy_wetty/standalone main_daemon
+docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data --name w5 easy_wetty/standalone main_daemon
 ```
 
 
