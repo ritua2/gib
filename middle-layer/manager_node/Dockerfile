@@ -6,6 +6,7 @@ COPY startup.sh                 /scripts/startup.sh
 COPY connected_users.py         /conductor/connected_users.py 
 COPY synchronizer.sh            /conductor/synchronizer.sh
 COPY mysql_interactions.py      /conductor/mysql_interactions.py
+COPY email_common.py            /conductor/email_common.py
 COPY web_data_to_json_file.py   /conductor/web_data_to_json_file.py
 
 

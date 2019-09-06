@@ -21,6 +21,7 @@ import uuid
 from werkzeug.utils import secure_filename
 import zipfile
 
+import email_common as ec
 import mysql_interactions as mints
 import web_data_to_json_file
 
@@ -1337,6 +1338,7 @@ def upload_results(username, job_ID, key):
         tar = tarfile.open(tar_location)
         tar.extractall(user_results_dir+job_ID)
         tar.close()
+        os.remove(tar_location)
 
     except:
         tar.close()
@@ -1359,10 +1361,68 @@ def upload_results(username, job_ID, key):
         miniserver_port = str(int(port_used)+100)
         wetty_key = PK_32(ip_used, port_used)
 
-        req = requests.post("http://"+ip_used+":"+miniserver_port+"/"+wetty_key+"/upload_dir",
-            files={"dirname": open(tar_location, "rb")})
+        # Do not send the original tar file, send a file containing the directory as well
+        tmp_tar_name = "/tmp/"+random_string(16)+"_data.tar.gz"
+
+        tmp_tar = tarfile.open(tmp_tar_name, "w|gz")
+        tmp_tar.add(user_results_dir+job_ID, arcname = job_ID)
+        tmp_tar.close()
+
+        req = requests.post("http://"+ip_used+":"+miniserver_port+"/"+wetty_key+"/upload_result_dir",
+            files={"dirname": open(tmp_tar_name, "rb")})
+
+        os.remove(tmp_tar_name)
 
     return "Updated job results"
+
+
+
+
+####################
+# EMAIL ACTIONS
+####################
+
+
+
+# Sends a validation email to an user
+@app.route("/api/email/validate", methods=['GET'])
+def validate_email():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    # basepath: Where the dir is stored
+    # dirname: Directory in particular that must be uploaded
+    check = l2_contains_l1(["key", "email", "username"], ppr.keys())
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    email_address = ppr["email"]
+    username = ppr["username"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+    if not ec.correctly_formatted_email_address(email_address):
+        return "INVALID email address format"
+
+    validate_key = random_string(16)
+
+
+    # TODO
+    # Add information to MySQL
+
+
+    text = "Welcome to GIB,\n\nThank you for registering as a volunteer!\n\n"
+    text += "Please verify your email by clicking or copying the following link into your browser search bar: "
+    text += "http://"+os.environ['URL_BASE']+"/api/email/validate_email/"+email_address+"/"+validate_key
+    text += "\n\nSincerely,\n\nThe TACC development team"
+
+    # Send the email
+    return ec.send_mail_dev(email, 'GIB email verification', text, [])
 
 
 
