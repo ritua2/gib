@@ -22,6 +22,7 @@ from werkzeug.utils import secure_filename
 import zipfile
 
 import email_common as ec
+import ldap_validate
 import mysql_interactions as mints
 import web_data_to_json_file
 
@@ -1384,8 +1385,8 @@ def upload_results(username, job_ID, key):
 
 
 
-# Sends a validation email to an user
-@app.route("/api/email/validate", methods=['GET'])
+# Sends a generic email, no attachments
+@app.route("/api/email/send", methods=['POST'])
 def validate_email():
 
     if not request.is_json:
@@ -1394,14 +1395,15 @@ def validate_email():
     ppr = request.get_json()
     # basepath: Where the dir is stored
     # dirname: Directory in particular that must be uploaded
-    check = l2_contains_l1(["key", "email", "username"], ppr.keys())
+    check = l2_contains_l1(["key", "email_address", "subject", "text"], ppr.keys())
 
     if check:
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    email_address = ppr["email"]
-    username = ppr["username"]
+    subject = ppr["subject"]
+    email_address = ppr["email_address"]
+    text = ppr["text"]
 
     if not valid_adm_passwd(key):
         return "INVALID key"
@@ -1409,20 +1411,49 @@ def validate_email():
     if not ec.correctly_formatted_email_address(email_address):
         return "INVALID email address format"
 
-    validate_key = random_string(16)
-
-
-    # TODO
-    # Add information to MySQL
-
-
-    text = "Welcome to GIB,\n\nThank you for registering as a volunteer!\n\n"
-    text += "Please verify your email by clicking or copying the following link into your browser search bar: "
-    text += "http://"+os.environ['URL_BASE']+"/api/email/validate_email/"+email_address+"/"+validate_key
-    text += "\n\nSincerely,\n\nThe TACC development team"
 
     # Send the email
-    return ec.send_mail_dev(email, 'GIB email verification', text, [])
+    return ec.send_mail_dev(email_address, subject, text, [])
+
+
+
+####################
+# LDAP ACTIONS
+####################
+
+
+# Validates a user's password and uid using ldap
+@app.route("/api/ldap/validate", methods=['POST'])
+def validate_ldap():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    # basepath: Where the dir is stored
+    # dirname: Directory in particular that must be uploaded
+    check = l2_contains_l1(["key", "ldap_host", "username", "password", "before", "after"], ppr.keys())
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    ldap_host = ppr["ldap_host"]
+    username = ppr["username"]
+    password = ppr["password"]
+    before = ppr["before"]
+    after = ppr["after"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID key"
+
+
+    # Validates
+    if ldap_validate.ldap_check(username, password, ldap_host, before, after):
+        return "User validated"
+    else:
+        return "INVALID: User or password are incorrect"
+
 
 
 
