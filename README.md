@@ -39,6 +39,9 @@ MYSQL_SERVER=IP_ADDRESS
 cp .env ../springipt/envar.txt
 cp .env ../springipt/.env
 
+# Modify 'IPaddress' and 'portnumber' to their actual values in the .env files above
+
+
 # Modify the springIPT variables to be the same as above, including the VM IP
 vi ../springipt/src/main/resources/application.properties
   
