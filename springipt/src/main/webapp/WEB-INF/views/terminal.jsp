@@ -1,6 +1,4 @@
-<!-- {% extends 'base.html' %}
 
-{% block headersum %} -->
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
 <%@ page import="java.util.*" %>
@@ -9,59 +7,47 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="base.jsp" />
-<div class="container">
-<h1>
-    Hello ${ip}
-</h1>
-    <h1>Terminal</h1>
-    <!-- This particular block template is only for a tab header.
-    This block can be modified or removed completely, just be sure to remove the
-    opening and closing "headersum" blocks.  -->
-    <!-- {% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-    {% block body %} -->
-    <table cellpadding="0" cellspacing="0" width="100%" height="350px">
+    <title>Putty Terminal</title>
+
+    <!-- <link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
+
+</head>
+
+<body>
+<div class="container">
+
+
+    
+
+
+
+
+
+
+    
+   <table cellpadding="0" cellspacing="0" width="100%" height="350px">
     <tr>
       <td width="75%">
       <div class="terminal">
-        <!-- {% if url %} -->
-        <%-- <c:if test="url"> --%>    
-        <%-- right here --%>
-        <%-- the ip address is different for each user --%>
+        
         <c:set var="username" value="${pageContext.request.userPrincipal.name}" />
         <c:set var="path" value="${contextPath}" />
-        <%--
-          String username = (String)pageContext.getAttribute("username");
-          String path =getServletContext().getRealPath("/");
-          String result = "";
-          System.out.println(getServletContext().getRealPath("/"));
-          try {
-            Runtime r = Runtime.getRuntime();                    
-            String command = path.concat("resources/UserTerminal.sh ").concat(username);
-            Process p = r.exec(command);
-            BufferedReader in =
-                new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                System.out.println(inputLine);
-                result += inputLine;
-            }
-            in.close();
-
-          } catch (IOException e) {
-               System.out.println(e);
-          }
-          System.out.println("result is " + result);
-          pageContext.setAttribute("UserRedirect", result);
-        --%>
-		<% out.println("http://"+request.getAttribute("ip")+"/wetty"); %>
+        
+		
           <iframe id="webterm" src="http://<%= request.getAttribute("ip")%>/wetty" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
-        <!-- {% else %} -->
-    <%--     </c:if>
-        <c:if test="url"> --%>
-          <!-- <iframe id="webterm" src=""  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe> -->
-        <!-- {% endif %} -->
-    <%--     </c:if> --%>
+        
+    
       </div>
       </td>
       <td valign="top">
@@ -289,4 +275,8 @@
   </script>
 <!-- {% endblock %} -->
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
+</body>
+</html>
 <jsp:include page="footer.jsp" />

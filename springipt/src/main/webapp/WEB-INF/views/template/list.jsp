@@ -3,11 +3,24 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+<jsp:include page="../base.jsp" />
 <!DOCTYPE html>
 <html lang="en">
-<jsp:include page="../base.jsp" />
-<jsp:include page="../fragments/header.jsp" />
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
 
+    <title>Comments</title>
+
+    <!--<link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
+
+</head>
 <body>
 
 	<div class="container">
@@ -21,9 +34,12 @@
 				<strong>${msg}</strong>
 			</div>
 		</c:if>
-
-		<h1>All Comments</h1>
-
+		
+		<c:if test="${pageContext.request.userPrincipal.name != null}">
+		<button class="btn btn-primary"
+							onclick="location.href='/springipt/template/addcomment'">Post Comment</button>
+		<!--<h3>Click <a href="/springipt/template/addcomment">here</a> to post a comment</h3>-->
+		</c:if>
 		<table class="table table-striped">
 			<thead>
 				<tr>
@@ -46,13 +62,19 @@
 						<spring:url value="/comments/${comment.id}/delete" var="deleteUrl" />
 						<spring:url value="/comments/${comment.id}/reply" var="replyUrl" />
 
-						<button class="btn btn-info" onclick="location.href='${userUrl}'">Query</button>
+						<button class="btn btn-info" onclick="location.href='${userUrl}'">Details</button>
+						<c:if test="${pageContext.request.userPrincipal.name != null}">
+						<c:if test="${pageContext.request.userPrincipal.name == comment.createdby}">
 						<button class="btn btn-primary"
-							onclick="location.href='${updateUrl}'">Update</button>
+							onclick="location.href='${updateUrl}'">Edit</button>
 						<button class="btn btn-danger"
 							onclick="this.disabled=true;location.href='${deleteUrl}'">Delete</button>
+							</c:if>
+						
 						<button class="btn btn-success"
-							onclick="this.disabled=true;location.href='${replyUrl}'">Reply</button></td>
+							onclick="this.disabled=true;location.href='${replyUrl}'">Reply</button>
+						</c:if>
+					</td>
 				</tr>
 				<c:forEach var="reply" items="${comment.replies}">
 					<tr>
@@ -67,8 +89,10 @@
 		</table>
 
 	</div>
-
-	<jsp:include page="../fragments/footer.jsp" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
+	
 
 </body>
 </html>
+<jsp:include page="../footer.jsp" />

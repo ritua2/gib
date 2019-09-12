@@ -43,5 +43,9 @@
    <listener-class>com.ipt.web.service.SesListener</listener-class>
 	</listener>
 	
+	<error-page>
+        <error-code>404</error-code>
+        <location>/pagenotfound</location>
+    </error-page>
 	
 </web-app>

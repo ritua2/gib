@@ -5,37 +5,10 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <!-- Footer -->
   <footer id="myFooter">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-3">
-                    <h5>Get started</h5>
-                    <ul>
-                        <li><a href="${contextPath}/welcome">Home</a></li>
-						<c:if test="${pageContext.request.userPrincipal.name == null}">
-                        <li><a href="${contextPath}/login">Sign up</a></li>
-						</c:if>
-                    </ul>
-                </div>
-                <div class="col-sm-3">
-                    <h5>About us</h5>
-                    <ul>
-                        <li><a href="#">Project Overview</a></li>
-                        <li><a href="#">Project Team</a></li>
-                    </ul>
-                </div>
-                <div class="col-sm-3">
-                    <h5>Support</h5>
-                    <ul>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="${contextPath}/comments">Forums</a></li>
-                    </ul>
-                </div>
-                
-            </div>
-        </div>
+        
         <div class="second-bar">
            <div class="container">
-                <h2 class="logo"><a href="#"> TACC | IPT </a></h2>
+                <h2 class="logo"><a href="https://portal.tacc.utexas.edu/"> TACC </a>|<a href="/springipt"> IPT </a></h2>
                 <div class="social-icons">
                     <br />
                     <p>&copy; TACC | IPT 2018</p>

@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -101,6 +102,14 @@ public class LoginUserController {
     @GetMapping(value = "/login")
     public String login(Model model, String error, String logout, HttpServletRequest request) {
 		
+	
+
+        return "login_v7";
+    }
+	
+	 @GetMapping(value = "/login_normal")
+    public String login_normal(Model model, String error, String logout, HttpServletRequest request) {
+		
 		if (error != null)
             model.addAttribute("error", "Your username and password is invalid.");
 
@@ -108,8 +117,25 @@ public class LoginUserController {
 			model.addAttribute("name", logout);
             model.addAttribute("message", "You have been logged out successfully.");
 		}	
+		
+		
+		return "login_normal";
+    }
+	@GetMapping(value = "/login_tacc")
+    public String login_tacc(Model model, String error, String logout, HttpServletRequest request, Authentication authentication) {
+		
+		if (error != null)
+            model.addAttribute("error", "Your username and password is invalid.");
 
-        return "login";
+        if (logout != null){
+			model.addAttribute("name", logout);
+            model.addAttribute("message", "You have been logged out successfully.");
+		}
+		
+		
+				
+
+        return "login_tacc";
     }
 	
 	 @GetMapping(value = "/perform_logout")
@@ -129,9 +155,17 @@ public class LoginUserController {
     
 
     @GetMapping(value = {"/", "/welcome"})
-    public String welcome(HttpServletRequest request, Model model) {
+    public String welcome(HttpServletRequest request, Model model, HttpSession session, Authentication authentication) {
 		Principal principal = request.getUserPrincipal();
 		loggedinUser=principal.getName();
+		Boolean abc=request.isUserInRole("ROLE_ADMIN");
+		Boolean is_ldap=false;
+		session.setAttribute("is_admin", abc.toString());
+		if(authentication.getPrincipal().toString().contains("Not granted any authorities")){
+			if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl"))
+				is_ldap=true;
+		}
+		session.setAttribute("is_ldap", is_ldap.toString());
         return "welcome";
     }
     
@@ -227,9 +261,11 @@ public class LoginUserController {
 				rd.close();
 				if(result2!=null){
 			try{
+			Boolean abc=request.isUserInRole("ROLE_ADMIN");
 			File file2 = new File("Redirect.txt");
 			FileWriter fileWriter = new FileWriter(file2);
 			fileWriter.write(result2.toString());
+			fileWriter.write(abc.toString());
 			fileWriter.flush();
 			fileWriter.close();
 		}catch(IOException e){

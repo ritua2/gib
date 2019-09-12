@@ -23,9 +23,7 @@
 
 <nav class="navbar navbar-inverse " style="background:#222;">
 	<div class="container">
-		<div class="navbar-header">
-			<a class="navbar-brand" href="${urlHome}">Spring MVC Form</a>
-		</div>
+		
 		<div id="navbar">
 			<ul class="nav navbar-nav navbar-right">
 				<li class="active"><a href="${urlAddUser}">Add User</a></li>
@@ -34,3 +32,4 @@
 		</div>
 	</div>
 </nav>
+</head>

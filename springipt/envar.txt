@@ -1,0 +1,28 @@
+# Contains all the necessary environmental variables to setup the middle-layer completely
+
+
+# DATABASE
+
+# Redis variables
+REDIS_AUTH=key
+
+
+# MANAGER NODE
+
+orchestra_key=okey
+URL_BASE=IP of Server
+PROJECT=gib
+gthreads=4
+
+
+# GREYFISH STORAGE
+greyfish_key=gkey
+greyfish_path=/greyfish
+greyfish_threads=4
+
+#MYSQL Creds
+
+MYSQL_USER=user
+MYSQL_PASSWORD=pwd
+MYSQL_CONN_URL=jdbc:mysql://<URL>/iptweb?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL
+MYSQL_TABLE=assignment

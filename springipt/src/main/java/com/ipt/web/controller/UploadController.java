@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
@@ -461,353 +462,25 @@ public class UploadController {
 
 	}
 
-	@GetMapping("/compile")
-	public String uploadStatus() {
-		logger.info("Rendering compile page");
-		
-		
-		
-		return "compile";
-	}
-	
-	@RequestMapping(value = "/compilejob", method = RequestMethod.POST, produces = "application/json")
-	public String compilejob(@RequestParam("system") String system, @RequestParam("driver") MultipartFile driver,
-			@RequestParam("compiler") String compiler, @RequestParam("ccommand") String ccommand, @RequestParam("outfiles") String outFileName, @RequestParam("modules") String modulesName,
-			@RequestParam("fileToDownload") String fileSelected,
-			RedirectAttributes redirectAttributes, HttpServletRequest request) {
-		
-		
-		String jsonInputString=null, okey=null, baseIP=null, queue = null;
-		BufferedReader reader=null;
-		URL url = null;
-		StringBuilder result = new StringBuilder();
-		String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        StringBuilder salt = new StringBuilder();
-		StringBuilder randomFileName = new StringBuilder();
-        Random rnd = new Random();
-		
-		try{
-		File file4 = new File("Run_submit.txt");
-		FileWriter fileWriter = new FileWriter(file4);
-		
-		
-		fileWriter.write("Selected File: "+ fileSelected);
-		fileWriter.write("\n");
-		
-		while (salt.length() < 32) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            salt.append(SALTCHARS.charAt(index));
-        }
-		
-		while (randomFileName.length() < 16) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            randomFileName.append(SALTCHARS.charAt(index));
-        }
-        String saltStr = salt.toString();
-		
-		File file = new File(fileSelected);
-		
-		if(!file.exists()){
-		
-		if (driver.isEmpty()) {
-				redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
-				// return "redirect:/terminal";
-		}
-		}
-		
-		try {
-				if(!file.exists()){
-					byte[] bytes = driver.getBytes();
-				Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ driver.getOriginalFilename());
-				Files.write(path, bytes);
-				}
-				else{
-					byte[] bytes = Files.readAllBytes(file.toPath());
-					Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
-				Files.write(path, bytes);
-				}
-				
-		}catch (IOException e) {
-				e.printStackTrace();
-		}	
-			File f1 = null;
-		if(!file.exists())
-				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ driver.getOriginalFilename());
-			else
-				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
-				File f2 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ randomFileName.toString()+".zip");
-				boolean b = f1.renameTo(f2);
-		
-		try {
-					File envar = new File("/usr/local/tomcat/webapps/envar.txt");
-					reader = new BufferedReader(new FileReader(envar));
-					String line = reader.readLine();
-					while (line != null) {
-						if(line.contains("orchestra_key"))
-							okey=line.substring(line.indexOf("=")+1);
-						else if(line.contains("URL_BASE"))
-							baseIP=line.substring(line.indexOf("=")+1);
-						line = reader.readLine();
-					}
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-		if(system.equals("Stampede2")||system.equals("Lonestar2"))
-			queue="normal";
-		else
-			queue="compute";
-		
-		try{
-			//set the JSON
-				jsonInputString = "{\"key\":\""+okey+"\",\"User\":\""+request.getUserPrincipal().getName()+"\", \"origin\":\"web\", \"Job\":\"Compile\", \"CC\": \"1\", \"C0\": \""+compiler+ccommand+"\", \"modules\":\""+modulesName+"\", \"sc_system\":\""+system+"\",\"ID\":\""+saltStr+"\",\"output_files\":\""+outFileName+"\", \"dirname\":\""+f2.getName().toString().substring(0,f2.getName().toString().indexOf("."))+"\",\"sc_queue\":\""+queue+"\",\"n_nodes\":\"1\",\"n_cores\":\"1\", \"runtime\": \"00:10:00\"}";
-			
-				url = new URL("http://"+baseIP+":5000/api/jobs/new");
-				
-			} catch(MalformedURLException e){
-				e.printStackTrace();
-			}catch (IOException e) {
-				e.printStackTrace();
-			} 	
-				
-			try{
-			
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", "application/json; utf-8");
-			conn.setDoOutput(true);
-			
-			
-			fileWriter.write("\n");
-			fileWriter.write("Base IP: "+ baseIP);
-			fileWriter.write("\n");
-			fileWriter.write("URL: "+ url.toString());
-			fileWriter.write("\n");
-			fileWriter.write(request.getUserPrincipal().getName());
-			fileWriter.write("\n");
-			fileWriter.write(jsonInputString);
-			fileWriter.write("\n");
-			fileWriter.flush();
-			fileWriter.close();
-		
-		
-		
-		
-		try(OutputStream os = conn.getOutputStream()) {
-				byte[] input = jsonInputString.getBytes("utf-8");
-				os.write(input, 0, input.length);           
-			}
-			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line;
-			//curl_output=abc;
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-			rd.close();
-			
-			try{
-			File file3 = new File("RunResult.txt");
-			FileWriter fileWriter2 = new FileWriter(file3);
-			fileWriter2.write(result.toString());
-			fileWriter2.write("\n");
-			fileWriter2.flush();
-			fileWriter2.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-				
-		}catch(ProtocolException e){
-			e.printStackTrace();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-				
-		}catch(IOException e){
-			e.printStackTrace();
-		}		
-				
-				
-		return "compile";
-		
-	}
-	
-	@GetMapping("/run")
-	public String runStatus() {
-		logger.info("Rendering run page");
-		return "run";
-	}
-	
-	@RequestMapping(value = "/runjob", method = RequestMethod.POST, produces = "application/json")
-	//@RequestMapping(value = "/runjob", method = RequestMethod.GET)
-	public String runjob(@RequestParam("system") String system,
-			@RequestParam("rcommand") String rcommand,
-			@RequestParam("jobq") String jobq,
-			@RequestParam("rtime") String rtime,
-			@RequestParam("outfiles") String outFileName,
-			@RequestParam("numcores") String numcores, 
-			@RequestParam("numnodes") String numnodes, 
-			@RequestParam("modules") String modulesName, 
-			@RequestParam("binary") MultipartFile binary,
-			@RequestParam("fileToDownload") String fileSelected,
-			RedirectAttributes redirectAttributes,
-			HttpServletRequest request) {
-		System.out.println(system + ",  " + rcommand);
 
 	
-		String jsonInputString=null, okey=null, baseIP=null, queue = null;
-		BufferedReader reader=null;
-		URL url = null;
-		StringBuilder result = new StringBuilder();
-		String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        StringBuilder salt = new StringBuilder();
-		StringBuilder randomFileName = new StringBuilder();
-        Random rnd = new Random();
-		String TIME_PATTERN = "[0-9][0-9]:[0-5][0-9]:[0-5][0-9]";
-		Pattern pattern=Pattern.compile(TIME_PATTERN);
-		Matcher matcher=pattern.matcher(rtime);
-		
-		while (salt.length() < 32) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            salt.append(SALTCHARS.charAt(index));
-        }
-		
-		while (randomFileName.length() < 16) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            randomFileName.append(SALTCHARS.charAt(index));
-        }
-        String saltStr = salt.toString();
-		
-			File file = new File(fileSelected);
-		
-		/*if (binary.isEmpty()) {
-				redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
-				// return "redirect:/terminal";
-		}*/
-		
-		/*if (!matcher.matches()) {
-				redirectAttributes.addFlashAttribute("msg", "Please enter time in correct format");
-				return "redirect:/runjob";
-		}*/
-		
-		try {
-				
-				if(!file.exists()){
-				byte[] bytes = binary.getBytes();
-				Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ binary.getOriginalFilename());
-				Files.write(path, bytes);
-				}
-				else{
-					byte[] bytes = Files.readAllBytes(file.toPath());
-					Path path = Paths.get(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
-				Files.write(path, bytes);
-				}
-				
-		}catch (IOException e) {
-				e.printStackTrace();
-		}		
-				File f1 = null;
-			if(!file.exists())
-				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ binary.getOriginalFilename());
-			else
-				f1 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ file.getName());
-				File f2 = new File(UPLOADED_FOLDER +"commonuser/jobs_left/"+ randomFileName.toString()+".zip");
-				boolean b = f1.renameTo(f2);
-		
-		try {
-					File envar = new File("/usr/local/tomcat/webapps/envar.txt");
-					reader = new BufferedReader(new FileReader(envar));
-					String line = reader.readLine();
-					while (line != null) {
-						if(line.contains("orchestra_key"))
-							okey=line.substring(line.indexOf("=")+1);
-						else if(line.contains("URL_BASE"))
-							baseIP=line.substring(line.indexOf("=")+1);
-						line = reader.readLine();
-					}
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-		try{
-			//set the JSON
-				jsonInputString = "{\"key\":\""+okey+"\",\"User\":\""+request.getUserPrincipal().getName()+"\", \"origin\":\"web\", \"Job\":\"Run\", \"RC\": \"1\", \"R0\": \""+rcommand+"\", \"modules\":\""+modulesName+"\", \"sc_system\":\""+system+"\",\"ID\":\""+saltStr+"\",\"output_files\":\""+outFileName+"\", \"dirname\":\""+f2.getName().toString().substring(0,f2.getName().toString().indexOf("."))+"\",\"sc_queue\":\""+jobq+"\",\"n_nodes\":\""+numnodes+"\",\"n_cores\":\""+numcores+"\", \"runtime\": \""+rtime+"\"}";
-			
-				url = new URL("http://"+baseIP+":5000/api/jobs/new");
-				
-			} catch(MalformedURLException e){
-				e.printStackTrace();
-			}catch (IOException e) {
-				e.printStackTrace();
-			} 	
-				
-			try{
-			
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", "application/json; utf-8");
-			conn.setDoOutput(true);
-			
-			try{
-			File file4 = new File("Run_submit.txt");
-			FileWriter fileWriter = new FileWriter(file4);
-			fileWriter.write("\n");
-			fileWriter.write("Base IP: "+ baseIP);
-			fileWriter.write("\n");
-			fileWriter.write("URL: "+ url.toString());
-			fileWriter.write("\n");
-			fileWriter.write(request.getUserPrincipal().getName());
-			fileWriter.write("\n");
-			fileWriter.write(jsonInputString);
-			fileWriter.write("\n");
-			fileWriter.flush();
-			fileWriter.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}	
-		
-		
-		
-		try(OutputStream os = conn.getOutputStream()) {
-				byte[] input = jsonInputString.getBytes("utf-8");
-				os.write(input, 0, input.length);           
-			}
-			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line;
-			//curl_output=abc;
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-			rd.close();
-			
-			try{
-			File file3 = new File("RunResult.txt");
-			FileWriter fileWriter = new FileWriter(file3);
-			fileWriter.write(result.toString());
-			fileWriter.write("\n");
-			fileWriter.flush();
-			fileWriter.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-				
-		}catch(ProtocolException e){
-			e.printStackTrace();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-		
-		
-		
-		return "run";
-		
-	}
-	
 	@GetMapping("/compileRun")
-	public String compileRunStatus() {
-		//logger.info("Rendering run page");
-		return "compileRun_v4";
+	public String compileRunStatus(Authentication authentication) {
+		
+		
+		
+		if(authentication.getPrincipal().toString().contains("ROLE_ADMIN"))
+		return "compileRun_v5";
+	else{
+		if(authentication.getPrincipal().toString().contains("Not granted any authorities")){
+			if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl"))
+				return "compileRun_v5";
+			else
+				return "accessDenied";
+		}else
+			return "accessDenied";
+	}
+		
 	}
 	
 	@RequestMapping(value = "/compileRunJob", method = RequestMethod.POST, produces = "application/json")
@@ -830,8 +503,7 @@ public class UploadController {
 	@RequestParam("modules3") String modules3,
 	@RequestParam("files") String files,
 	@RequestParam("fileToUpload") String fileToUpload,
-	@RequestParam("localFiles") MultipartFile localFiles,
-			RedirectAttributes redirectAttributes, HttpServletRequest request)
+	@RequestParam("localFiles") MultipartFile localFiles)
 	{
 		try{
 			File file = new File("CompileRun_submit.txt");
@@ -1058,7 +730,7 @@ public class UploadController {
 		
 		
 		
-		return "compileRun_v4";
+		return "compileRun_v5";
 		
 	}
 

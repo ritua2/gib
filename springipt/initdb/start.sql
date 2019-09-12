@@ -16,6 +16,7 @@ CREATE TABLE `comment` (
   `tag` varchar(255) NOT NULL,
   `created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `lastUpdated` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `createdby` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 
@@ -45,6 +46,10 @@ CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(500) NOT NULL,
+  `institution` varchar(1000) NOT NULL,
+  `country` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 

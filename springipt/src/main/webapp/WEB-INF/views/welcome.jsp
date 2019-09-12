@@ -3,6 +3,8 @@
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="base.jsp" />
+
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
 <%-- <div class="container">
 
     <c:if test="${pageContext.request.userPrincipal.name != null}">
