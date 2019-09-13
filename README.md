@@ -146,3 +146,23 @@ http://IPAddress:9090/springipt/login
 
 
 
+* **Removing the gib containers**
+
+To kill and remove the gib containers, except wetty instances:
+```bash
+docker kill manager_node && docker rm manager_node
+docker kill redis && docker rm redis
+docker kill greyfish && docker rm greyfish
+docker kill tomcat_springipt && docker rm tomcat_springipt
+docker kill mysql_springipt && docker rm mysql_springipt
+```
+
+
+
+If all the containers belong to gib:
+```bash
+docker kill $(docker ps -aq) && docker rm $(docker ps -aq)
+```
+
+
+
