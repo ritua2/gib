@@ -62,7 +62,7 @@ public class LoginUserController {
 	
 		
 	private String ip_returned=null;
-	private String loggedinUser=null;
+	
 	
 	
 	public static MappedUser mappedUser=new MappedUser();
@@ -151,31 +151,54 @@ public class LoginUserController {
         
     }
 	
-	
-    
-
-    @GetMapping(value = {"/", "/welcome"})
-    public String welcome(HttpServletRequest request, Model model, HttpSession session, Authentication authentication) {
-		Principal principal = request.getUserPrincipal();
-		loggedinUser=principal.getName();
-		Boolean abc=request.isUserInRole("ROLE_ADMIN");
+	@GetMapping(value = {"/", "/welcome"})
+    public String welcome(HttpServletRequest request, Model model, HttpSession session, Principal principal, Authentication authentication) {
+		
+		Boolean abc=false;
 		Boolean is_ldap=false;
-		session.setAttribute("is_admin", abc.toString());
+		Boolean check=false;
+		check=null == principal;
+		
+		if(!check){
+			abc=request.isUserInRole("ROLE_ADMIN");
+			session.setAttribute("is_admin", abc.toString());
 		if(authentication.getPrincipal().toString().contains("Not granted any authorities")){
 			if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl"))
 				is_ldap=true;
 		}
 		session.setAttribute("is_ldap", is_ldap.toString());
-        return "welcome";
+		
+			return "welcome";
+		}else 			
+			return "redirect:/login";
     }
     
     @GetMapping(value = "/terminal")
     public String terminal(Model model,HttpServletRequest request, HttpSession session) {
        
 	   String curl_output=null;
+	   String loggedin_user=null;
+	   
+	   if(session.getAttribute("is_ldap")=="true"){
+		   if(authentication.getName().toString().contains(" "))
+			   loggedin_user=authentication.getName().toString().replace(" ","_");
+	   }else
+		   loggedin_user=request.getUserPrincipal().getName();
+	   
+	   try{
+			File file4 = new File("Details.txt");
+			FileWriter fileWriter = new FileWriter(file4);
+			fileWriter.write("\n");
+			fileWriter.write("Username : "+ loggedin_user);
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 		
 		
-	if(session.getAttribute("mySessionAttribute")==null || ((session.getAttribute("mySessionAttribute")!=null)&& ((new com.ipt.web.service.MappingService().findMapping(request.getUserPrincipal().getName()))!="Null"))){
+	if(session.getAttribute("mySessionAttribute")==null || ((session.getAttribute("mySessionAttribute")!=null)&& ((new com.ipt.web.service.MappingService().findMapping(loggedin_user))!="Null"))){
 		
 		
 		StringBuilder result = new StringBuilder();
@@ -201,10 +224,10 @@ public class LoginUserController {
 			e.printStackTrace();
 		}
 		
-		Principal principal = request.getUserPrincipal();
+		
 		
 		try{
-			url = new URL("http://"+baseIP+":5000/api/assign/users/"+principal.getName());
+			url = new URL("http://"+baseIP+":5000/api/assign/users/"+loggedin_user);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -225,6 +248,9 @@ public class LoginUserController {
 			File file1 = new File("Assign.txt");
 			FileWriter fileWriter = new FileWriter(file1);
 			fileWriter.write(result.toString());
+			fileWriter.write("\n");
+			fileWriter.write("User:"+loggedin_user);
+			fileWriter.write("\n");
 			fileWriter.flush();
 			fileWriter.close();
 		}catch(IOException e){
@@ -249,7 +275,7 @@ public class LoginUserController {
 		else{
 			
 			try{
-				url = new URL("http://"+baseIP+":5000/api/redirect/users/"+principal.getName()+"/"+ip_returned.substring(0,ip_returned.indexOf(':')));
+				url = new URL("http://"+baseIP+":5000/api/redirect/users/"+loggedin_user+"/"+ip_returned.substring(0,ip_returned.indexOf(':')));
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestMethod("GET");
 				conn.setInstanceFollowRedirects( false );
@@ -261,11 +287,11 @@ public class LoginUserController {
 				rd.close();
 				if(result2!=null){
 			try{
-			Boolean abc=request.isUserInRole("ROLE_ADMIN");
+			
 			File file2 = new File("Redirect.txt");
 			FileWriter fileWriter = new FileWriter(file2);
 			fileWriter.write(result2.toString());
-			fileWriter.write(abc.toString());
+			
 			fileWriter.flush();
 			fileWriter.close();
 		}catch(IOException e){
@@ -287,20 +313,22 @@ public class LoginUserController {
 		}
     	
 			session.setAttribute("mySessionAttribute", curl_output);
-			mappedUser.setUser(principal.getName());
+			mappedUser.setUser(loggedin_user);
 			mappedUser.setIp(curl_output);
-			session.setAttribute("uName", principal.getName());
+			session.setAttribute("uName", loggedin_user);
 			session.setAttribute("uIP", curl_output);
 
 			
 			mappingRepository.save(mappedUser);
 			
 			
-		List<MappedUser> list=mappingRepository.findAll();
+		
 			
 	}else{
-		com.ipt.web.service.WaitService.wait(request.getUserPrincipal().getName());
-		String str = com.ipt.web.service.WaitService.returnWaitKey(request.getUserPrincipal().getName());
+		
+		com.ipt.web.service.WaitService.wait(loggedin_user);
+		
+		String str = com.ipt.web.service.WaitService.returnWaitKey(loggedin_user);
 		if(session.getAttribute("key")==null && session.getAttribute("key1")==null){
 			
 			session.setAttribute("key1", str);
