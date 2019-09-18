@@ -1,5 +1,3 @@
-
-
 CREATE USER IF NOT EXISTS 'spring'@'localhost';
 ALTER USER 'spring'@'localhost' IDENTIFIED WITH mysql_native_password BY 'spring';
 
@@ -16,6 +14,7 @@ CREATE TABLE `comment` (
   `tag` varchar(255) NOT NULL,
   `created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `lastUpdated` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `createdby` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 
@@ -45,6 +44,10 @@ CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `name` varchar(500) NOT NULL,
+  `institution` varchar(1000) NOT NULL,
+  `country` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
@@ -98,16 +101,16 @@ INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (1, 'ROLE_USER');
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (2, 'ROLE_ADMIN');
 
 
-# Adds column to user table
-ALTER TABLE user ADD COLUMN email VARCHAR(255);
-
 # Email validation table
 CREATE TABLE prevalidation (
-    id                      int(11)      UNIQUE NOT NULL,
-    username                VARCHAR(255)        NOT NULL,
-    password                VARCHAR(255),
-    email                   VARCHAR(255),
-    validation_key          VARCHAR(255),
-
-    PRIMARY KEY (id)
+	id           	int(11)      AUTO_INCREMENT UNIQUE NOT NULL,
+	username        VARCHAR(255)        NOT NULL,
+	password        VARCHAR(255),
+	email           VARCHAR(255),
+	name			VARCHAR(500) 		NOT NULL,
+    institution 	VARCHAR(1000) 		NOT NULL,
+	country			VARCHAR(255) 		NOT NULL,
+	validation_key  VARCHAR(255),
+	
+	PRIMARY KEY (id)
 );
