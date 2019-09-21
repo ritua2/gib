@@ -10,12 +10,16 @@ services:
       - mysql_springipt:mysql_springipt
     ports: 
       - "9090:8080"
+      - "443:443"
+      - "8443:8443"
     volumes:
       - ./target/springipt-0.0.1.war:/usr/local/tomcat/webapps/springipt.war
       - ./envar.txt:/usr/local/tomcat/webapps/envar.txt
       - myvol:/home/term
       - ./ssh/id_rsa:/usr/local/tomcat/.ssh/PrivateKey.ppk
       - greyfish:/home/greyfish/users
+       - ./keystore:/usr/local/tomcat/keystore
+      - ./server.xml:/usr/local/tomcat/conf/server.xml
 
 
   mysql_springipt:
