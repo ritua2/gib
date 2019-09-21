@@ -9,7 +9,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class SessionHandler extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        request.getSession().setMaxInactiveInterval(3*60);
+        request.getSession().setMaxInactiveInterval(5*60);
         return true;
     }
 }

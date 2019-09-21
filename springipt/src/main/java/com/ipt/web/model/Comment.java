@@ -21,6 +21,7 @@ public class Comment {
 	private String body;
 	private String tag;
 	private Date created;
+	private String createdby;
 	private Date lastUpdated;
 	
 	@Transient
@@ -49,6 +50,12 @@ public class Comment {
 	}
 	public void setTitle(String title) {
 		this.title = title;
+	}
+	public String getCreatedby() {
+		return createdby;
+	}
+	public void setCreatedby(String createdby) {
+		this.createdby = createdby;
 	}
 	public String getBody() {
 		return body;

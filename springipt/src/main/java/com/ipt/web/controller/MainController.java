@@ -55,8 +55,49 @@ public class MainController {
 			return "help";
 
 		}
+		
+		@RequestMapping(value = "/aboutus", method = RequestMethod.GET)
+		public String showAboutUs(Model model) {
 
+			
+			return "about-us";
+
+		}
+		
+		@RequestMapping(value = "/faq", method = RequestMethod.GET)
+		public String showFaq(Model model) {
+
+			
+			return "faq";
+
+		}
+		
+		@RequestMapping(value = "/vdemos", method = RequestMethod.GET)
+		public String showVDemo(Model model) {
+
+			
+			return "vdemos";
+
+		}
+		
+		@RequestMapping(value = "/contactus", method = RequestMethod.GET)
+		public String showContactUs(Model model) {
+
+			
+			return "contactus";
+
+		}
+		
+		@RequestMapping(value = "/accessDenied", method = RequestMethod.GET)
+	public String accessDenied(){
+		return "accessDenied";
+	}
 	
+	@RequestMapping(value = "/pagenotfound", method = RequestMethod.GET)
+	public String pagenotfound(){
+		return "pagenotfound";
+	}
+
 	
 
 }

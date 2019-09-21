@@ -9,7 +9,13 @@ public class LoginUser {
     private Long id;
     private String username;
     private String password;
+	private String email;
+	private String name;
+	private String institution;
+	private String country;
     private String passwordConfirm;
+	private String validation_key;
+	private String validation_state;
     private Role role;
 
     @Id
@@ -28,6 +34,38 @@ public class LoginUser {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+	
+	public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+	
+	public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+	
+	public String getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(String institution) {
+        this.institution = institution;
+    }
+	
+	public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public String getPassword() {
@@ -55,5 +93,21 @@ public class LoginUser {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+	
+	public String getValidation_key() {
+        return validation_key;
+    }
+
+    public void setValidation_key(String validation_key) {
+        this.validation_key = validation_key;
+    }
+	
+	public String getValidation_state() {
+        return validation_state;
+    }
+
+    public void setValidation_state(String validation_state) {
+        this.validation_state = validation_state;
     }
 }

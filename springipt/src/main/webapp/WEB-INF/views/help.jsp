@@ -2,19 +2,33 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+<jsp:include page="base.jsp" />
 <!DOCTYPE html>
 <html lang="en">
-<jsp:include page="base.jsp" />
 
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Need Help?</title>
+
+  <!-- <link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
+
+</head>
 
 <body>
 <!-- Help Tab -->
         <!--Section header-->
+		<div class="container">	
         <h2>Just Getting Started with IPT?</h2>
         <!--Links-->
-        <h4><a href="https://diagrid.org/resources/ipt/about" target="_blank"
-               alt="Interactive Parallelization Tool (IPT)">Interactive Parallelization Tool (IPT)</a></h4>
+        
 
         <p>Interactive Parallelization Tool (IPT) is a high-level tool for transforming serial C/C++ applications
           into their parallel variants. The parallel programming models that are currently supported by IPT are:
@@ -36,28 +50,20 @@
         <!--Section header-->
         <h2>Want to Learn More?</h2>
         <!--Links-->
-        <h4><a href="{% static 'supportdocs/trainingIPT.zip' %}" target="_blank" alt="Tutorial Files for IPT">Tutorial
+        <h4><a href="https://drive.google.com/drive/u/0/folders/1TuGOd-h-qz_6pQWQ0lgBXzeIpawHwYz1" target="_blank" alt="Tutorial Files for IPT">Tutorial
             Files for IPT</a></h4>
 
         <p>Some test cases and the step-by-step process of parallelizing those test cases using IPT can be downloaded
-        <a href={% static 'supportdocs/trainingIPT.zip' %} target="_blank" alt="IPT user guide">here</a>.</p>
+        <a href="https://drive.google.com/open?id=1J5AIAub9lnfZmZRktCjMPPHnL_3AcJnE" target="_blank" alt="IPT user guide">here</a>.</p>
 
-        <h4><a href="{% static 'supportdocs/User_Guide_1.0.pdf' %}" target="_blank" alt="IPT user guide">IPT User
+        <h4><a href="https://github.com/ritua2/IPT/blob/master/User_Guide_1.0_excerpt.pdf" target="_blank" alt="IPT user guide">IPT User
             Guide</a></h4>
+		</div>	
+       
 
-        <h4>The usage of IPT is also demonstrated through the following videos:</h4>
-        <h5>OpenMP Version of Molecular Dynamics Code Using the Interactive Parallelization Tool</h5>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/JH7o_k9Bxd0?rel=0" frameborder="0" allowfullscreen></iframe>
-        <h5>Interactive Parallelization Tool - Parallelizing Molecular Dynamics with MPI</h5>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/HvlA4pnfFjE?rel=0" frameborder="0" allowfullscreen></iframe>
-        <h5>The Interactive Parallelization Tool - Parallelizing the FFT Algorithm with CUDA</h5>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/kCOjqza7OG8?rel=0" frameborder="0" allowfullscreen></iframe>
-        <h5>The Interactive Parallelization Tool - Parallelizing the FFT algorithm with OpenMP</h5>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/L4a19kF6q48?rel=0" frameborder="0" allowfullscreen></iframe>
-        <h5>The Interactive Parallelization Tool - Parallelizing the FFT algorithm with MPI</h5>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/sg9HDTz0zbo?rel=0" frameborder="0" allowfullscreen></iframe>
-
-      <jsp:include page="footer.jsp" />
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>  
 
 </body>
 </html>
+ <jsp:include page="footer.jsp" />

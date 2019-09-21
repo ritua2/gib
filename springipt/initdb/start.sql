@@ -48,6 +48,8 @@ CREATE TABLE `user` (
   `name` varchar(500) NOT NULL,
   `institution` varchar(1000) NOT NULL,
   `country` varchar(255) NOT NULL,
+  `validation_key`  VARCHAR(255),
+  `validation_state`  VARCHAR(255),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
@@ -99,18 +101,3 @@ CREATE TABLE jobs (
 
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (1, 'ROLE_USER');
 INSERT INTO `iptweb`.`role` (`id`, `name`) VALUES (2, 'ROLE_ADMIN');
-
-
-# Email validation table
-CREATE TABLE prevalidation (
-	id           	int(11)      AUTO_INCREMENT UNIQUE NOT NULL,
-	username        VARCHAR(255)        NOT NULL,
-	password        VARCHAR(255),
-	email           VARCHAR(255),
-	name			VARCHAR(500) 		NOT NULL,
-    institution 	VARCHAR(1000) 		NOT NULL,
-	country			VARCHAR(255) 		NOT NULL,
-	validation_key  VARCHAR(255),
-	
-	PRIMARY KEY (id)
-);

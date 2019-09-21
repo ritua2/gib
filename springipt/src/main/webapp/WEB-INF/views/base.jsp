@@ -28,7 +28,7 @@
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<a class="navbar-brand"><img
+				<a class="navbar-brand" href="/springipt"><img
 					src="${contextPath}/resources/images/IPT-Fut.svg"></a>
 				<!--<a class="navbar-brand">Interactive Parallelization Tool</a> -->
 			</div>
@@ -48,7 +48,7 @@
 	<div class="main-banner">
 		<p>
 			<img src="${contextPath}/resources/images/IPT-Banner.jpg"
-				class="img-responsive" alt="IPT Banner">
+				class="img-responsive" alt="IPT Banner" style="width: 100%;">
 		</p>
 	</div>
 	
@@ -58,24 +58,48 @@
 	<div class="container">
 		<ul class="nav nav-tabs">
 			<c:if test="${pageContext.request.userPrincipal.name != null}">
+			<c:if test="${sessionScope.is_admin == 'true'}">
+			<li id='admin-tab'><a href="${contextPath}/admin">Admin</a></li>
+			</c:if>
 			<li id='terminal-tab'><a href="${contextPath}/terminal">Terminal</a></li>
-			<li id='compile-tab'><a href="${contextPath}/compile">Compile</a></li>
-			<li id='run-tab'><a href="${contextPath}/run">Run</a></li>
+			
+			<c:if test="${(sessionScope.is_admin == 'true')||(sessionScope.is_ldap == 'true')}">
+			<li id='run-tab'><a href="${contextPath}/compileRun">Compile & Run</a></li>
+			</c:if>
 			<li id='history-tab'><a href="${contextPath}/jobHistory">Job
 					History</a></li>
-			<li id='help-tab'><a href="${contextPath}/help">Help</a></li>
-
-			<li id='admin-tab'><a href="${contextPath}/admin">Admin</a></li>
-			<li id='compile-tab'><a href="${contextPath}/comments">Messageboard</a></li>
+			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
+                <span class="caret"></span></a>
+                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
+                <li><a href="/springipt/faq">FAQ</a></li>
+                <li><a href="/springipt/help">User Guide</a></li>
+				<li><a href="/springipt/vdemos">Video Demos</a></li>
+				<li><a href="/springipt/contactus">Contact Us</a></li>				
+                </ul>
+	</li>
+			
+			
+			
+			<li id='compile-tab'><a href="${contextPath}/comments">Message Board</a></li>
+			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
 			</c:if>
 			<c:if test="${pageContext.request.userPrincipal.name == null}">
-			<li>	</li>
-			<li>	</li>
-			<li>	</li>
-			<li>	</li>
+			&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 
-			<li id='help-tab'><a href="${contextPath}/help">Help</a></li>
-			<li id='compile-tab'><a href="${contextPath}/comments">Messageboard</a></li> 
+			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
+                <span class="caret"></span></a>
+                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
+                <li><a href="/springipt/faq">FAQ</a></li>
+                <li><a href="/springipt/help">User Guide</a></li>
+				<li><a href="/springipt/vdemos">Video Demos</a></li>
+				<li><a href="/springipt/contactus">Contact Us</a></li>				
+                </ul>
+	</li>
+			<li id='compile-tab'><a href="${contextPath}/comments">Message Board</a></li> 
+			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
+			<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li><li id="signup-tab"><a href="/springipt/registration" >Sign Up</a></li>
+    <li id="login-tab" ><a href="/springipt/login_normal" >Log In</a>
+	</li>
 			</c:if>
 		</ul>
 		<!-- End Tabs -->
