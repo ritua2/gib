@@ -19,6 +19,7 @@ public class LoginUserServiceImpl implements LoginUserService {
 
     @Override
     public void save(LoginUser loginUser) {
+		if(loginUser.getValidation_state().equals("no"))
     	loginUser.setPassword(bCryptPasswordEncoder.encode(loginUser.getPassword()));
         loginUser.setRole(roleRepository.findOne(1L));
         userRepository.save(loginUser);
@@ -27,5 +28,10 @@ public class LoginUserServiceImpl implements LoginUserService {
     @Override
     public LoginUser findByUsername(String loginUsername) {
         return userRepository.findByUsername(loginUsername);
+    }
+	
+	@Override
+    public void delete(LoginUser loginUser) {
+    	userRepository.delete(loginUser);
     }
 }

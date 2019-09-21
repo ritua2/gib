@@ -28,6 +28,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ipt.web.model.LoginUser;
 import com.ipt.web.model.MappedUser;
@@ -57,8 +59,7 @@ public class LoginUserController {
 	@Autowired
     private MappingRepository mappingRepository;
 	
-	//@Autowired
-	//private SesListener sesListener;
+	
 	
 		
 	private String ip_returned=null;
@@ -77,17 +78,112 @@ public class LoginUserController {
 
     @PostMapping(value = "/registration")
     public String registration(@ModelAttribute("userForm") LoginUser userForm, BindingResult bindingResult, Model model) {
+		
+		String jsonInputString=null, okey=null, baseIP=null;
+		BufferedReader reader=null;
+		URL url = null;
+		StringBuilder result = new StringBuilder();
+		
         userValidator.validate(userForm, bindingResult);
 
         if (bindingResult.hasErrors()) {
             return "registration";
         }
 		
+		try {
+					File envar = new File("/usr/local/tomcat/webapps/envar.txt");
+					reader = new BufferedReader(new FileReader(envar));
+					String line = reader.readLine();
+					while (line != null) {
+						if(line.contains("orchestra_key"))
+							okey=line.substring(line.indexOf("=")+1);
+						else if(line.contains("URL_BASE"))
+							baseIP=line.substring(line.indexOf("=")+1);
+						line = reader.readLine();
+					}
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+		String token = UUID.randomUUID().toString();
+		userForm.setValidation_state("no");
+		userForm.setValidation_key(token);
+		
 		loginUserService.save(userForm);
 		
 		
-
-        // Creates the user directory
+		final String confirmationUrl = "http://"+baseIP+":6969/springipt/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
+		
+			
+		String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering as a volunteer!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl+"\\n"+"Please be logged in while confirming yourself.";
+		
+		
+		
+		try{
+		jsonInputString = "{\"key\":\""+okey+"\",\"subject\":\"Registration Confirmation for "+userForm.getUsername()+"\", \"email_address\": \""+userForm.getEmail()+"\", \"text\":\""+message+"\"}"; 
+		
+		url = new URL("http://"+baseIP+":5000/api/email/send");
+		} catch(MalformedURLException e){
+				e.printStackTrace();
+			}catch (IOException e) {
+				e.printStackTrace();
+			} 	
+		
+		try{
+			
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json; utf-8");
+			conn.setDoOutput(true);
+			
+			File file4 = new File("EmailValidation_submit.txt");
+			
+			FileWriter fileWriter = new FileWriter(file4);
+			
+			fileWriter.write("\n");
+			fileWriter.write("Base IP: "+ baseIP);
+			fileWriter.write("\n");
+			fileWriter.write("Base IP: "+ message);
+			fileWriter.write("\n");
+			fileWriter.write("URL: "+ url.toString());
+			fileWriter.write("\n");
+			fileWriter.write("\n");
+			fileWriter.write(jsonInputString);
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+			
+			try(OutputStream os = conn.getOutputStream()) {
+				byte[] input = jsonInputString.getBytes("utf-8");
+				os.write(input, 0, input.length);           
+			}
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			//curl_output=abc;
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			rd.close();
+			
+			try{
+			File file3 = new File("ValidationResult.txt");
+			FileWriter fileWriter2 = new FileWriter(file3);
+			fileWriter2.write(result.toString());
+			fileWriter2.write("\n");
+			fileWriter2.flush();
+			fileWriter2.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+				
+		}catch(ProtocolException e){
+			e.printStackTrace();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+				
+		// Creates the user directory
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()).mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home").mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib").mkdirs();
@@ -99,16 +195,95 @@ public class LoginUserController {
         return "redirect:/welcome";
     }
 
-    @GetMapping(value = "/login")
-    public String login(Model model, String error, String logout, HttpServletRequest request) {
+	@GetMapping(value = "/registrationConfirmation")
+    public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code, Authentication auth, HttpServletRequest request) {
 		
+		Boolean check=false;
+		check=null == auth.getPrincipal();
+		
+		try{
+			File file3 = new File("Valid_Link.txt");
+			FileWriter fileWriter2 = new FileWriter(file3);
+			fileWriter2.write("\n");
+			fileWriter2.write(userName);
+			fileWriter2.write("\n");
+			fileWriter2.write(code);
+			fileWriter2.write("\n");
+			fileWriter2.flush();
+			fileWriter2.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		if(loginUserService.findByUsername(userName).getValidation_key().equals(code)){
+			LoginUser lu=loginUserService.findByUsername(userName);
+			lu.setValidation_state("verified");
+			loginUserService.save(lu);
+			if(!check)
+				return "registrationConfirmation1";
+			else
+				return "registrationConfirmation2";
+		}else{
+			loginUserService.delete(loginUserService.findByUsername(userName));
+			HttpSession session = request.getSession(true);
+			session.invalidate();
+			return "registrationError";
+		}
+		
+    }
+    		
 	
-
+	@RequestMapping(value = "/test1")
+    public void test1(HttpSession session, HttpServletRequest request) { 
+		
+		try{
+			File file4 = new File("Abc.txt");
+			FileWriter fileWriter = new FileWriter(file4);
+			fileWriter.append("\n");
+			fileWriter.append("LDAP User");
+			fileWriter.append("\n");
+			fileWriter.append("Session: "+session.getAttribute("mySessionAttribute2"));
+			fileWriter.append("\n");
+			
+			fileWriter.append("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		
+    }
+	
+	@RequestMapping(value = "/test2")
+    public void test2(HttpSession session, HttpServletRequest request) { 
+		
+		try{
+			File file4 = new File("Abc2.txt");
+			FileWriter fileWriter = new FileWriter(file4);
+			fileWriter.append("\n");
+			fileWriter.append("DB User");
+			fileWriter.append("\n");
+			fileWriter.append("Session: "+session.getAttribute("mySessionAttribute2"));
+			fileWriter.append("\n");
+			//fileWriter.append("Type: "+request.getParameter("utype").toString());
+			fileWriter.append("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		
+    }
+	
+	@GetMapping(value = "/entry")
+    public String entry() {
         return "login_v7";
     }
 	
 	 @GetMapping(value = "/login_normal")
-    public String login_normal(Model model, String error, String logout, HttpServletRequest request) {
+    public String login_normal(Model model, String error, String logout) {
 		
 		if (error != null)
             model.addAttribute("error", "Your username and password is invalid.");
@@ -121,22 +296,12 @@ public class LoginUserController {
 		
 		return "login_normal";
     }
-	@GetMapping(value = "/login_tacc")
-    public String login_tacc(Model model, String error, String logout, HttpServletRequest request, Authentication authentication) {
-		
-		if (error != null)
-            model.addAttribute("error", "Your username and password is invalid.");
 
-        if (logout != null){
-			model.addAttribute("name", logout);
-            model.addAttribute("message", "You have been logged out successfully.");
-		}
 		
 		
 				
 
-        return "login_tacc";
-    }
+     
 	
 	 @GetMapping(value = "/perform_logout")
     public String logout1(HttpServletRequest request) {
@@ -170,7 +335,7 @@ public class LoginUserController {
 		
 			return "welcome";
 		}else 			
-			return "redirect:/login";
+			return "redirect:/entry";
     }
     
     @GetMapping(value = "/terminal")

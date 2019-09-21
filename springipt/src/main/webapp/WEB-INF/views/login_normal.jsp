@@ -30,7 +30,18 @@
                 </div>
 
     <form method="POST" action="${contextPath}/login" class="form-signin" style="width: 30%; margin-left: 400px">
-        <h2 class="form-heading">Log in as an IPT User</h2>
+		<div class="form-group" id="utype">
+						<label >User Type:</label> &nbsp;&nbsp;&nbsp;<input type="radio" id="utype" name="utype" value="tacc" checked=""  
+						> TACC User 
+						<span style="padding-left: 1em"><input type="radio" id="utype" name="utype" value="db"  > IPT User     <br> 
+					</span><c:if
+								test="utype_error">
+								<div class="error">
+									<p>There was an error: ${ utype_error }</p>
+								</div>
+							</c:if>
+					</div>
+        <h2 class="form-heading">Log in</h2>
 
         <div class="form-group ${error != null ? 'has-error' : ''}">
             <span>${message}</span>
@@ -40,8 +51,7 @@
             <input name="password" type="password" class="form-control" placeholder="Password" style="margin-bottom:20px"/>
             <span>${error}</span>
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
+			<button class="btn btn-lg btn-primary btn-block" type="submit" onclick="test()">Log In</button>
             
         </div>
 
@@ -52,5 +62,18 @@
 <!-- /container -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>
+<script>
+function test(){
+	console.log(document.querySelector('input[name="utype"]:checked').value)
+	var a = document.querySelector('input[name="utype"]:checked').value
+	if(a==="tacc"){
+		console.log("Calling Tacc")
+		location.href='/springipt/test1'
+	}else if(a==="db"){
+		console.log("CAlling DB")
+		location.href='/springipt/test2'
+	}
+}
+</script>
 </body>
 </html>

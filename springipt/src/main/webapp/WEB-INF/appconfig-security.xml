@@ -33,11 +33,11 @@
         
 		<form-login login-page="/login_normal" default-target-url="/welcome" authentication-failure-url="/login_normal?error" username-parameter="username" password-parameter="password"/>
 		
-		<form-login login-page="/login_tacc" default-target-url="/welcome" authentication-failure-url="/login_tacc?error" username-parameter="username" password-parameter="password"/>
+		
 		
         <csrf disabled="true"/>
-		<session-management invalid-session-url="/login">
-			<concurrency-control expired-url="/login" />
+		<session-management invalid-session-url="/entry">
+			<concurrency-control expired-url="/entry" />
 		</session-management>
 		<access-denied-handler error-page="/accessDenied"/>
     </http>

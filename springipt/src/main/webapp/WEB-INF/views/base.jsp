@@ -98,12 +98,7 @@
 			<li id='compile-tab'><a href="${contextPath}/comments">Message Board</a></li> 
 			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
 			<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li><li id="signup-tab"><a href="/springipt/registration" >Sign Up</a></li>
-    <li id="login-tab" ><a data-toggle="dropdown" href="#" aria-expanded="false">Log In
-                <span class="caret"></span></a>
-                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
-                <li><a href="/springipt/login_tacc">Log In as TACC User</a></li>
-                <li><a href="/springipt/login_normal">Log In as IPT portal user</a></li> 
-                </ul>
+    <li id="login-tab" ><a href="/springipt/login_normal" >Log In</a>
 	</li>
 			</c:if>
 		</ul>
