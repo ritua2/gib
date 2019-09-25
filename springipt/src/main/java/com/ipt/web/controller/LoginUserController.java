@@ -1,15 +1,18 @@
 package com.ipt.web.controller;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.File;
+
+
+import java.io.OutputStream;
+
+
 import java.lang.Exception;
 import java.net.*;
 import java.security.Principal;
@@ -33,11 +36,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ipt.web.model.LoginUser;
 import com.ipt.web.model.MappedUser;
+import com.ipt.web.model.UnconfirmedUser;
 import com.ipt.web.repository.UserRepository;
 import com.ipt.web.repository.MappingRepository;
+import com.ipt.web.repository.RoleRepository;
+import com.ipt.web.repository.UnconfirmedUserRepository;
+
 import com.ipt.web.service.LoginUserService;
+import com.ipt.web.service.UserService;
 import com.ipt.web.service.SecurityService;
 import com.ipt.web.validator.LoginUserValidator;
+import com.ipt.web.validator.UnconfirmedUserValidator;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import com.ipt.web.service.SesListener;
 
@@ -46,6 +55,9 @@ import com.ipt.web.service.SesListener;
 public class LoginUserController {
     @Autowired
     private LoginUserService loginUserService;
+	
+	@Autowired
+    private UserService userService;
 
     @Autowired
     private SecurityService securityService;
@@ -54,7 +66,16 @@ public class LoginUserController {
     private LoginUserValidator userValidator;
 	
 	@Autowired
+    private UnconfirmedUserValidator unconfirmedUserValidator;
+	
+	@Autowired
     private UserRepository userRepository;
+	
+	@Autowired
+    private RoleRepository roleRepository;
+	
+	@Autowired
+    private UnconfirmedUserRepository unconfirmedUserRepository;
 	
 	@Autowired
     private MappingRepository mappingRepository;
@@ -70,35 +91,40 @@ public class LoginUserController {
 
     @GetMapping(value = "/registration")
     public String registration(Model model) {
-        model.addAttribute("userForm", new LoginUser());
+        model.addAttribute("userForm", new UnconfirmedUser());
 
         return "registration";
     }
-
-    @PostMapping(value = "/registration")
-    public String registration(@ModelAttribute("userForm") LoginUser userForm, BindingResult bindingResult, Model model) {
+	
+	@PostMapping(value = "/registration")
+    public String registration(@ModelAttribute("userForm") UnconfirmedUser userForm, BindingResult bindingResult, Model model) {
 		
 		String jsonInputString=null, okey=null, baseIP=null;
 		BufferedReader reader=null;
 		URL url = null;
 		StringBuilder result = new StringBuilder();
 		
-        userValidator.validate(userForm, bindingResult);
-
+        
+		unconfirmedUserValidator.validate(userForm, bindingResult);
+		
+	
+		
         if (bindingResult.hasErrors()) {
             return "registration";
         }
 		
 		String token = UUID.randomUUID().toString();
-		userForm.setValidation_state("no");
+		
 		userForm.setValidation_key(token);
-		loginUserService.save(userForm);
+		
+		
+		userService.save(userForm);
 		
 		
 		final String confirmationUrl = "http://"+baseIP+":9090/springipt/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
 		
 			
-		String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl+"\\n"+"Please be logged in while clicking the link.";
+		String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
 		
 		
 		
@@ -170,31 +196,45 @@ public class LoginUserController {
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home").mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home/gib").mkdirs();
 
-        securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
+        
 
-        return "redirect:/welcome";
+        
+		return "redirect:/sentlink";
+    }
+	
+	@GetMapping(value = "/sentlink")
+    public String sentLink() {
+        
+        return "sentlink";
     }
 
 	@GetMapping(value = "/registrationConfirmation")
-    public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code, Authentication auth, HttpServletRequest request) {
+    public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code) {
 		
-		Boolean check=false;
-		check=null == auth.getPrincipal();
-		if(loginUserService.findByUsername(userName).getValidation_key().equals(code)){
-			LoginUser lu=loginUserService.findByUsername(userName);
-			lu.setValidation_state("verified");
-			loginUserService.save(lu);
-			if(!check)
-				return "registrationConfirmation1";
-			else
+		
+		
+		if(unconfirmedUserRepository.findByUsername(userName)!=null){
+			if(unconfirmedUserRepository.findByUsername(userName).getValidation_key().equals(code)){
+				LoginUser lu= new LoginUser();
+				lu.setId(unconfirmedUserRepository.findByUsername(userName).getId());
+				lu.setUsername(unconfirmedUserRepository.findByUsername(userName).getUsername());
+				lu.setEmail(unconfirmedUserRepository.findByUsername(userName).getEmail());
+				lu.setName(unconfirmedUserRepository.findByUsername(userName).getName());
+				lu.setInstitution(unconfirmedUserRepository.findByUsername(userName).getInstitution());
+				lu.setCountry(unconfirmedUserRepository.findByUsername(userName).getCountry());
+				lu.setPassword(unconfirmedUserRepository.findByUsername(userName).getPassword());
+				
+				lu.setRole(roleRepository.findOne(1L));
+				userRepository.save(lu);
+				unconfirmedUserRepository.delete(unconfirmedUserRepository.findByUsername(userName));
 				return "registrationConfirmation2";
-		}else{
-			loginUserService.delete(loginUserService.findByUsername(userName));
-			HttpSession session = request.getSession(true);
-			session.invalidate();
+			}else{
+				if(unconfirmedUserRepository.findByUsername(userName)!=null)
+					unconfirmedUserRepository.delete(unconfirmedUserRepository.findByUsername(userName));
+				return "registrationError";
+			}
+		}else
 			return "registrationError";
-		}
-		
     }
    
 	@RequestMapping(value = "/test1")
@@ -248,7 +288,21 @@ public class LoginUserController {
 		return "login_normal";
     }
 	
-	 
+	
+	
+	
+	 @GetMapping(value = "/perform_logout")
+    public String logout1(HttpServletRequest request) {
+		
+		if(request.getSession().getAttribute("mySessionAttribute")!=null)
+		com.ipt.web.service.WaitService.freeInstance(request.getUserPrincipal().getName(),request.getSession().getAttribute("mySessionAttribute").toString());
+		
+		HttpSession session = request.getSession(false);
+		session.invalidate();
+		
+		return "redirect:/login?logout";
+        
+    }
 	
 	@GetMapping(value = {"/", "/welcome"})
     public String welcome(HttpServletRequest request, Model model, HttpSession session, Principal principal, Authentication authentication) {
