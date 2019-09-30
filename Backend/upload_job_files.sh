@@ -11,8 +11,9 @@ rm tmp-store-results/orchestra_file
 rm tmp-store-results/manager_node_file
 rm tmp-store-results/User_file
 rm tmp-store-results/jobID_file
+rm tmp-store-results/upload_job_files.sh
 
-rm tmp-store-results/tmp-store-results
+rm -rf tmp-store-results/tmp-store-results
 
 
 cd tmp-store-results
@@ -27,6 +28,11 @@ okey=$(cat ../orchestra_file)
 manager_node=$(cat ../manager_node_file)
 username=$(cat ../User_file)
 jobID=$(cat ../jobID_file)
+
+
+# For usernames with spaces, transforms the space into the html code
+username=${username// /%20}
+
 
 curl -F file=@results_file.tar.gz http://"$manager_node":5000/api/jobs/upload_results/user/"$username"/"$jobID"/key="$okey"
 
