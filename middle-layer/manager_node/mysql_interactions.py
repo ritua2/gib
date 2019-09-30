@@ -77,6 +77,36 @@ def jobs_with_status(max_jobs_wanted, sc_system, status="Received by server"):
 
 
 
+# Returns the status of a job, assumes said job exists
+def status_of_job(job_ID):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    # Ensures that the job ID exists
+    query = ("SELECT COUNT(*) FROM jobs WHERE id=%s")
+    cursor.execute(query, (job_ID, ))
+
+    counter = next(cursor)
+
+    if counter[0] == 0:
+        return ["Job ID "+job_ID+" does not exist", 1]
+
+
+    query = ("SELECT status FROM jobs WHERE id=%s")
+    cursor.execute(query, (job_ID, ))
+
+    S = next(cursor)
+
+    springIPT_db.commit()
+    cursor.close()
+    springIPT_db.close()
+
+    return [S[0], 0]
+
+
+
 # Given a list of job IDs, returns a list of their directory locations
 # job_ids (arr) (str)
 def directory_locations_from_job_ids(job_ids):

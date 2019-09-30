@@ -17,6 +17,7 @@ import requests
 import signal
 import subprocess
 import tarfile
+from urllib.parse import unquote
 import uuid
 from werkzeug.utils import secure_filename
 import zipfile
@@ -1276,6 +1277,35 @@ def status_update():
 
 
 
+# Returns the status of a job
+@app.route("/api/jobs/status", methods=['POST'])
+def get_job_status():
+
+    if not request.is_json:
+        return "POST parameters could not be parsed"
+
+    ppr = request.get_json()
+    ppr_keys = ppr.keys()
+    check = l2_contains_l1(["key", "job_ID"], ppr_keys)
+
+    if check:
+        return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
+
+    key = ppr["key"]
+    job_ID = ppr["job_ID"]
+
+    if not valid_adm_passwd(key):
+        return "INVALID: Access not allowed"
+
+    [job_status, error] = mints.status_of_job(job_ID)
+
+    if error:
+        return "INVALID, "+job_status
+
+    return job_status
+
+
+
 # Updates the execution time of a job
 @app.route("/api/jobs/status/update_execution_time", methods=['POST'])
 def update_execution_time():
@@ -1313,10 +1343,12 @@ def upload_results(username, job_ID, key):
     if not valid_adm_passwd(key):
         return "INVALID: Access not allowed"
 
+    username = unquote(username)
+
     # Checks if the user directory exists
     GREYFISH_DIR = "/greyfish/sandbox/DIR_"+username+"/"
     if not os.path.isdir(GREYFISH_DIR):
-        return "INVALID: User does exist"
+        return "INVALID: User does not exist"
 
     user_results_dir = GREYFISH_DIR+"results/"
     if not os.path.isdir(user_results_dir):
