@@ -5,25 +5,9 @@
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="../base.jsp" />
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-    <title>Comments</title>
 
-    <!--<link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
-    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
-
-</head>
-<body>
-
-	<div class="container">
+	<div class="container" style="padding-left: 80px;padding-right: 130px">
 
 		<c:if test="${not empty msg}">
 			<div class="alert alert-${css} alert-dismissible" role="alert">
@@ -93,6 +77,5 @@
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>
 	
 
-</body>
-</html>
+
 <jsp:include page="../footer.jsp" />

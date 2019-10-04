@@ -1,23 +1,35 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <!-- Footer -->
   <footer id="myFooter">
         
-        <div class="second-bar">
-           <div class="container">
-                <h2 class="logo"><a href="https://portal.tacc.utexas.edu/"> TACC </a>|<a href="/springipt"> IPT </a></h2>
+        
+           
+		   <div class="container">
+
+<div class="container-fluid" style="position: relative; z-index: 5;  
+margin:-35px 0px 0px 0px; 
+padding:45px 76px 35px 76px; 
+text-align: left; 
+font-size: 1.2em;
+filter: alpha(opacity=50);
+border-radius: 0px;">
+<div class="col-md-6" style="margin-left: -30px;">
+				
+					<h2 class="logo"><a href="https://portal.tacc.utexas.edu/"> TACC </a>|<a href="/springipt"> IPT </a></h2>
                 <div class="social-icons">
-                    <br />
-                    <p>&copy; TACC | IPT 2018</p>
-                    <!--<a href="#" class="twitter"><i class="fa fa-twitter"></i></a>
-                    <a href="#" class="facebook"><i class="fa fa-facebook"></i></a>
-                    <a href="#" class="google"><i class="fa fa-google-plus"></i></a>-->
-                </div>
-            </div>
-        </div>
+					<p>
+					&copy;TACC | IPT 2018 &nbsp; &nbsp;
+					<a href="https://twitter.com/TACC" class="twitter"><i class="fa fa-twitter"></i></a> &nbsp;
+					<a href="https://www.facebook.com/tacc.utexas/" class="facebook"><i class="fa fa-facebook"></i></a>   
+					</p>       
+				</div>
+				</div>
+			</div>
+    </div>
+            
   </footer>
 <!-- End of footer -->
 
@@ -30,21 +42,5 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 
-    <!-- For login.jsp -->
-    <script>
-        $( document ).ready(function() {
-          $("#forgot_password_form").hide();
-        });
-
-        $(".forgot_password_section").click(function(){
-          $("#forgot_password_form").show();
-          $("#login_form").hide();
-        });
-
-        $(".login_section").click(function(){
-          $("#forgot_password_form").hide();
-          $("#login_form").show();
-        });
-    </script>
 </body>
 </html>

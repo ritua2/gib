@@ -4,14 +4,19 @@
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
-<!DOCTYPE html>
-<html lang="en">
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="base.jsp" />
 
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
 
-<body>
 
 	<div class="container">
+		<div class="container-fluid" style=" z-index: 5;  
+margin:-35px 0px 0px 0px; 
+padding:45px 415px 35px 65px; 
+text-align: left; 
+font-size: 1.2em; 
+border-radius: 0px;">
 
 		<c:if test="${not empty msg}">
 			<div class="alert alert-${css} alert-dismissible" role="alert">
@@ -60,7 +65,8 @@
 		</table>
 
 	</div>
-<br/>
+	</div>
+	<br/>
 <br/>
 <br/>
 <br/>
@@ -71,6 +77,3 @@
 <br/>
 <br/>
 	<jsp:include page="footer.jsp" />
-
-</body>
-</html>
