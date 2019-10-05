@@ -15,7 +15,6 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -99,6 +98,8 @@ public class UploadController {
 	//private static String UPLOADED_FOLDER = "/home/term/";
 	private static String UPLOADED_FOLDER = "/home/greyfish/users/sandbox/DIR_";
 	private final Logger logger = LoggerFactory.getLogger(UploadController.class);
+	private String loggedin_user=null;
+	
 	
 	private File file = new File("Output.txt");
 
@@ -116,7 +117,10 @@ public class UploadController {
 				BufferedReader reader=null;
 				URL url = null;
 				StringBuilder result = new StringBuilder();
-				Principal principal = request.getUserPrincipal();
+				loggedin_user=request.getUserPrincipal().getName();
+				
+				if(loggedin_user.contains(" "))
+					loggedin_user=loggedin_user.replace(" ","_");
 				
 				
 				try {
@@ -147,13 +151,14 @@ public class UploadController {
 			try {
 
 				byte[] bytes = file.getBytes();
-				Path path = Paths.get(UPLOADED_FOLDER +principal.getName()+"/home/gib/home/gib/"+ file.getOriginalFilename());
+				
+				Path path = Paths.get(UPLOADED_FOLDER +loggedin_user+"/home/gib/home/gib/"+ file.getOriginalFilename());
 				Files.write(path, bytes);
 				
 				//set the JSON 
 				jsonInputString = "{\"key\":\""+okey+"\",\"filepath\":\""+"home/gib/home/gib/"+ file.getOriginalFilename().toString()+"\", \"IP\":\""+request.getSession().getAttribute("mySessionAttribute").toString().substring(0,request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":"))+"\",\"Port\":\""+request.getSession().getAttribute("mySessionAttribute").toString().substring(request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":")+1)+"\"}";
 				
-				url = new URL("http://"+baseIP+":5000/api/greyfish/users/"+request.getUserPrincipal().getName()+"/upload_file");
+				url = new URL("http://"+baseIP+":5000/api/greyfish/users/"+loggedin_user+"/upload_file");
 				
 				Process p1 = Runtime.getRuntime().exec("chown -R 1001:1001 /home/term");
 
@@ -188,7 +193,7 @@ public class UploadController {
 			}
 			StringJoiner sj = new StringJoiner(" , ");
 			
-			Path path1 = Paths.get(UPLOADED_FOLDER + principal.getName()+"/home/gib/home/gib/"+map.get(files[0].getOriginalFilename()));
+			Path path1 = Paths.get(UPLOADED_FOLDER + loggedin_user+"/home/gib/home/gib/"+map.get(files[0].getOriginalFilename()));
 						
 			try{			
 				dirPath = path1.toString().substring(ordinalIndexOf(path1.toString(), "/", 9)+1, ordinalIndexOf(path1.toString(), "/", 10));
@@ -197,7 +202,7 @@ public class UploadController {
 				//set the JSON
 				jsonInputString = "{\"key\":\""+okey+"\",\"basepath\":\""+"home/gib/home/gib\", \"IP\":\""+request.getSession().getAttribute("mySessionAttribute").toString().substring(0,request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":"))+"\",\"Port\":\""+request.getSession().getAttribute("mySessionAttribute").toString().substring(request.getSession().getAttribute("mySessionAttribute").toString().indexOf(":")+1)+"\", \"dirname\":\""+dirPath+"\" }";
 			
-				url = new URL("http://"+baseIP+":5000/api/greyfish/users/"+request.getUserPrincipal().getName()+"/upload_dir");
+				url = new URL("http://"+baseIP+":5000/api/greyfish/users/"+loggedin_user+"/upload_dir");
 				
 			} /*catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -220,7 +225,7 @@ public class UploadController {
 				try {
 					byte[] bytes = f.getBytes();
 					System.out.println("File PATH GETNAME =" + f.getName() + " Original path Name" + f.getOriginalFilename());
-					Path path = Paths.get(UPLOADED_FOLDER + principal.getName()+"/home/gib/home/gib/"+map.get(f.getOriginalFilename()));
+					Path path = Paths.get(UPLOADED_FOLDER + loggedin_user+"/home/gib/home/gib/"+map.get(f.getOriginalFilename()));
 					Path parentDir = path.getParent();
 					if (!Files.exists(parentDir))
 						Files.createDirectories(parentDir);
@@ -264,7 +269,7 @@ public class UploadController {
 			fileWriter.write("\n");
 			fileWriter.write("URL: "+ url.toString());
 			fileWriter.write("\n");
-			fileWriter.write(request.getUserPrincipal().getName());
+			fileWriter.write("User: "+loggedin_user);
 			fileWriter.write("\n");
 			fileWriter.write(jsonInputString);
 			fileWriter.write("\n");
@@ -321,10 +326,12 @@ public class UploadController {
 		URL url = null;
 		String jsonInputString=null, key=null;
 		StringBuilder result = new StringBuilder();
+		loggedin_user=request.getUserPrincipal().getName();
+				
+		if(loggedin_user.contains(" "))
+			loggedin_user=loggedin_user.replace(" ","_");
 		
-		System.out.println("Uploaded folder path" + UPLOADED_FOLDER);
 		
-		Principal principal = request.getUserPrincipal();
 		
 		if(session.getAttribute("mySessionAttribute")!=null){
 		try{
@@ -375,7 +382,7 @@ public class UploadController {
 		}
 		}
 		Map<String, String> listofpath = new HashMap<String, String>();
-		walk(UPLOADED_FOLDER + principal.getName()+"/home/gib/home/gib/", listofpath);
+		walk(UPLOADED_FOLDER + loggedin_user+"/home/gib/home/gib/", listofpath);
 		
 		try{
 			FileWriter fileWriter = new FileWriter(file);
