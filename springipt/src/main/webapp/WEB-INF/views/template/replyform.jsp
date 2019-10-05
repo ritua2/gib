@@ -4,27 +4,12 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="../base.jsp" />
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Create reply</title>
-
-    <!--<link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
-    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
-
-</head>
-<body>
 
 
-<div class="container">
+
+<div class="container" style="padding-left: 80px;padding-right: 630px">
 
 	<c:choose>
 		<c:when test="${replyForm['new']}">
@@ -95,6 +80,5 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>
-</body>
-</html>
+
 <jsp:include page="../footer.jsp" />

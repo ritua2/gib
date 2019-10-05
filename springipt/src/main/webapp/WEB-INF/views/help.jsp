@@ -4,33 +4,15 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="base.jsp" />
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Need Help?</title>
-
-  <!-- <link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
-    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
-
-</head>
-
-<body>
 <!-- Help Tab -->
         <!--Section header-->
-		<div class="container">	
+		<div class="container" style="padding-left: 80px;padding-right: 130px">	
         <h2>Just Getting Started with IPT?</h2>
         <!--Links-->
         
 
-        <p>Interactive Parallelization Tool (IPT) is a high-level tool for transforming serial C/C++ applications
+        <p style="text-align: justify; text-justify: inter-word;">Interactive Parallelization Tool (IPT) is a high-level tool for transforming serial C/C++ applications
           into their parallel variants. The parallel programming models that are currently supported by IPT are:
           MPI, OpenMP, CUDA, and Hybrid Programming models. The end-users of IPT must have an understanding
           of the basic concepts involved in parallel programming (e.g., data distribution and data gathering).
@@ -64,6 +46,5 @@
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>  
 
-</body>
-</html>
+
  <jsp:include page="footer.jsp" />

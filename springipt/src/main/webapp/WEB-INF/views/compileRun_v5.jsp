@@ -4,20 +4,9 @@
 	<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="base.jsp" />
-<html>
-<head>
-<meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
 
-<title>Compile & Run</title>
-<!-- <link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
-    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
 
-<style>
+	<style>
 .reveal-if-active {
 	opacity: 1;
 	max-height: 0;
@@ -25,7 +14,7 @@
 	font-size: 16px;
 	transform: scale(0.8);
 	transition: 0.5s;
-	margin-left: -20px;
+	margin-left: -100px;
 }
 
 .reveal-if-active label {
@@ -45,14 +34,15 @@ input[type="radio"]:checked ~ .reveal-if-active {
 	overflow: visible;
 }
 </style>
-</head>
-<body>
-	
-
-	
-	<div class="container" style="width: 60%">
+	<div class="container" >
+		<div class="container-fluid" style=" z-index: 5;  
+margin:-35px 0px 0px 0px; 
+padding:45px 415px 35px 65px; 
+text-align: left; 
+font-size: 1.2em; 
+border-radius: 0px;">
 		
-		<p>This form will guide you towards composing the command for
+		<p style="text-align: justify; text-justify: inter-word;  width: 105%;">This form will guide you towards composing the command for
 			compiling your serial or parallel programs on TACC/XSEDE resources.
 			Please upload all the files that are external to your program but are
 			required for compiling it successfully, such as, header files and
@@ -69,13 +59,12 @@ input[type="radio"]:checked ~ .reveal-if-active {
 					<input type="hidden" name="${_csrf.parameterName}"
 						value="${_csrf.token}" />
 					<div class="form-group">
-						<label for="system">*System:</label> <select class="form-control"
-							id="system" name="system"  onchange="updateQueues()" style="width: 60%">
+						<table><tbody><tr><td><label for="system">*System: &nbsp; &nbsp;</label> </td><td style="width: 70%"><select class="form-control" id="system" name="system" onchange="updateQueues()">
 							<option value="comet">Comet</option>
 							<option value="stampede2">Stampede2</option>
 							<option value="Lonestar5">LoneStar5</option>
 							 
-						</select>
+						</select></td></tr></tbody></table>
 
 						<c:if test="system_error">
 							<div class="error">
@@ -84,25 +73,9 @@ input[type="radio"]:checked ~ .reveal-if-active {
 						</c:if>
 					</div>
 					
-					<div class="form-group" id="ptype">
+					<div class="form-group" id="ptype" style="width: 150%;">
 						<label for="system">Program Type:</label> &nbsp;&nbsp;&nbsp;<input type="radio" name="ptype" value="gcc" checked="" 
-						title="
-							Some sample commands to compile are as follows:
-
-							Serial Programs (C/C++)
-							gcc -o executable_name program_name.c
-							gcc -o executable_name program_name.c helper_file.c
-							gcc -o executable_name program_name.c -lm ; #use \"-lm\" if you have any math functions
-
-							g++ -o executable_name program_name.cc
-							g++ -o executable_name program_name.cc helper_file.cc
-							g++ -o executable_name program_name.cc -lm ; #use \"-lm\" if you have any math functions
-
-							make; # use this if you provided a Makefile
-
-							chmod +x compile.sh; compile.sh; # use this if your commands are in a script that has been uploaded too
-						
-								"> Serial(C/C++) 
+						> Serial(C/C++) 
 						<span style="padding-left: 1em"><input type="radio" name="ptype" value="mpi"> MPI(C/C++)  <span style="padding-left: 1em"><input type="radio" name="ptype" value="openmp"> OpenMP(C/C++)</span>  <span style="padding-left: 1em"><input type="radio" name="ptype" value="cuda"> CUDA(C/C++)</span> <br> 
 					</span><c:if
 								test="ptype_error">
@@ -112,10 +85,10 @@ input[type="radio"]:checked ~ .reveal-if-active {
 							</c:if>
 					</div>
 						
-						<div class="container" style="margin-left: -20px">
-						<table style="width: 80%; table-layout: fixed;">
+						<div>
+						<table style="width: 130%; table-layout: fixed;">
 							<tbody><tr>
-    <td style="width: 15%"><div class="form-group" id="ops0"><label for="ops">Select Operation:&nbsp;&nbsp;&nbsp;</label></div></td>
+    <td ><div class="form-group" id="ops0" ><label for="ops">Select Operation:</label></div></td>
 								<td>
 									<div class="form-group" id="ops" name="ops">
 						
@@ -251,14 +224,28 @@ input[type="radio"]:checked ~ .reveal-if-active {
 					<div class="form-group" id="fileselect">
 
 						<label for="binary">Provide a zip file containing all the
-							related files.</label>
-						<br><INPUT TYPE="radio" NAME="files" VALUE="wetty"
-							CHECKED> From Wetty<select id=fileToUpload
-							name="fileToUpload" class="form-control" style="width: 80%">
-							<option value="">--Select--</option>
-						</select> <BR> <span ><INPUT
-							TYPE="radio" NAME="files" VALUE="local"> From Local
-							System<input type="file" id="localFiles" name="localFiles" class="form-control" style="width: 80%"/></span>
+							related files: </label>
+						<br>
+						<table>
+        <tbody><tr>
+            <td>
+                <input type="radio" name="files" value="wetty" checked=""> From Wetty
+            </td>
+            <td style="width: 70%">
+                <select id="fileToUpload" name="fileToUpload" class="form-control" style="width: 80%">
+                    <option value="">--Select--</option>
+				</select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="radio" name="files" value="local"> From Local System &nbsp;&nbsp;
+            </td>
+            <td>
+                <input type="file" id="localFiles" name="localFiles" class="form-control" style="width: 80%">
+            </td>
+        </tr>
+    </tbody></table>
 						<c:if test="driver_error">
 							<div class="error">
 								<p>There was an error: ${ driver_error }</p>
@@ -283,6 +270,7 @@ input[type="radio"]:checked ~ .reveal-if-active {
 
 	<br />
 	<br />
+	</div>
 	</div>
 	<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
 	<script>
@@ -564,8 +552,7 @@ function check(value){
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>
-</body>
-</html>
+
 <jsp:include page="footer.jsp" />
 
 

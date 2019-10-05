@@ -19,11 +19,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src='https://www.google.com/recaptcha/api.js'></script>
 </head>
-<%-- 
-<spring:url value="/" var="urlHome" />
-<spring:url value="terminal" var="urlTerminal" />
- --%>
-<body >
+
+
+<body style="background: #e9ebf0">
 	<!-- Navbar -->
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
@@ -58,6 +56,7 @@
 	<div class="container">
 		<ul class="nav nav-tabs">
 			<c:if test="${pageContext.request.userPrincipal.name != null}">
+			<li>&emsp;&emsp;&emsp;&nbsp;&nbsp;</li>
 			<c:if test="${sessionScope.is_admin == 'true'}">
 			<li id='admin-tab'><a href="${contextPath}/admin">Admin</a></li>
 			</c:if>
@@ -84,7 +83,7 @@
 			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
 			</c:if>
 			<c:if test="${pageContext.request.userPrincipal.name == null}">
-			&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+			<li>&emsp;&emsp;&emsp;&nbsp;&nbsp;</li>
 
 			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 <span class="caret"></span></a>
@@ -122,32 +121,5 @@
 	<!-- Latest compiled and minified JavaScript -->
 	<script
 		src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-	<script>
-		var link_was_clicked = false;
-document.addEventListener("click", function(e) {
-  if (e.target.nodeName.toLowerCase() === 'a') {
-    link_was_clicked = true;
-  }
-}, true);
-
-window.onbeforeunload = function(event) {
-	if(link_was_clicked===true){
-	console.log("abc1");
-	//event.returnValue=null;
-	link_was_clicked = false;
-	}else{
-	console.log("abc2");
-    //event.returnValue = "Write something clever here..";
-	//return "";
-	
-	}
-	
-};
-	</script>
-		
 
 
-
-
-</body>
-</html>
