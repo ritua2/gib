@@ -25,6 +25,8 @@ services:
             - MYSQL_DATABASE
             - MYSQL_USER
             - MYSQL_PASSWORD
+            - SENDER_EMAIL
+            - SENDER_EMAIL_PASSWORD
         command: "tail -F anything"
 
 
