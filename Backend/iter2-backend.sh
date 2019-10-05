@@ -3,9 +3,6 @@
 ###############
 # BASICS
 #
-# Temporary file containing the most recent changes to gateway-backend.sh
-# Not to be used
-#
 # Assumptions: Download and processing is fast enough to never be in a situation where two cron jobs are executing at the same time
 ###############
 

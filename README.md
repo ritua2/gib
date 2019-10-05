@@ -166,3 +166,33 @@ docker kill $(docker ps -aq) && docker rm $(docker ps -aq)
 
 
 
+* **Receiving Jobs**
+
+GIB will run user jobs in a supercomputer with the Slurm scheduler. In order to take advantage of this, execute the following commands from the supercomputer
+to set up the necessary directories and environmental variables
+```bash
+git clone https://github.com/ritua2/gib
+cd Backend
+
+# Mofidy the .env file with data corresponding to GIB, supercomputer user information (username and allocation name), etc.
+# sc_server: Stampede2/Lonestar5/Comet
+# execution_directory: Directory in which jobs are run and temporarily stored
+vi .env
+
+chmod +x iter2-backend.sh
+chmod +x delete_run_jobs.sh
+```
+
+Requests available jobs from the server (may also run as a cron job):
+```bash
+./iter2-backend.sh
+```
+
+Delete data corresponding to jobs already run (may be run as a cron job):
+```bash
+./delete_run_jobs.sh
+```
+
+
+NB: As of right now, GIB only supports Stampede2, Lonestar5 (Texas Advanced Computing Center), and Comet (San Diego Supercomputer Center).
+
