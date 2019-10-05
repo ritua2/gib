@@ -24,7 +24,8 @@ COPY checksums.py       /grey/checksums.py
 # Bash for convenience
 RUN apk update && apk add bash curl openrc openssh && mkdir -p /greyfish/sandbox &&\
     pip3 install gunicorn Flask redis requests &&\
-    chmod +x /grey/new_user.py /grey/grey_regular.py /grey/gget_all.py /grey/push_all.py /grey/API_Daemon.sh /grey/admin.py
+    chmod +x /grey/new_user.py /grey/grey_regular.py /grey/gget_all.py /grey/push_all.py /grey/API_Daemon.sh /grey/admin.py &&\
+    mkdir -p /greyfish/sandbox/DIR_commonuser/jobs_left
 
 
 WORKDIR /greyfish
