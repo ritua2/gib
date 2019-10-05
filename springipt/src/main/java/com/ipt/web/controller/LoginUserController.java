@@ -113,6 +113,22 @@ public class LoginUserController {
             return "registration";
         }
 		
+		try {
+					File envar = new File("/usr/local/tomcat/webapps/envar.txt");
+					reader = new BufferedReader(new FileReader(envar));
+					String line = reader.readLine();
+					while (line != null) {
+						if(line.contains("orchestra_key"))
+							okey=line.substring(line.indexOf("=")+1);
+						else if(line.contains("URL_BASE"))
+							baseIP=line.substring(line.indexOf("=")+1);
+						line = reader.readLine();
+					}
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 		String token = UUID.randomUUID().toString();
 		
 		userForm.setValidation_key(token);
@@ -316,8 +332,14 @@ public class LoginUserController {
 			abc=request.isUserInRole("ROLE_ADMIN");
 			session.setAttribute("is_admin", abc.toString());
 		if(authentication.getPrincipal().toString().contains("Not granted any authorities")){
-			if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl"))
+			if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl")){
 				is_ldap=true;
+				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")).mkdirs();
+				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home").mkdirs();
+				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib").mkdirs();
+				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home").mkdirs();
+				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home/gib").mkdirs();
+			}				
 		}
 		session.setAttribute("is_ldap", is_ldap.toString());
 		
