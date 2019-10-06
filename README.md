@@ -87,6 +87,11 @@ exit
 # Start springIPT and MySQL containers
 cd ../springipt
 
+# Edit DB settings
+vi initdb/start.sql
+
+# Replace original <db_user> with value for environment variable: MYSQL_USER and <DB user's Password> with value for environment variable:  MYSQL_PASSWORD
+
 # Edit LDAP settings
 vi src/main/webapp/WEB-INF/appconfig-security.xml
 
