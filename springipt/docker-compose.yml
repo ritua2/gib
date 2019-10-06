@@ -18,8 +18,7 @@ services:
       - myvol:/home/term
       - ./ssh/id_rsa:/usr/local/tomcat/.ssh/PrivateKey.ppk
       - greyfish:/home/greyfish/users
-       - ./keystore:/usr/local/tomcat/keystore
-      - ./server.xml:/usr/local/tomcat/conf/server.xml
+      
 
 
   mysql_springipt:

@@ -29,17 +29,28 @@ docker volume create --name=greyfish
 cd gib/middle-layer
 
 vi .env
-# Set the following in the .env file
+# Set the values of the following variables as per your choice in the .env file.
+
+orchestra_key=orchestra
+URL_BASE=127.0.0.1
+REDIS_AUTH=redpassword
 MYSQL_ROOT_PASSWORD=Root_Password
 MYSQL_USER=Create_User_Name
 MYSQL_PASSWORD=Your_password
 MYSQL_SERVER=IP_ADDRESS
+greyfish_key=greyfish
+SENDER_EMAIL=a@example.com
+SENDER_EMAIL_PASSWORD=a1
+
+
 
 # Copy the environment variables file to springIPT directory
 cp .env ../springipt/envar.txt
 cp .env ../springipt/.env
 
-# Modify 'IPaddress' and 'portnumber' to their actual values in the .env files above
+# Only change the values of <IPaddress> <portnumber>(generally 6603) and <databasename>(same to MYSQL_DATABASE variable) in the .env files above.
+
+#MYSQL_CONN_URL=jdbc:mysql://<IPaddress>:<portnumber>/<databasename>?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL
 
 
 # Modify the springIPT variables to be the same as above, including the VM IP
@@ -75,8 +86,62 @@ exit
 
 # Start springIPT and MySQL containers
 cd ../springipt
+
+# Edit LDAP settings
+vi src/main/webapp/WEB-INF/appconfig-security.xml
+
+# Edit tag <authentication-manager>
+# Edit "user-dn-pattern" attribute of tag <ldap-authentication-provider>
+# Edit "url", "manager-dn" and "password" attributes of tag <ldap-server> with correct LDAP server IP, port and dn pattern
+
+# Install Maven if not already installed, then execute maven build 
 mvn clean package
+
 # if rebuilding: docker kill tomcat_springipt; docker rm tomcat_springipt
+docker-compose up -d --build
+```
+
+* **Installing secure version of SpringIPT**
+
+```bash
+
+#Enter IPT container
+docker exec -it tomcat_springipt bash
+
+#Generate Keystore, change the variable <keystore> as per your choice
+$JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA -keystore <keystore>
+
+#Create password for keystore and enter the details as required.
+#Verify the deatils and enter 'yes'
+#Press "Enter/Return" when asked for password again
+
+#Exit the container
+exit
+
+#Pull generated keystore file from container
+docker cp tomcat_springipt:/usr/local/tomcat/<keystore> .
+
+#Change server.xml
+vi server.xml
+
+#Change the following values: <path and name of keystore file>, <password>(with password of generated keystore file)
+<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+               maxThreads="150" scheme="https" secure="true"
+               clientAuth="false" sslProtocol="TLS" 
+	       keystoreFile="/usr/local/tomcat/<path and name of keystore file>"
+	       keystorePass="<password>" />
+		   
+#Edit docker-compose.yml file to add keystore file and edited server.xml
+vi docker-compose.yml
+
+#Add the following lines after line #20, take care of indentation.
+- ./keystore:/usr/local/tomcat/keystore
+- ./server.xml:/usr/local/tomcat/conf/server.xml
+
+# Bring down the running containers
+docker-compose down -v
+
+# Rebuild the containers
 docker-compose up -d --build
 ```
 

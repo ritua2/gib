@@ -52,7 +52,7 @@
         </authentication-provider>
     </authentication-manager>
 
-	<ldap-server id="ldapServer" url="ldap://<serverip>:<server port>/<dc=ip1, dc=ip2, dc=ip3, dc=ip4"
+	<ldap-server id="ldapServer" url="ldap://<serverip>:<server port>/<dc=octet1, dc=octet2, dc=octet3, dc=octet4"
 		manager-dn="<dn pattern>" manager-password="password"/>
 		
 	
