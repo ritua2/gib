@@ -80,4 +80,9 @@ chmod 700 -R /gib/global/
 
 
 cd /gib/wetty
-node index.js --bypasshelmet
+
+
+# Creates the SSL files
+yes "" | openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 30000 -nodes
+
+node index.js --bypasshelmet --sslkey key.pem --sslcert cert.pem
