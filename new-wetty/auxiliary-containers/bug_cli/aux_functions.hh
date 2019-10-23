@@ -84,7 +84,46 @@ string read_directory(const string& base_path, string &final_string)
 
 
 // Same as above, but without checking subdirectories
-string read_dir_no_subs(const string& base_path, string &final_string)
+string read_dir_no_subs(const string& base_path, string &final_string, bool show_hidden_files)
+{
+    DIR* dirp = opendir(base_path.c_str());
+    struct dirent * dp;
+    while ((dp = readdir(dirp)) != NULL) {
+
+        // Prints the complete name of the directory
+        string file_name =  dp->d_name;
+
+        string complete_path = base_path;
+        complete_path.append(file_name);
+
+        // Ignores current and previous directories
+        if ((file_name == ".") || (file_name == "..")){
+            continue;
+        }
+
+        if ( (! show_hidden_files) && (file_name.at(0) == '.')) {
+            continue;
+        }
+
+
+        if (is_dir(complete_path.c_str())){
+            final_string.append(complete_path);
+            final_string.append("/\n");
+        } else {
+            // Adds to the string
+            final_string.append(complete_path);
+            final_string.append("\n");
+        }
+
+    }
+    closedir(dirp);
+    return final_string;
+}
+
+
+
+// Gets directories from another directory without checking subdirectories
+string read_dirs_from_dir_no_subs(const string& base_path, string &final_string)
 {
     DIR* dirp = opendir(base_path.c_str());
     struct dirent * dp;
@@ -104,16 +143,12 @@ string read_dir_no_subs(const string& base_path, string &final_string)
         if (is_dir(complete_path.c_str())){
             final_string.append(complete_path);
             final_string.append("/\n");
-        } else {
-            // Adds to the string
-            final_string.append(complete_path);
-            final_string.append("\n");
-        }
-
+        } 
     }
     closedir(dirp);
     return final_string;
 }
+
 
 
 // Given a string and a token, it returns a vector of strings split by said token
@@ -290,7 +325,3 @@ void print_table_2str(string title_left, string title_right, string title_left_c
     cout << string(201, '-') << "\n";
 
 }
-
-
-
-

@@ -22,14 +22,15 @@ int main(){
     string NCNC = "\033[0m"; // No color
 
     // Gets the list of directories
-    string bc_path = "Bug_Collection/";
+    string bc_path = "/shared/data/Bug_Collection/";
     string empty_string = "";
     string newline_str = "\n";
-    string bug_directories = read_dir_no_subs(bc_path, empty_string);
+    string bug_directories = read_dirs_from_dir_no_subs(bc_path, empty_string);
     // Removes the last character
     bug_directories.pop_back();
 
     vector <string> main_bug_categories = split(bug_directories, newline_str);
+
 
     // Prompts the user to select the appropriate option
     std::printf("Select the parallel implementation:\n");
@@ -63,7 +64,7 @@ int main(){
     // Shows the user the list of bugs
     string user_dir_program = main_bug_categories[user_program_selection];
     string empty2 = "";
-    string bug_list = read_dir_no_subs(user_dir_program, empty2);
+    string bug_list = read_dir_no_subs(user_dir_program, empty2, false);
     bug_list.pop_back();
 
     vector <string> user_bug_vec = split(bug_list, newline_str);
@@ -108,7 +109,7 @@ int main(){
 
     // Buggy file is always named buggy_version.*
     string empty3 = "";
-    string all_files_within_bug = read_dir_no_subs(bug_dir, empty3);
+    string all_files_within_bug = read_dir_no_subs(bug_dir, empty3, false);
     all_files_within_bug.pop_back();
     vector <string> bug_files = split(all_files_within_bug, newline_str);
 

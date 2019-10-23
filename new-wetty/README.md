@@ -9,6 +9,8 @@ Build the wetty and ssh server images
 docker build -f Dockerfile.ssh -t easy_wetty/ssh:latest .
 # Wetty image
 docker build -f Dockerfile.wetty -t easy_wetty/standalone:latest .
+# Auxiliary bug DB CLI
+docker build -t easy_wetty/bud_db:cli  auxiliary-containers/bug_cli
 ```
 
 
@@ -18,8 +20,14 @@ docker build -f Dockerfile.wetty -t easy_wetty/standalone:latest .
 # Create shared volume for rsync
 docker volume create --name=rsync_data
 
-# Start image
-docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 4646:22 -v rsync_data:/home/rsync_user/data easy_wetty/ssh
+# Create shared volume for auxiliary containers
+docker volume create --name=auxiliary
+
+# Start wetty
+docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 4646:22 -v rsync_data:/home/rsync_user/data \
+	-v auxiliary:/shared easy_wetty/ssh
+# Adds the bug DB CLI
+docker run -d -v auxiliary:/shared easy_wetty/bud_db:cli tail -f /dev/null
 ```
 
 
@@ -37,7 +45,8 @@ conductor="example.com" orchestra_key="orchestra" docker-compose up -d
 Or, if using multiple containers:
 
 ```bash
-docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data easy_wetty/standalone main_daemon
+docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data \
+	-v auxiliary:/shared easy_wetty/standalone main_daemon
 ```
 
 

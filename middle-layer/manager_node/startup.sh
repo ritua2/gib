@@ -9,6 +9,9 @@ if [ -f "/etc/wait.key" ]; then
     # Gets the key
     wait_key=$(head -n 1 "$wait_key_file")
 
+    # Provides the path to the bug DB CLI
+    alias bug_db_cli=/shared/bug_db_cli
+
     # Gets the username
     export USER=$(head -2 "$wait_key_file" | tail -1)
 
@@ -44,6 +47,9 @@ else
        exit
     fi
 
+    # Provides the path to the bug DB CLI
+    alias bug_db_cli=/shared/bug_db_cli
+
     # Gets the greyfish server location
     export GS=$(curl -s http://$MANAGER_NODE:5000/api/greyfish/location)
 
@@ -58,7 +64,6 @@ else
     # Checks that the previous data is actually tarred
     if { tar ztf "summary.tar.gz" || tar tf "summary.tar.gz"; } >/dev/null 2>&1; then
        tar -xzf summary.tar.gz
-       mv /home/gib/home/gib/home/gib/* /home/gib
        rm -rf /home/gib/home
     fi
 
