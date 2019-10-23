@@ -41,6 +41,16 @@ padding:45px 415px 35px 65px;
 text-align: left; 
 font-size: 1.2em; 
 border-radius: 0px;">
+
+		<c:if test="${not empty alert}">
+			<div class="alert alert-${css} alert-dismissible" role="alert">
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<strong>${alert}</strong>
+			</div>
+		</c:if>
 		
 		<p style="text-align: justify; text-justify: inter-word;  width: 105%;">This form will guide you towards composing the command for
 			compiling your serial or parallel programs on TACC/XSEDE resources.
@@ -55,7 +65,7 @@ border-radius: 0px;">
 		<div id="compile" class="tab-pane fade in active">
 			<div class="container" style="width: 90%;margin-left: -10px">
 				<form method="POST" action="${contextPath}/compileRunJob"
-					enctype="multipart/form-data" id="myForm">
+					enctype="multipart/form-data" id="myForm" name="myForm" onsubmit="event.preventDefault(); radio();">
 					<input type="hidden" name="${_csrf.parameterName}"
 						value="${_csrf.token}" />
 					<div class="form-group">
@@ -74,9 +84,54 @@ border-radius: 0px;">
 					</div>
 					
 					<div class="form-group" id="ptype" style="width: 150%;">
-						<label for="system">Program Type:</label> &nbsp;&nbsp;&nbsp;<input type="radio" name="ptype" value="gcc" checked="" 
-						> Serial(C/C++) 
-						<span style="padding-left: 1em"><input type="radio" name="ptype" value="mpi"> MPI(C/C++)  <span style="padding-left: 1em"><input type="radio" name="ptype" value="openmp"> OpenMP(C/C++)</span>  <span style="padding-left: 1em"><input type="radio" name="ptype" value="cuda"> CUDA(C/C++)</span> <br> 
+						<label for="ptype">Program Type:</label> &nbsp;&nbsp;&nbsp;<input type="radio" id="ptype" name="ptype" value="gcc" checked="" > <a    title="Some sample commands to compile are as follows:
+
+Serial Programs (C/C++)
+gcc -o executable_name program_name.c
+gcc -o executable_name program_name.c helper_file.c
+gcc -o executable_name program_name.c -lm ; #use '-lm' if you have any math functions
+
+g++ -o executable_name program_name.cc
+g++ -o executable_name program_name.cc helper_file.cc
+g++ -o executable_name program_name.cc -lm ; #use '-lm' if you have any math functions
+
+make; # use this if you provided a Makefile
+
+chmod +x compile.sh; compile.sh; # use this if your commands are in a script that has been uploaded too." style="color:black;">Serial(C/C++) </a>
+						<span style="padding-left: 1em"><input type="radio" name="ptype" value="mpi"> <a    title="Some sample commands to compile are as follows:
+
+MPI Programs (C/C++)
+mpicc -o executable_name program_name.c
+mpicc -o executable_name program_name.c helper_file.c
+mpicc -o executable_name program_name.c -lm ; #use '-lm' if you have any math functions
+
+mpicxx -o executable_name program_name.cc
+mpicxx -o executable_name program_name.cc helper_file.cc
+mpicxx -o executable_name program_name.cc -lm ; #use '-lm' if you have any math functions
+
+make; # use this if you provided a Makefile
+
+chmod +x compile.sh; compile.sh; # use this if your commands are in a script that has been uploaded too." style="color:black;"> MPI(C/C++) </a> <span style="padding-left: 1em"><input type="radio" name="ptype" value="openmp">  <a    title="Some sample commands to compile are as follows:
+
+OpenMP Programs (C/C++)
+gcc -fopenmp -o executable_name program_name.c
+gcc -fopenmp -o executable_name program_name.c helper_file.c
+gcc -fopenmp -o executable_name program_name.c -lm ; #use '-lm' if you have any math functions
+
+g++ -fopenmp -o executable_name program_name.cc
+g++ -fopenmp -o executable_name program_name.cc helper_file.cc
+g++ -fopenmp -o executable_name program_name.cc -lm ; #use '-lm' if you have any math functions
+
+make; # use this if you provided a Makefile
+
+chmod +x compile.sh; compile.sh; # use this if your commands are in a script that has been uploaded too." style="color:black;">OpenMP(C/C++)</a></span>  <span style="padding-left: 1em"><input type="radio" name="ptype" value="cuda">  <a title="Some sample commands to compile are as follows:
+
+CUDA Programs (C/C++)
+nvcc -o executable_name program_name.c
+
+make; # use this if you provided a Makefile
+
+chmod +x compile.sh; compile.sh; # use this if your commands are in a script that has been uploaded too." style="color:black;">CUDA(C/C++)</a></span> <br> 
 					</span><c:if
 								test="ptype_error">
 								<div class="error">
@@ -94,11 +149,11 @@ border-radius: 0px;">
 						
 							<input type="radio" name="radios" value="radio1" id="radio1">  <label for="radio1">Compile</label>
 							<div class="reveal-if-active">
-							<div style="background-color: #eeeeee">
-							<label for="ccommand">Enter command to Compile</label> <input type="text" id="ccommand" name="ccommand" class="form-control" data-require-pair="#command3" placeholder="Enter $command" onblur="check(this.value)">
+							<div style="background-color: #eeeeee" >
+							<label for="ccommand">Enter command to Compile</label> <input type="text" id="ccommand" name="ccommand" class="form-control" data-require-pair="#radio1" placeholder="Enter $command" onblur="check(this.value)" title="Enter compile command">
 						</div>
 						<div style="background-color: #eeeeee">
-						<label for="modules1">Modules:</label> <input type="text" class="form-control" id="modules1" placeholder="Add modules to load separated by commas" name="modules1">
+						<label for="modules1">Modules:</label> <input type="text" class="form-control" id="modules1" placeholder="Add modules to load separated by commas" name="modules1" data-require-pair="#radio1" title="Add modules to load separated by commas">
 
 						
 					</div>
@@ -135,20 +190,26 @@ border-radius: 0px;">
 			
 			</div>
 			<div style="background-color: #eeeeee">
-			<label for="numnodes">Number of Nodes:</label> <input value="" type="text" class="form-control" id="numnodes" placeholder="Enter number of nodes. if OpenMP or CUDA: Enter 1, if MPI or Hybrid: You may enter 1+" name="numnodes" data-require-pair="#radio2">
+			<label for="numnodes">Number of Nodes:</label> <input value="" type="text" class="form-control" id="numnodes" placeholder="Enter number of nodes. if OpenMP or CUDA: Enter 1, if MPI or Hybrid: You may enter 1+" name="numnodes" data-require-pair="#radio2" title="Enter number of nodes. if OpenMP or CUDA: Enter 1, if MPI or Hybrid: You may enter 1+">
 			
 			</div>
 			<div style="background-color: #eeeeee">
-				<label for="rcommandargs">Runtime:</label> <input value="" type="text" class="form-control" id="rtime" placeholder="Please enter the time in format: HH:MM:ss" name="rtime" data-require-pair="#radio2">
+				<label for="rcommandargs">Runtime:</label> <input value="" type="text" class="form-control" id="rtime" placeholder="Please enter the time in format: HH:MM:ss" name="rtime" data-require-pair="#radio2" title="Please enter the time in format: HH:MM:ss">
 				
 			</div>
 			<!--<div style="background-color: #eeeeee ; height: 32%">-->
 			<div style="background-color: #eeeeee">
-			<label for="rcommand">Enter command to Run</label> <input type="text" id="rcommand" name="rcommand" class="form-control" data-require-pair="#radio2" placeholder="Enter $command">
+			<label for="rcommand">Enter command to Run</label> <input type="text" id="rcommand" name="rcommand" class="form-control" data-require-pair="#radio2" placeholder="Enter $command" title="Sample commands for running serial or parallel programs:
+
+./executable_name ; # serial, OpenMP, CUDA
+./executable_name arg1 arg2; # serial, OpenMP, CUDA
+ibrun executable_name ;# MPI programs on Stampede2, LS5, or Comet
+ibrun executable_name arg1 arg2; # MPI programs on Stampede2, LS5, or Comet
+chmod +x runScript.sh; runScript.sh; # use this if your commands are in a script that has been uploaded too.">
 								</div>
 								
 								<div style="background-color: #eeeeee">
-						<label for="modules2">Modules:</label> <input type="text" class="form-control" id="modules2" placeholder="Add modules to load separated by commas" name="modules2">
+						<label for="modules2">Modules:</label> <input type="text" class="form-control" id="modules2" placeholder="Add modules to load separated by commas" name="modules2" data-require-pair="#radio2" title="Add modules to load separated by commas">
 
 						
 					</div>
@@ -186,22 +247,28 @@ border-radius: 0px;">
 			
 			</div>
 			<div style="background-color: #eeeeee">
-			<label for="numnodes2">Number of Nodes:</label> <input value="" type="text" class="form-control" id="numnodes2" placeholder="Enter number of nodes. if OpenMP or CUDA: Enter 1, if MPI or Hybrid: You may enter 1+" name="numnodes2" data-require-pair="#radio3">
+			<label for="numnodes2">Number of Nodes:</label> <input value="" type="text" class="form-control" id="numnodes2" placeholder="Enter number of nodes. if OpenMP or CUDA: Enter 1, if MPI or Hybrid: You may enter 1+" name="numnodes2" data-require-pair="#radio3" title="Enter number of nodes. if OpenMP or CUDA: Enter 1, if MPI or Hybrid: You may enter 1+">
 			
 			</div>
 			<div style="background-color: #eeeeee">
-				<label for="rcommandargs">Runtime:</label> <input value="" type="text" class="form-control" id="rtime2" placeholder="Please enter the time in format: HH:MM:ss" name="rtime2" data-require-pair="#radio3">
+				<label for="rcommandargs">Runtime:</label> <input value="" type="text" class="form-control" id="rtime2" placeholder="Please enter the time in format: HH:MM:ss" name="rtime2" data-require-pair="#radio3" title="Please enter the time in format: HH:MM:ss">
 				
 			</div>
 			<div style="background-color: #eeeeee">
-			<label for="crcommand1">Enter command to Compile</label> <input type="text" id="crcommand1" name="crcommand1" class="form-control" data-require-pair="#radio3" placeholder="Enter $command" onblur="check(this.value)">
+			<label for="crcommand1">Enter command to Compile</label> <input type="text" id="crcommand1" name="crcommand1" class="form-control" data-require-pair="#radio3" placeholder="Enter $command" onblur="check(this.value)" title="Enter compile command.">
 								</div>
 			<!--<div style="background-color: #eeeeee; height: 30%" >-->
 			<div style="background-color: #eeeeee">
-			<label for="crcommand2">Enter command to Run</label> <input type="text" id="crcommand2" name="crcommand2" class="form-control" data-require-pair="#radio3" placeholder="Enter $command">
+			<label for="crcommand2">Enter command to Run</label> <input type="text" id="crcommand2" name="crcommand2" class="form-control" data-require-pair="#radio3" placeholder="Enter $command" title="Sample commands for running serial or parallel programs:
+
+./executable_name ; # serial, OpenMP, CUDA
+./executable_name arg1 arg2; # serial, OpenMP, CUDA
+ibrun executable_name ;# MPI programs on Stampede2, LS5, or Comet
+ibrun executable_name arg1 arg2; # MPI programs on Stampede2, LS5, or Comet
+chmod +x runScript.sh; runScript.sh; # use this if your commands are in a script that has been uploaded too.">
 								</div>
 			<div style="background-color: #eeeeee">
-						<label for="modules3">Modules:</label> <input type="text" class="form-control" id="modules3" placeholder="Add modules to load separated by commas" data-require-pair="#radio3" name="modules3">
+						<label for="modules3">Modules:</label> <input type="text" class="form-control" id="modules3" placeholder="Add modules to load separated by commas" data-require-pair="#radio3" name="modules3" title="Add modules to load separated by commas">
 
 						
 					</div>
@@ -548,6 +615,46 @@ function check(value){
 	}
        
 }
+
+function radio(){
+	if(document.querySelector('input[name="radios"]:checked')===null){
+		alert("Please select an operation.");
+		window.location.href = '${contextPath}/compileRun';
+	}else{
+		console.log("Here");
+		document.myForm.action = "${contextPath}/compileRunJob";
+		document.myForm.submit();
+}
+		
+}
+
+var FormStuff = {
+  
+  init: function() {
+    this.applyConditionalRequired();
+    this.bindUIActions();
+  },
+  
+  bindUIActions: function() {
+    $("input[type='radio']").on("change", this.applyConditionalRequired);
+  },
+  
+  applyConditionalRequired: function() {
+  	
+    $(".form-control").each(function() {
+      var el = $(this);
+      if ($(el.data("require-pair")).is(":checked")) {
+        el.prop("required", true);
+      } else {
+        el.prop("required", false);
+      }
+    });
+    
+  }
+  
+};
+
+FormStuff.init();
 
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>

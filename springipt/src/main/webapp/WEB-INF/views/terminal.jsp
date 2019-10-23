@@ -85,7 +85,7 @@
         <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Select file or folder to download. Folder path ends with a slash '/' "><h3>Download File/Folder </h3></a>
       <form id="downloadForm" method="GET" action="${contextPath}/terminal/download" enctype="multipart/form-data">
           <div class="form-group">
-    	  <select id=fileToDownload>
+    	  <select id=fileToDownload class="form-control">
       	    <option value="">--Select--</option>
     	  </select>
               <input type="hidden" name="action" value="download">

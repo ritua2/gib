@@ -99,7 +99,7 @@ public class CommentController {
 				replyService.saveOrUpdate(reply);
 				
 				// POST/REDIRECT/GET
-				return "redirect:/comments/" + reply.getId();
+				return "redirect:/comments/" + reply.getParentId();
 
 				// POST/FORWARD/GET
 				// return "user/list";

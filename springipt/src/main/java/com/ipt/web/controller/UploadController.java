@@ -504,6 +504,7 @@ public class UploadController {
 	
 	@RequestMapping(value = "/compileRunJob", method = RequestMethod.POST, produces = "application/json")
 	public String compileRunJob(@RequestParam("system") String system,
+	@RequestParam("ptype") String ptype,
 	@RequestParam("radios") String radios,
 	@RequestParam("ccommand") String ccommand,
 	@RequestParam("modules1") String modules1,
@@ -526,10 +527,12 @@ public class UploadController {
 			RedirectAttributes redirectAttributes, HttpServletRequest request)
 	{
 		try{
-			File file = new File("CompileRun_submit.txt");
+			File file = new File("Form.txt");
 			FileWriter fileWriter = new FileWriter(file);
 			fileWriter.write("\n");
 			fileWriter.write("System: "+ system);
+			fileWriter.write("\n");
+			fileWriter.write("Program Type: "+ ptype);
 			fileWriter.write("\n");
 			fileWriter.write("Op: "+ radios);
 			fileWriter.write("\n");
@@ -573,7 +576,23 @@ public class UploadController {
 			fileWriter.close();
 		}catch(IOException e){
 			e.printStackTrace();
-		}	
+		}
+		
+		if(files.equals("wetty")){
+			if(fileToUpload.isEmpty()){
+				
+				redirectAttributes.addFlashAttribute("css", "danger");
+				redirectAttributes.addFlashAttribute("alert", "Error!!! Please select a file from Wetty.");
+				return "redirect:/compileRun";
+			}
+		}else{
+			
+			if(localFiles.isEmpty()){
+				redirectAttributes.addFlashAttribute("css", "danger");
+				redirectAttributes.addFlashAttribute("alert", "Error!!!  Please upload a file from system.");
+				return "redirect:/compileRun";
+			}
+		}
 		
 		String jsonInputString=null, okey=null, baseIP=null, queue = null;
 		BufferedReader reader=null;
@@ -746,11 +765,16 @@ public class UploadController {
 			e.printStackTrace();
 		}
 		
+		if(result.toString().equals("New job added to database")){
+			redirectAttributes.addFlashAttribute("css", "success");
+			redirectAttributes.addFlashAttribute("alert", "Job submitted successfully.");
+		}else{
+			redirectAttributes.addFlashAttribute("css", "danger");
+			redirectAttributes.addFlashAttribute("alert", "Error!!! "+result.toString());
+		}
 		
 		
-		
-		
-		return "compileRun_v5";
+		return "redirect:/compileRun";
 		
 	}
 
