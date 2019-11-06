@@ -40,6 +40,7 @@
 
         <h4><a href="https://github.com/ritua2/IPT/blob/master/User_Guide_1.0_excerpt.pdf" target="_blank" alt="IPT user guide">IPT User
             Guide</a></h4>
+        <p>Covers a series of IPT examples for transforming serial programs into their parallelized versions</p>
 		</div>	
        
 
