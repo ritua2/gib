@@ -45,7 +45,7 @@
         <a href="https://linkedin.com/in/hannah-devault-utbme2020/"> Hannah DeVault</a>
     </h4>
 
-    <p style="margin-left: -80px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Undergraduate Research Assistant</p></div>
+    <p style="margin-left: -80px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Undergraduate Research Assistant</p></div>
 
 </div>
 
@@ -62,7 +62,7 @@
             </div>
             <div class="nova title">
                 <h4><a href="https://www.linkedin.com/in/geraldjoshua/">Gerald Joshua</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/anubhawn/">Anubhaw K Nand</a></h4>
-                <p>Undergraduate Student Intern&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graduate Student Intern</p>
+                <p>Undergraduate Student Intern&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graduate Student Intern</p>
             </div>
         </div>
     </section>
