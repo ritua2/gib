@@ -26,7 +26,7 @@
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="/springipt"><img
+				<a class="navbar-brand" href="/"><img
 					src="${contextPath}/resources/images/IPT-Fut.svg"></a>
 				<!--<a class="navbar-brand">Interactive Parallelization Tool</a> -->
 			</div>
@@ -70,10 +70,10 @@
 			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 <span class="caret"></span></a>
                 <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
-                <li><a href="/springipt/faq">FAQ</a></li>
-                <li><a href="/springipt/help">User Guide</a></li>
-				<li><a href="/springipt/vdemos">Video Demos</a></li>
-				<li><a href="/springipt/contactus">Contact Us</a></li>				
+                <li><a href="/faq">FAQ</a></li>
+                <li><a href="/help">User Guide</a></li>
+				<li><a href="/vdemos">Video Demos</a></li>
+				<li><a href="/contactus">Contact Us</a></li>				
                 </ul>
 	</li>
 			
@@ -88,16 +88,16 @@
 			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 <span class="caret"></span></a>
                 <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
-                <li><a href="/springipt/faq">FAQ</a></li>
-                <li><a href="/springipt/help">User Guide</a></li>
-				<li><a href="/springipt/vdemos">Video Demos</a></li>
-				<li><a href="/springipt/contactus">Contact Us</a></li>				
+                <li><a href="/faq">FAQ</a></li>
+                <li><a href="/help">User Guide</a></li>
+				<li><a href="/vdemos">Video Demos</a></li>
+				<li><a href="/contactus">Contact Us</a></li>				
                 </ul>
 	</li>
 			<li id='compile-tab'><a href="${contextPath}/comments">Message Board</a></li> 
 			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
-			<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li><li id="signup-tab"><a href="/springipt/registration" >Sign Up</a></li>
-    <li id="login-tab" ><a href="/springipt/login_normal" >Log In</a>
+			<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li><li id="signup-tab"><a href="/registration" >Sign Up</a></li>
+    <li id="login-tab" ><a href="/login_normal" >Log In</a>
 	</li>
 			</c:if>
 		</ul>

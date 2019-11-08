@@ -10,7 +10,7 @@
 <br />
 <div class="container">
     <center>
-        <h1>You have been verified successfully. Please log in <a href="/springipt/login_normal">here<a></h1>
+        <h1>You have been verified successfully. Please log in <a href="/login_normal">here<a></h1>
 		
     </center>
 </div>

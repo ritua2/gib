@@ -18,10 +18,10 @@
         
 <div>
     <div class="nova team-overview">
-        <figure><img alt="" src="/springipt/resources/images/Carlos.jpg" height="225" width="225">
-            <img alt="" src="/springipt/resources/images/KP.JPG" height="225" width="225">
-            <img alt="" src="/springipt/resources/images/Ritu.jpg">
-            <img alt="" src="/springipt/resources/images/Trung.jpg" height="225" width="225">
+        <figure><img alt="" src="/resources/images/Carlos.jpg" height="225" width="225">
+            <img alt="" src="/resources/images/KP.JPG" height="225" width="225">
+            <img alt="" src="/resources/images/Ritu.jpg">
+            <img alt="" src="/resources/images/Trung.jpg" height="225" width="225">
         </figure>
     </div>
 
@@ -37,7 +37,7 @@
 <div>
 
     <div class="nova team-overview">
-        <figure><img alt="" src="/springipt/resources/images/Hannah.jpg" height="225" width="225"></figure>
+        <figure><img alt="" src="/resources/images/Hannah.jpg" height="225" width="225"></figure>
     </div>
 
     <div class="nova title">
@@ -57,8 +57,8 @@
         </h2>
         <div>
             <div class="nova team-overview">
-                <figure><img alt="" src="/springipt/resources/images/Joshua.jpg" height="225" width="225">
-                <img alt="" src="/springipt/resources/images/Anubhaw.jpg" height="225" width="225"></figure>
+                <figure><img alt="" src="/resources/images/Joshua.jpg" height="225" width="225">
+                <img alt="" src="/resources/images/Anubhaw.jpg" height="225" width="225"></figure>
             </div>
             <div class="nova title">
                 <h4><a href="https://www.linkedin.com/in/geraldjoshua/">Gerald Joshua</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/anubhawn/">Anubhaw K Nand</a></h4>
