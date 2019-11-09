@@ -222,6 +222,7 @@ public class CommentController {
 		logger.debug("showComment() id: {}", id);
 
 		Comment comment = commentService.findById(id);
+		comment.setReplies(replyService.findAllRepliesByparentId(comment.getId()));
 		if (comment == null) {
 			model.addAttribute("css", "danger");
 			model.addAttribute("msg", "Comment not found");

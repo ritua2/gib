@@ -38,7 +38,7 @@
 				<tr>
 					<td>${comment.id}</td>
 					<td>${comment.title}</td>
-					<td>${comment.body}</td>
+					<td style="max-width: 100px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">${comment.body}</td>
 					<td>${comment.tag}</td>
 
 					<td><spring:url value="/comments/${comment.id}" var="userUrl" />
@@ -64,7 +64,7 @@
 					<tr>
 						<td></td>
 						<td>${reply.title}</td>
-						<td>${reply.body}</td>
+						<td style="max-width: 100px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">${reply.body}</td>
 						<td>${reply.tag}</td>
 						<td></td>
 					</tr>

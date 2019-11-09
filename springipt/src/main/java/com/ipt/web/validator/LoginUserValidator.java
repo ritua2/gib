@@ -30,6 +30,9 @@ public class LoginUserValidator implements Validator {
         if (loginUserService.findByUsername(user.getUsername()) != null) {
             errors.rejectValue("username", "Duplicate.userForm.username");
         }
+		if (loginUserService.findByUsername(user.getUsername()).getEmail() != null) {
+            errors.rejectValue("email", "Duplicate.userForm.email");
+        }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "NotEmpty");
         if (user.getPassword().length() < 5 || user.getPassword().length() > 32) {

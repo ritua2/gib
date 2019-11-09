@@ -468,7 +468,7 @@ public class LoginUserController {
 			}	
 		
 			if(curl_output.contains("Redirecting"))
-				curl_output=curl_output.substring(curl_output.indexOf("http://")+7, curl_output.indexOf("/wetty"));
+				curl_output=curl_output.substring(curl_output.indexOf("https://")+8, curl_output.indexOf("/wetty"));
 			else
 				curl_output = "Error!!";		
 		}
