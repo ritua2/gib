@@ -50,7 +50,8 @@
         <c:set var="path" value="${contextPath}" />
         
 		
-          <iframe id="webterm" src="http://<%= request.getAttribute("ip")%>/wetty" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+          <iframe id="webterm" src="https://<%= request.getAttribute("ip")%>/wetty" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+	  
         
     
       </div>
