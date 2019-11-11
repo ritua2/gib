@@ -21,7 +21,7 @@
 		
 		<c:if test="${pageContext.request.userPrincipal.name != null}">
 		<button class="btn btn-primary"
-							onclick="location.href='/springipt/template/addcomment'">Post Comment</button>
+							onclick="location.href='/template/addcomment'">Post Comment</button>
 		<!--<h3>Click <a href="/springipt/template/addcomment">here</a> to post a comment</h3>-->
 		</c:if>
 		<table class="table table-striped">

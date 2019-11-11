@@ -80,10 +80,6 @@ public class LoginUserController {
 	@Autowired
     private MappingRepository mappingRepository;
 	
-	//@Autowired
-	//private SesListener sesListener;
-	
-		
 	private String ip_returned=null;
 	
 	public static MappedUser mappedUser=new MappedUser();
@@ -104,7 +100,7 @@ public class LoginUserController {
 		URL url = null;
 		StringBuilder result = new StringBuilder();
 		
-        
+        //userValidator.validate(userForm, bindingResult);
 		unconfirmedUserValidator.validate(userForm, bindingResult);
 		
 	
@@ -130,14 +126,14 @@ public class LoginUserController {
 				}
 				
 		String token = UUID.randomUUID().toString();
-		
+		//userForm.setValidation_state("no");
 		userForm.setValidation_key(token);
 		
-		
+		//loginUserService.save(userForm);
 		userService.save(userForm);
 		
 		
-		final String confirmationUrl = "http://"+baseIP+":9090/springipt/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
+		final String confirmationUrl = "http://"+baseIP+":9090/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
 		
 			
 		String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
@@ -153,6 +149,7 @@ public class LoginUserController {
 			}catch (IOException e) {
 				e.printStackTrace();
 			} 	
+		
 		try{
 			
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -211,10 +208,9 @@ public class LoginUserController {
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib").mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home").mkdirs();
         new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home/gib").mkdirs();
+        //securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
 
-        
-
-        
+        //return "redirect:/welcome";
 		return "redirect:/sentlink";
     }
 	
@@ -227,32 +223,121 @@ public class LoginUserController {
 	@GetMapping(value = "/registrationConfirmation")
     public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code) {
 		
+		//Boolean check=false;
+		//check=null == auth.getPrincipal();
 		
+		try{
+			File file3 = new File("Valid_Link.txt");
+			FileWriter fileWriter2 = new FileWriter(file3);
+			fileWriter2.write("\n");
+			fileWriter2.write(userName);
+			fileWriter2.write("\n");
+			fileWriter2.write(code);
+			fileWriter2.write("\n");
+			fileWriter2.flush();
+			fileWriter2.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 		
 		if(unconfirmedUserRepository.findByUsername(userName)!=null){
-			if(unconfirmedUserRepository.findByUsername(userName).getValidation_key().equals(code)){
-				LoginUser lu= new LoginUser();
-				lu.setId(unconfirmedUserRepository.findByUsername(userName).getId());
-				lu.setUsername(unconfirmedUserRepository.findByUsername(userName).getUsername());
-				lu.setEmail(unconfirmedUserRepository.findByUsername(userName).getEmail());
-				lu.setName(unconfirmedUserRepository.findByUsername(userName).getName());
-				lu.setInstitution(unconfirmedUserRepository.findByUsername(userName).getInstitution());
-				lu.setCountry(unconfirmedUserRepository.findByUsername(userName).getCountry());
-				lu.setPassword(unconfirmedUserRepository.findByUsername(userName).getPassword());
-				
-				lu.setRole(roleRepository.findOne(1L));
-				userRepository.save(lu);
+		if(unconfirmedUserRepository.findByUsername(userName).getValidation_key().equals(code)){
+			LoginUser lu= new LoginUser();
+			lu.setId(unconfirmedUserRepository.findByUsername(userName).getId());
+			lu.setUsername(unconfirmedUserRepository.findByUsername(userName).getUsername());
+			lu.setEmail(unconfirmedUserRepository.findByUsername(userName).getEmail());
+			lu.setName(unconfirmedUserRepository.findByUsername(userName).getName());
+			lu.setInstitution(unconfirmedUserRepository.findByUsername(userName).getInstitution());
+			lu.setCountry(unconfirmedUserRepository.findByUsername(userName).getCountry());
+			lu.setPassword(unconfirmedUserRepository.findByUsername(userName).getPassword());
+			//lu.setPasswordConfirm(unconfirmedUserRepository.findByUsername(userName).getPassword());
+			lu.setRole(roleRepository.findOne(1L));
+			userRepository.save(lu);
+			unconfirmedUserRepository.delete(unconfirmedUserRepository.findByUsername(userName));
+			return "registrationConfirmation2";
+		}else{
+			if(unconfirmedUserRepository.findByUsername(userName)!=null)
 				unconfirmedUserRepository.delete(unconfirmedUserRepository.findByUsername(userName));
-				return "registrationConfirmation2";
-			}else{
-				if(unconfirmedUserRepository.findByUsername(userName)!=null)
-					unconfirmedUserRepository.delete(unconfirmedUserRepository.findByUsername(userName));
-				return "registrationError";
-			}
+			return "registrationError";
+		}
 		}else
 			return "registrationError";
-    }
-   
+	}
+	
+	/*@GetMapping(value = "/registrationConfirmation")
+    public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code, Authentication auth, HttpServletRequest request) {
+		
+		Boolean check=false;
+		check=null == auth.getPrincipal();
+		
+		try{
+			File file3 = new File("Valid_Link.txt");
+			FileWriter fileWriter2 = new FileWriter(file3);
+			fileWriter2.write("\n");
+			fileWriter2.write(userName);
+			fileWriter2.write("\n");
+			fileWriter2.write(code);
+			fileWriter2.write("\n");
+			fileWriter2.flush();
+			fileWriter2.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		if(loginUserService.findByUsername(userName).getValidation_key().equals(code)){
+			LoginUser lu=loginUserService.findByUsername(userName);
+			lu.setValidation_state("verified");
+			loginUserService.save(lu);
+			if(!check)
+				return "registrationConfirmation1";
+			else
+				return "registrationConfirmation2";
+		}else{
+			loginUserService.delete(loginUserService.findByUsername(userName));
+			HttpSession session = request.getSession(true);
+			session.invalidate();
+			return "registrationError";
+		}
+		
+    }*/
+	
+	
+	
+
+    /*@GetMapping(value = "/login")
+    public String login(Model model, String error, String logout, HttpServletRequest request) { 
+
+		RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
+		HttpServletRequest request1=null;
+
+		if (RequestContextHolder.getRequestAttributes() != null) {
+				request1 = ((ServletRequestAttributes) attribs).getRequest();
+		}
+
+
+		try{
+			File file4 = new File("Test.txt");
+			FileWriter fileWriter = new FileWriter(file4);
+			fileWriter.write("\n");
+			fileWriter.write("Khwaab");
+			//fileWriter.write("auth: "+SecurityContextHolder.getContext().getAuthentication().getDetails());
+			fileWriter.write("\n");
+			fileWriter.flush();
+			fileWriter.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		/*if (error != null)
+            model.addAttribute("error", "Your username and password is invalid.");
+
+        if (logout != null){
+			model.addAttribute("name", logout);
+            model.addAttribute("message", "You have been logged out successfully.");
+		}*/	
+
+		/*  return "redirect:/welcome";
+    }*/
 	@RequestMapping(value = "/test1")
     public void test1(HttpSession session, HttpServletRequest request) { 
 		
@@ -284,7 +369,7 @@ public class LoginUserController {
 			e.printStackTrace();
 		}
 	}
-		@GetMapping(value = "/entry")
+	@GetMapping(value = "/entry")
     public String entry() {
         return "login_v7";
     }
@@ -343,6 +428,9 @@ public class LoginUserController {
 		}
 		session.setAttribute("is_ldap", is_ldap.toString());
 		
+		// TODO
+		// Add user information to MySQL
+
 			return "welcome";
 		}else 			
 			return "redirect:/entry";
@@ -353,6 +441,23 @@ public class LoginUserController {
        
 	   String curl_output=null;
 	   String loggedin_user=null;
+	   
+	   String baseIP0=null;
+		
+		File file0 = new File("/usr/local/tomcat/webapps/envar.txt");
+		BufferedReader reader0;
+		try {
+			reader0 = new BufferedReader(new FileReader(file0));
+			String line = reader0.readLine();
+			while (line != null) {
+				if(line.contains("URL_BASE"))
+					baseIP0=line.substring(line.indexOf("=")+1);
+				line = reader0.readLine();
+			}
+			reader0.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	   
 	   if(session.getAttribute("is_ldap")=="true"){
 		   if(authentication.getName().toString().contains(" "))
@@ -387,7 +492,7 @@ public class LoginUserController {
 			e.printStackTrace();
 		}
 		
-		
+		//Principal principal = request.getUserPrincipal();
 		
 		try{
 			url = new URL("http://"+baseIP+":5000/api/assign/users/"+loggedin_user);
@@ -395,6 +500,7 @@ public class LoginUserController {
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json; utf-8");
 			conn.setDoOutput(true);
+			
 			jsonInputString = "{\"key\":\""+okey+"\", \"sender\":\"carlos\"}";
 			try(OutputStream os = conn.getOutputStream()) {
 				byte[] input = jsonInputString.getBytes("utf-8");
@@ -402,6 +508,7 @@ public class LoginUserController {
 			}
 			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			String line;
+			//curl_output=abc;
 			while ((line = rd.readLine()) != null) {
 				result.append(line);
 			}
@@ -424,6 +531,7 @@ public class LoginUserController {
 			}else{
 				ip_returned=result.toString();
 			}
+			
 	  
 		}catch(MalformedURLException e){
 			e.printStackTrace();
@@ -450,9 +558,11 @@ public class LoginUserController {
 				rd.close();
 				if(result2!=null){
 			try{
+			//Boolean abc=request.isUserInRole("ROLE_ADMIN");
 			File file2 = new File("Redirect.txt");
 			FileWriter fileWriter = new FileWriter(file2);
 			fileWriter.write(result2.toString());
+			//fileWriter.write(abc.toString());
 			fileWriter.flush();
 			fileWriter.close();
 		}catch(IOException e){
@@ -468,7 +578,7 @@ public class LoginUserController {
 			}	
 		
 			if(curl_output.contains("Redirecting"))
-				curl_output=curl_output.substring(curl_output.indexOf("http://")+7, curl_output.indexOf("/wetty"));
+				curl_output=curl_output.substring(curl_output.indexOf("https://")+8, curl_output.indexOf("/wetty"));
 			else
 				curl_output = "Error!!";		
 		}
@@ -483,10 +593,10 @@ public class LoginUserController {
 			mappingRepository.save(mappedUser);
 			
 			
-		
+		//List<MappedUser> list=mappingRepository.findAll();
 			
 	}else{
-		
+		//com.ipt.web.service.WaitService.wait(request.getUserPrincipal().getName());
 		com.ipt.web.service.WaitService.wait(loggedin_user);
 		
 		//String str = com.ipt.web.service.WaitService.returnWaitKey(request.getUserPrincipal().getName());
@@ -501,7 +611,17 @@ public class LoginUserController {
 		
 	}
 		model.addAttribute("ip", (String) session.getAttribute("mySessionAttribute"));
+		model.addAttribute("baseip", baseIP0);
+			
         return "terminal";
     }
+	
+	@GetMapping(value = "/redirect")
+    public String redirect(Model model, HttpSession session) {
+		model.addAttribute("ip", (String) session.getAttribute("mySessionAttribute"));
+        return "redirect";
+    }
+	
+	
 
 }
