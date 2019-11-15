@@ -1,5 +1,5 @@
 CREATE USER IF NOT EXISTS '<db_user>'@'localhost';
-ALTER USER '<db_user>'@'localhost' IDENTIFIED WITH mysql_native_password BY '<DB user's Password>';
+ALTER USER '<db_user>'@'localhost' IDENTIFIED WITH mysql_native_password BY '<DB user\'s Password>';
 
 CREATE DATABASE  IF NOT EXISTS iptweb;
 GRANT ALL PRIVILEGES ON iptweb.* to '<db_user>'@'localhost';
@@ -122,3 +122,11 @@ CREATE TABLE jobs (
 
 INSERT INTO iptweb.role (id, name) VALUES (1, 'ROLE_USER');
 INSERT INTO iptweb.role (id, name) VALUES (2, 'ROLE_ADMIN');
+
+
+CREATE TABLE current_users (
+    username     VARCHAR(255) UNIQUE NOT NULL,
+    user_type    VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
