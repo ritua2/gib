@@ -38,82 +38,77 @@
 				<!--<a class="navbar-brand">Interactive Parallelization Tool</a> -->
 			</div>
 
-			<ul class="nav navbar-nav navbar-right">
-				<c:if test="${pageContext.request.userPrincipal.name != null}">
+
+			<!--Tabs-->
+			<div class="container">
+				<ul class="nav nav-tabs">
+					<c:if test="${pageContext.request.userPrincipal.name != null}">
+						<li>&emsp;&emsp;&emsp;&nbsp;&nbsp;</li>
+						<c:if test="${sessionScope.is_admin == 'true'}">
+							<li id='admin-tab'><a href="${contextPath}/admin" style="color: #ffffff;">Admin</a></li>
+						</c:if>
+						<li id='terminal-tab'><a href="${contextPath}/terminal" style="color: #ffffff;">Terminal</a></li>
 						
-						</form>
-								Welcome ${pageContext.request.userPrincipal.name} | 
-						<a
-								href="${contextPath}/perform_logout"><span
-						class="glyphicon glyphicon-log-out">Logout</span></a>
-				</c:if>
-			</ul>
+						<c:if test="${(sessionScope.is_admin == 'true')||(sessionScope.is_ldap == 'true')}">
+							<li id='run-tab'><a href="${contextPath}/compileRun" style="color: #ffffff;">Compile & Run</a></li>
+						</c:if>
+						<li id='history-tab'><a href="${contextPath}/jobHistory" style="color: #ffffff;">Job History</a></li>
+
+						<li id='help-tab' >
+							<a data-toggle="dropdown" href="#" aria-expanded="false" style="color: #ffffff;">Help
+			                	<span class="caret"></span>
+			            	</a>
+			                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
+				                <li><a href="/faq" style="color: #555555;">FAQ</a></li>
+				                <li><a href="/help" style="color: #555555;">User Guide</a></li>
+								<li><a href="/vdemos" style="color: #555555;">Video Demos</a></li>
+								<li><a href="/contactus" style="color: #555555;">Contact Us</a></li>				
+			                </ul>
+						</li>
+						
+
+						<li id='compile-tab'><a href="${contextPath}/comments" style="color: #ffffff;">Message Board</a></li> 
+						<li id='aboutus-tab'><a href="${contextPath}/aboutus" style="color: #ffffff;">About Us</a></li>
+						<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li>
+						<li id="username-tab"><a href="/" style="color: #ffffff;">Welcome ${pageContext.request.userPrincipal.name}</a></li>
+						<li id="logout-tab" >
+							<a href="${contextPath}/perform_logout" style="color: #ffffff;">
+								<span class="glyphicon glyphicon-log-out">Logout</span>
+							</a>
+						</li>
+					</c:if>
+
+					<c:if test="${pageContext.request.userPrincipal.name == null}">
+						<li>&emsp;&emsp;&emsp;&nbsp;&nbsp;</li>
+
+						<li id='help-tab' >
+							<a data-toggle="dropdown" href="#" aria-expanded="false" style="color: #ffffff;">Help
+			                	<span class="caret"></span>
+			            	</a>
+			                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
+				                <li><a href="/faq" style="color: #555555;">FAQ</a></li>
+				                <li><a href="/help" style="color: #555555;">User Guide</a></li>
+								<li><a href="/vdemos" style="color: #555555;">Video Demos</a></li>
+								<li><a href="/contactus" style="color: #555555;">Contact Us</a></li>				
+			                </ul>
+						</li>
+						<li id='compile-tab'><a href="${contextPath}/comments" style="color: #ffffff;">Message Board</a></li> 
+						<li id='aboutus-tab'><a href="${contextPath}/aboutus" style="color: #ffffff;">About Us</a></li>
+						<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li><li id="signup-tab"><a href="/registration" style="color: #ffffff;">Sign Up</a></li>
+						<li id="login-tab" ><a href="/login_normal" style="color: #ffffff;">Log In</a></li>
+					</c:if>
+
+				</ul>
+				<!-- End Tabs -->
+
+			</div>
+
 		</div>
 	</nav>
-	
-
-	<!--Tabs-->
-	<div class="container">
-		<ul class="nav nav-tabs">
-			<c:if test="${pageContext.request.userPrincipal.name != null}">
-			<li>&emsp;&emsp;&emsp;&nbsp;&nbsp;</li>
-			<c:if test="${sessionScope.is_admin == 'true'}">
-			<li id='admin-tab'><a href="${contextPath}/admin">Admin</a></li>
-			</c:if>
-			<li id='terminal-tab'><a href="${contextPath}/terminal">Terminal</a></li>
-			
-			<c:if test="${(sessionScope.is_admin == 'true')||(sessionScope.is_ldap == 'true')}">
-			<li id='run-tab'><a href="${contextPath}/compileRun">Compile & Run</a></li>
-			</c:if>
-			<li id='history-tab'><a href="${contextPath}/jobHistory">Job
-					History</a></li>
-			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
-                <span class="caret"></span></a>
-                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
-                <li><a href="/faq">FAQ</a></li>
-                <li><a href="/help">User Guide</a></li>
-				<li><a href="/vdemos">Video Demos</a></li>
-				<li><a href="/contactus">Contact Us</a></li>				
-                </ul>
-	</li>
-			
-			
-			
-			<li id='compile-tab'><a href="${contextPath}/comments">Message Board</a></li>
-			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
-			</c:if>
-			<c:if test="${pageContext.request.userPrincipal.name == null}">
-			<li>&emsp;&emsp;&emsp;&nbsp;&nbsp;</li>
-
-			<li id='help-tab' ><a data-toggle="dropdown" href="#" aria-expanded="false">Help
-                <span class="caret"></span></a>
-                <ul class="dropdown-menu" style="margin-left: -10px;margin-top: 0px">
-                <li><a href="/faq">FAQ</a></li>
-                <li><a href="/help">User Guide</a></li>
-				<li><a href="/vdemos">Video Demos</a></li>
-				<li><a href="/contactus">Contact Us</a></li>				
-                </ul>
-	</li>
-			<li id='compile-tab'><a href="${contextPath}/comments">Message Board</a></li> 
-			<li id='aboutus-tab'><a href="${contextPath}/aboutus">About Us</a></li>
-			<li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</li><li id="signup-tab"><a href="/registration" >Sign Up</a></li>
-    <li id="login-tab" ><a href="/login_normal" >Log In</a>
-	</li>
-			</c:if>
-		</ul>
-		<!-- End Tabs -->
-
-		<div class="tab-content">
 
 
-		
 
-		</div>
-	</div>
-
-		
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script
 		src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
 		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
@@ -121,5 +116,6 @@
 	<!-- Latest compiled and minified JavaScript -->
 	<script
 		src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+	
 
-
+	<div style="padding-bottom: 10rem;"></div>
