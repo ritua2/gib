@@ -22,6 +22,13 @@
 
 
 <body style="background: #e9ebf0">
+
+
+	<div class="main-banner">
+			<img src="${contextPath}/resources/images/IPT-Banner.jpg"
+				class="img-responsive" alt="IPT Banner" style="width: 100%;">
+	</div>
+
 	<!-- Navbar -->
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
@@ -43,13 +50,6 @@
 			</ul>
 		</div>
 	</nav>
-	<div class="main-banner">
-		<p>
-			<img src="${contextPath}/resources/images/IPT-Banner.jpg"
-				class="img-responsive" alt="IPT Banner" style="width: 100%;">
-		</p>
-	</div>
-	
 	
 
 	<!--Tabs-->
