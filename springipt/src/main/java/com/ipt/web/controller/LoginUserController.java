@@ -34,9 +34,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.ipt.web.model.CurrentUser;
 import com.ipt.web.model.LoginUser;
 import com.ipt.web.model.MappedUser;
 import com.ipt.web.model.UnconfirmedUser;
+import com.ipt.web.repository.CurrentUserRepository;
 import com.ipt.web.repository.UserRepository;
 import com.ipt.web.repository.MappingRepository;
 import com.ipt.web.repository.RoleRepository;
@@ -76,6 +78,9 @@ public class LoginUserController {
 	
 	@Autowired
     private UnconfirmedUserRepository unconfirmedUserRepository;
+	
+	@Autowired
+    private CurrentUserRepository currentUserRepository;
 	
 	@Autowired
     private MappingRepository mappingRepository;
@@ -397,6 +402,12 @@ public class LoginUserController {
 		
 		if(request.getSession().getAttribute("mySessionAttribute")!=null)
 		com.ipt.web.service.WaitService.freeInstance(request.getUserPrincipal().getName(),request.getSession().getAttribute("mySessionAttribute").toString());
+	
+		CurrentUser currentUser = new CurrentUser();
+		currentUser.setUsername(request.getUserPrincipal().getName().toString().replace(" ","_"));
+		currentUser.setUser_type(request.getSession().getAttribute("is_ldap").toString());
+		
+		currentUserRepository.delete(currentUser);
 		
 		HttpSession session = request.getSession(false);
 		session.invalidate();
@@ -428,9 +439,14 @@ public class LoginUserController {
 		}
 		session.setAttribute("is_ldap", is_ldap.toString());
 		
-		// TODO
-		// Add user information to MySQL
+		CurrentUser currentUser = new CurrentUser();
+		currentUser.setUsername(authentication.getName().toString().replace(" ","_"));
+		currentUser.setUser_type(is_ldap.toString());
+		
+		currentUserRepository.save(currentUser);
 
+		
+		
 			return "welcome";
 		}else 			
 			return "redirect:/entry";
