@@ -431,6 +431,11 @@ public class LoginUserController {
 		// TODO
 		// Add user information to MySQL
 
+
+
+
+		
+
 			return "welcome";
 		}else 			
 			return "redirect:/entry";
