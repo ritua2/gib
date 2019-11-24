@@ -4,7 +4,26 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <style type="text/css">
-    
+
+  
+
+  .navbar a {
+    float: left;
+    font-size: 16px;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+
+  
+
+  .navbar a:hover, .navbar li a:hover, {
+    background-color: grey;
+  }
+
+  
+
   html {
     height: 100%;
     box-sizing: border-box;
@@ -24,6 +43,8 @@
     width:100%;
   }
 
+
+  
 
   .footer {
     position: absolute;
@@ -64,7 +85,7 @@
     <div class="container">
 
       <div class="container-fluid" style="position: relative; z-index: 5;  
-      padding:16px 16px 0px 16px; 
+      padding:2px 16px 0px 16px; 
       text-align: left; 
       font-size: 1.2em;
       filter: alpha(opacity=1);
