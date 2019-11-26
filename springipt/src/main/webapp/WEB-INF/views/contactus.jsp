@@ -15,12 +15,11 @@
           <h2>Team</h2>
           <p style="font-size: 20px">Ritu Arora:<br><a href="mailto:rauta@tacc.utexas.edu">rauta@tacc.utexas.edu</a></p>
           <p style="font-size: 20px">Carlos Redondo:<br><a href="mailto:carlos.red@utexas.edu">carlos.red@utexas.edu</a></p>
-          <p style="font-size: 20px">Krishan Pal:<br><a href="mailto:ksingh35@binghamton.edu">ksingh35@binghamton.edu</a></p>
           <p style="font-size: 20px">Hannah DeVault:<br><a href="mailto:hdev@utexas.edu">hdev@utexas.edu</a></p>
           </div>
         <div style="margin-left: 50px">
           <h2>Phone / Fax</h2>
-          <p>(To be updated)<br>(To be updated)<br><br><strong>Email ID:</strong><a href="mailto:someone@tacc.com">To be added.</a></p>
+          <p>512-475-9411<br>512-475-9445<br><br><strong>Email ID:</strong><a href="info@tacc.utexas.edu">To be added.</a></p>
           </div>
         
         </td>
