@@ -134,5 +134,5 @@
 		src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 	
 
-	<div style="padding-bottom: 10rem;"></div>
+	<div style="padding-bottom: 2rem;"></div>
 
