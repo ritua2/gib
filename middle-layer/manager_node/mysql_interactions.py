@@ -226,3 +226,31 @@ def user_to_ip_port(username):
         springIPT_db.close()
 
         return ["User not present", True]
+
+
+
+# Finds if a current user is IPT or TACC
+def current_user_status(username):
+
+    springIPT_db = mysql_con.connect(host = os.environ['URL_BASE'], port = 6603, user = os.environ["MYSQL_USER"],
+                    password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
+    cursor = springIPT_db.cursor(buffered=True)
+
+    corrected_username = username.replace(" ", "_")
+
+    query = ("SELECT user_type FROM current_users WHERE username=%s")
+    cursor.execute(query, (corrected_username, ))
+
+    for (type_of_user,) in cursor:
+
+        springIPT_db.commit()
+        cursor.close()
+        springIPT_db.close()
+
+        return [[type_of_user], False]
+    else:
+        springIPT_db.commit()
+        cursor.close()
+        springIPT_db.close()
+
+        return ["User not present", True]

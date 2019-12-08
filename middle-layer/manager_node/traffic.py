@@ -1016,7 +1016,8 @@ def new_job():
 
     # Allowed access for:
     #   - Systems with orchestra key, springIPT mainly
-    #   - Calls from wetty
+    #   - Calls from wetty where the user is a TACC user
+
 
     invalid_access = True
 
@@ -1047,11 +1048,35 @@ def new_job():
     runtime = ppr["runtime"]
 
 
+    # If the user is not TACC, job cannot be submitted
+    [type_of_user, error_in_db] = mints.current_user_status(username)
+    greyfish_commonuser_job_loc = "/greyfish/sandbox/DIR_commonuser/jobs_left/"+dirname+".zip"
+
+
+    if error_in_db:
+
+        # Deletes the job data if it exists
+        if os.path.exists(greyfish_commonuser_job_loc):
+            os.remove(greyfish_commonuser_job_loc)
+
+        return "User is not logged in correctly"
+
+    if type_of_user[0] == "false":
+
+        # Deletes the job data if it exists
+        if os.path.exists(greyfish_commonuser_job_loc):
+            os.remove(greyfish_commonuser_job_loc)
+
+        return "User is not authorized to submit jobs"
+
+
+
     if hhmmss_pattern.match(runtime) == None:
         return "INVALID: time mut be specified as HH:MM:SS"
 
     if job_type not in ["Compile", "Run", "Both"]:
         return "INVALID: Job type not accepted, must be 'Compile', 'Run', or 'Both'"
+
 
     # Processes the commands
     if job_type == "Compile":
