@@ -63,7 +63,31 @@
     </div>
 
     <div class="col" style="background: #e5e5e5 ; width: 50%;">
-      
+
+      <p id="rcorners_solid" style="background-color: #fcfcfc;">
+        A tutorial and talk on IPT was hosted at the Terna Engineering College in Mumbai, India on December 2, 2019.
+      </p>
+
+      <p id="rcorners_solid" style="background-color: #fcfcfc;">
+        A talk on IPT was given at the TACC booth during SC19.
+      </p>
+
+      <p id="rcorners_solid" style="background-color: #fcfcfc;">
+        A talk on code correctness in parallel programs will be given at the EduHiPC 2019 workshop in Hyderabad, India
+      </p>
+
+      <p id="rcorners_solid" style="background-color: #fcfcfc;">
+        A tutorial on IPT was held in TACC on October 18th, 2019 event held in Austin, TX.
+      </p>
+
+      <p id="rcorners_solid" style="background-color: #fcfcfc;">
+        A tutorial on IPT was held at the TACCSTER 2019 event held in Austin, TX.
+      </p>
+
+      <p id="rcorners_solid" style="background-color: #fcfcfc;">
+        A tutorial on IPT was held in TACC on September 14th, 2017 event held in Austin, TX.
+      </p>
+
     </div>
 
   </div>
