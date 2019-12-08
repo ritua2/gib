@@ -57,7 +57,9 @@
       </p>
       <br><br>
 
-      <img src="https://www.tacc.utexas.edu/documents/1084364/1748789/stampede-boinc.jpg/" class="img-responsive" height="90%" width="90%">
+      <center>
+        <img src="https://www.tacc.utexas.edu/documents/1084364/1748789/stampede-boinc.jpg/" class="img-responsive" height="90%" width="90%">
+      </center>
     </div>
 
     <div class="col" style="background: #e5e5e5 ; width: 50%;">
