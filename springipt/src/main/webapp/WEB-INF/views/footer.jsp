@@ -56,7 +56,7 @@
 
   /* Based on https://stackoverflow.com/questions/14821087/horizontal-line-and-right-way-to-code-it-in-html-css */
   .dash{
-        border: 1px solid black;
+        border: 1px solid #b9aa16;
         width: 100%;
         height: 0px;
   }

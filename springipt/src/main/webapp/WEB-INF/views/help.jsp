@@ -4,10 +4,26 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <jsp:include page="base.jsp" />
+<!--<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Need Help?</title>
+
+
+</head>
+
+<body>-->
 <!-- Help Tab -->
         <!--Section header-->
-		<div class="container" style="padding-left: 80px;padding-right: 130px">	
+    <div class="container" style="padding-left: 80px;padding-right: 130px"> 
         <h2>Just Getting Started with IPT?</h2>
         <!--Links-->
         
@@ -38,14 +54,14 @@
         <p>Some test cases and the step-by-step process of parallelizing those test cases using IPT can be downloaded
         <a href="https://drive.google.com/open?id=1J5AIAub9lnfZmZRktCjMPPHnL_3AcJnE" target="_blank" alt="IPT user guide">here</a>.</p>
 
-        <h4><a href="https://github.com/ritua2/IPT/blob/master/User_Guide_1.0_excerpt.pdf" target="_blank" alt="IPT user guide">IPT User
-            Guide</a></h4>
-        <p>Covers a series of IPT examples for transforming serial programs into their parallelized versions</p>
-		</div>	
+        <h4><a href="https://github.com/ritua2/IPT/tree/master/Userguide" target="_blank" alt="IPT user guide">IPT User
+      Guide</a></h4><p>Covers a series of IPT examples for transforming serial programs into their parallelized versions</p>
+    </div>  
        
 
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>  
 
-
+<!--</body>
+</html>-->
  <jsp:include page="footer.jsp" />
