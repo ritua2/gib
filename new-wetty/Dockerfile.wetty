@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install -y lsyncd netcat netcat-openbsd rsync tree
     # Disallows su
     chmod 000 /bin/su &&\
     # Sets up the miniature server for executing commands in terminals with users
-    curl https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h > /gib/httplib.h &&\
+    # httplib.h version corresponds to that of August 7th, 2019
+    curl https://raw.githubusercontent.com/yhirose/cpp-httplib/22615f96828a72d84019b748ede01fa11d905977/httplib.h > /gib/httplib.h &&\
     cd /gib && g++ /gib/miniserver.cc -o miniserver -std=c++1y -pthread -lcurl &&\
     mkdir /var/log/lsyncd && touch /var/log/lsyncd/lsyncd.{log,status} &&\
 	mkdir /etc/lsyncd
