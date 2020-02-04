@@ -19,7 +19,7 @@
 
         <td style="padding-left: 20px;">
           <h4>Interactive Parallelization Tool - Parallelizing Molecular Dynamics with MPI</h4>
-          <iframe width="560" height="315" src="https://www.youtube.com/embed/HvlA4pnfFjE?rel=0" frameborder="0" allowfullscreen=""></iframe>
+          <iframe width="560" height="315" src="https://www.youtube.com/watch?v=MHuMc6MUga0" frameborder="0" allowfullscreen=""></iframe>
         </td>
 
       </tr>
@@ -50,18 +50,12 @@
           <h4>The Interactive Parallelization Tool - Introduction To Parallel Programming</h4>
           <iframe width="560" height="315" src="https://www.youtube.com/embed/T9ilr5F5sFM?rel=0" frameborder="0" allowfullscreen="" ></iframe>
         </td >
-
       </tr>
     </tbody><br><br>
   </table>
-</div>
-		
-	
-	
+</div>			
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>
 
 <jsp:include page="footer.jsp" />
-
-
 
