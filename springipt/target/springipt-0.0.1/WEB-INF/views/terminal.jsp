@@ -1,90 +1,121 @@
-<!-- {% extends 'base.html' %}
 
-{% block headersum %} -->
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.io.*" %>
+<%@ page import="java.lang.*"%>
+<%@page import="java.sql.DriverManager"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.Statement"%>
+<%@page import="java.sql.Connection"%>
+
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="base.jsp" />
-<h1>Terminal</h1>
-<!-- This particular block template is only for a tab header.
-This block can be modified or removed completely, just be sure to remove the
-opening and closing "headersum" blocks.  -->
-<!-- {% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-{% block body %} -->
-<table cellpadding="0" cellspacing="0" width="100%" height="350px">
-<tr>
-  <td width="75%">
-  <div class="terminal">
-    <!-- {% if url %} -->
-    <%-- <c:if test="url"> --%>
-      <iframe id="webterm" src="http://<%= System.getenv("WETTY_SERVER") %>:3000/wetty/"  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
-    <!-- {% else %} -->
-<%--     </c:if>
-    <c:if test="url"> --%>
-      <!-- <iframe id="webterm" src=""  style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe> -->
-    <!-- {% endif %} -->
-<%--     </c:if> --%>
+    <title>Putty Terminal</title>
+
+    <!-- <link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${contextPath}/resources/css/common.css" rel="stylesheet">-->
+
+</head>
+
+<body>
+<div class="container">
+
+  <table cellpadding="0" cellspacing="0" width="100%" height="350px">
+    <tr>
+      <td width="75%">
+      <div class="terminal">
+        
+        <c:set var="username" value="${pageContext.request.userPrincipal.name}" />
+        <c:set var="path" value="${contextPath}" />
+	 <%
+            String test =  (String) session.getAttribute("newip");
+            pageContext.setAttribute("test", test);
+         %>
+         <iframe id="webterm" src="<% out.println(test);%>" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
+      </div>
+      </td>
+      <td valign="top">
+      <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Upload Additional Files and they will show up in /home/ipt within your IPT terminal."><h3>File Upload</h3></a>
+      <form id="uploadForm" action="${contextPath}/terminal/upload" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <div id="myRadioGroup">
+        File upload <input type="radio" name="filefolder" checked="checked" value="file" />
+        Folder upload <input type="radio" name="filefolder" value="folder" />
+        <div id="file" class="desc">
+    	    <div class="form-group">
+    	        <input type="file" class="form-control" id="file"
+    	                       placeholder="Add additional files or folders" name="fileToUpload" >
+    	    </div>
+        </div>
+        <div id="folder" class="desc">
+    	    <div class="form-group">
+    	        <input type="file" class="form-control" id="folder"
+    	                       placeholder="Add additional files or folders" name="folderToUpload" webkitdirectory mozdirectory directory multiple>
+    	        <input type="hidden" id="uploadId" name="hiddenInput">
+    	    </div>
+        </div>
+    	</div>
+        <div class="text-right">
+          <button type="submit" class="btn btn-default">Upload</button>
+        </div>
+      </form>
+      <br/><br/>
+      
+        <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Select file or folder to download. Folder path ends with a slash '/' "><h3>Download File/Folder </h3></a>
+      <form id="downloadForm" method="GET" action="${contextPath}/terminal/download" enctype="multipart/form-data">
+          <div class="form-group">
+    	  <select id=fileToDownload class="form-control">
+      	    <option value="">--Select--</option>
+    	  </select>
+              <input type="hidden" name="action" value="download">
+          </div>
+          <table>
+    	<td width="80%">
+          <div class="text-left">
+              <button id=refreshList type="button" class="btn btn-default">Refresh List</button>
+          </div>
+    	</td>
+    	<td align="right">
+          <div class="text-right">
+              <button type="submit" id = "test" class="btn btn-default">Download</button>
+          </div>
+    	</td>
+          </table>
+      </form>
+
+      </td>
+    </tr>
+    </table>
   </div>
-  </td>
-  <td valign="top">
-  <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Upload Additional Files and they will show up in /home/ipt within your IPT terminal."><h3>File Upload</h3></a>
-  <form id="uploadForm" action="${contextPath}/terminal/upload" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-    <div id="myRadioGroup">
-    File upload <input type="radio" name="filefolder" checked="checked" value="file" />
-    Folder upload <input type="radio" name="filefolder" value="folder" />
-    <div id="file" class="desc">
-	    <div class="form-group">
-	        <input type="file" class="form-control" id="file"
-	                       placeholder="Add additional files or folders" name="fileToUpload" >
-	    </div>
-    </div>
-    <div id="folder" class="desc">
-	    <div class="form-group">
-	        <input type="file" class="form-control" id="folder"
-	                       placeholder="Add additional files or folders" name="folderToUpload" webkitdirectory mozdirectory directory multiple>
-	        <input type="hidden" id="uploadId" name="hiddenInput">
-	    </div>
-    </div>
-	</div>
-    <div class="text-right">
-      <button type="submit" class="btn btn-default">Upload</button>
-    </div>
-  </form>
-  <br/><br/>
+    <!-- {% endblock %}
   
-    <a data-toggle="tooltip"  style="border-bottom:1px dotted #000;text-decoration: none;" title="Select file or folder to download. Folder path ends with a slash '/' "><h3>Download File/Folder </h3></a>
-  <form id="downloadForm" method="GET" action="${contextPath}/terminal/download" enctype="multipart/form-data">
-      <div class="form-group">
-	  <select id=fileToDownload>
-  	    <option value="">--Select--</option>
-	  </select>
-          <input type="hidden" name="action" value="download">
-      </div>
-      <table>
-	<td width="80%">
-      <div class="text-left">
-          <button id=refreshList type="button" class="btn btn-default">Refresh List</button>
-      </div>
-	</td>
-	<td align="right">
-      <div class="text-right">
-          <button type="submit" class="btn btn-default">Download</button>
-      </div>
-	</td>
-      </table>
-  </form>
-
-  </td>
-</tr>
-</table>
-<!-- {% endblock %}
-
 {% block scripts %} -->
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+
   <script>
+	window.onload = function(){		
+		var frame = document.getElementById('webterm'); 
+		var key = "<%=session.getAttribute("key")%>";
+		var key1 = "<%=session.getAttribute("key1")%>";							
+		if(key!==key1){	
+			console.log("Sending:"+key1);
+			var stop = setInterval(function(){frame.contentWindow.postMessage(key1, "*");},100);
+			setTimeout(function( ) { clearInterval( stop ); }, 1000);
+		}								
+	};  
+	
       $(document).ready(function(){
           src = document.getElementById('webterm').src;
           if (src === window.location.href){
@@ -93,20 +124,24 @@ opening and closing "headersum" blocks.  -->
           $("#folder").hide();
           $("input[name$='filefolder']").click(function() {
           var test = $(this).val();
-
-           $("div.desc").hide();
+          $("div.desc").hide();
           $("#" + test).show();
     	  });
           $.ajax({
               url: '${contextPath}/terminal/getdropdownvalues',
               type: 'GET',
-  	    dataType: "json",
+  	      dataType: "json",
               success: function(data){
   	    drpDwnValue=data;
   	    $.each( drpDwnValue, function( key, f ) {
+			var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+				function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
                 $("#fileToDownload").append($('<option>', {
       		value: f +'/',
-      		text: f
+      		//text: f.substring(f.lastIndexOf("/"));
+			text: abc
   		}));
   	    });	
 
@@ -163,7 +198,14 @@ opening and closing "headersum" blocks.  -->
       $('#downloadForm').on('submit', function(event){
           event.preventDefault();
           $('#errorMsg').text('');
-          $.ajax({
+		  //url=window.location.origin + '${contextPath}/terminal/download/' + $('#fileToDownload').val();
+		  //var newWindow = window.open();
+		  //newWindow.location = url;
+		  var frame = document.getElementById('webterm'); 
+		  //var doc = ''+document.getElementById('test'); 
+		  //frame.contentWindow.postMessage(doc, "*"); 
+		  
+		  $.ajax({
             url: window.location.origin + '${contextPath}/terminal/download/' + $('#fileToDownload').val(),
             type: 'GET'
           }).fail(function(xhr) {
@@ -182,9 +224,13 @@ opening and closing "headersum" blocks.  -->
   	    $('#fileToDownload').html('');
   	    $('#fileToDownload').append('<option value="">--Select--</option>');
   	    $.each( drpDwnValue, function( key, f ) {
+				var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+				function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
                 $("#fileToDownload").append($('<option>', {
       		value: f + '/',
-      		text: f
+      		text: abc
   		}));
   	    });	
 
@@ -197,7 +243,7 @@ opening and closing "headersum" blocks.  -->
         });
 
       $('#uploadForm').on('submit', function(event){
-          event.preventDefault();
+		  event.preventDefault();
           $('#errorMsg').text('');
           var form = $('#uploadForm')[0]
           var formData = new FormData(form);
@@ -220,3 +266,9 @@ opening and closing "headersum" blocks.  -->
       });
   </script>
 <!-- {% endblock %} -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
+</body>
+</html>
+<jsp:include page="footer.jsp" /
