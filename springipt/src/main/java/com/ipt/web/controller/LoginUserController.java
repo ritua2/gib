@@ -8,10 +8,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
+import java.io.PrintWriter;
 
 import java.io.OutputStream;
-
+import java.io.FileNotFoundException;
 
 import java.lang.Exception;
 import java.net.*;
@@ -55,80 +55,80 @@ import com.ipt.web.service.SesListener;
 @Controller
 @Scope("session")
 public class LoginUserController {
-    @Autowired
-    private LoginUserService loginUserService;
+    	@Autowired
+    	private LoginUserService loginUserService;
 	
 	@Autowired
-    private UserService userService;
+    	private UserService userService;
 
-    @Autowired
-    private SecurityService securityService;
+    	@Autowired
+    	private SecurityService securityService;
 
-    @Autowired
-    private LoginUserValidator userValidator;
+    	@Autowired
+    	private LoginUserValidator userValidator;
 	
 	@Autowired
-    private UnconfirmedUserValidator unconfirmedUserValidator;
+    	private UnconfirmedUserValidator unconfirmedUserValidator;
 	
 	@Autowired
-    private UserRepository userRepository;
+    	private UserRepository userRepository;
 	
 	@Autowired
-    private RoleRepository roleRepository;
+    	private RoleRepository roleRepository;
 	
 	@Autowired
-    private UnconfirmedUserRepository unconfirmedUserRepository;
+    	private UnconfirmedUserRepository unconfirmedUserRepository;
 	
 	@Autowired
-    private CurrentUserRepository currentUserRepository;
+    	private CurrentUserRepository currentUserRepository;
 	
 	@Autowired
-    private MappingRepository mappingRepository;
+    	private MappingRepository mappingRepository;
 	
 	private String ip_returned=null;
 	
 	public static MappedUser mappedUser=new MappedUser();
 	private File file1 = new File("Output1.txt");
 
-    @GetMapping(value = "/registration")
-    public String registration(Model model) {
-        model.addAttribute("userForm", new UnconfirmedUser());
+    	@GetMapping(value = "/registration")
+    	public String registration(Model model) {
+        	model.addAttribute("userForm", new UnconfirmedUser());
 
-        return "registration";
-    }
+        	return "registration";
+    	}
 	
 	@PostMapping(value = "/registration")
-    public String registration(@ModelAttribute("userForm") UnconfirmedUser userForm, BindingResult bindingResult, Model model) {
+   	public String registration(@ModelAttribute("userForm") UnconfirmedUser userForm, BindingResult bindingResult, Model model) {
 		
 		String jsonInputString=null, okey=null, baseIP=null;
 		BufferedReader reader=null;
 		URL url = null;
 		StringBuilder result = new StringBuilder();
 		
-        //userValidator.validate(userForm, bindingResult);
+        	//userValidator.validate(userForm, bindingResult);
 		unconfirmedUserValidator.validate(userForm, bindingResult);
 		
 	
 		
-        if (bindingResult.hasErrors()) {
-            return "registration";
-        }
+        	if (bindingResult.hasErrors()) {
+            		return "registration";
+        	}
 		
 		try {
-					File envar = new File("/usr/local/tomcat/webapps/envar.txt");
-					reader = new BufferedReader(new FileReader(envar));
-					String line = reader.readLine();
-					while (line != null) {
-						if(line.contains("orchestra_key"))
-							okey=line.substring(line.indexOf("=")+1);
-						else if(line.contains("URL_BASE"))
-							baseIP=line.substring(line.indexOf("=")+1);
-						line = reader.readLine();
-					}
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			File envar = new File("/usr/local/tomcat/webapps/envar.txt");
+			reader = new BufferedReader(new FileReader(envar));
+			String line = reader.readLine();
+			while (line != null) {
+				if(line.contains("orchestra_key"))
+					okey=line.substring(line.indexOf("=")+1);
+				else if(line.contains("URL_BASE"))
+					baseIP=line.substring(line.indexOf("=")+1);
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 				
 		String token = UUID.randomUUID().toString();
 		//userForm.setValidation_state("no");
@@ -138,22 +138,22 @@ public class LoginUserController {
 		userService.save(userForm);
 		
 		
-		final String confirmationUrl = "http://"+baseIP+":9090/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
-		
+		//final String confirmationUrl = "http://"+baseIP+":9090/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
+		final String confirmationUrl = "https://iptweb.tacc.utexas.edu/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
 			
-		String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
-		
+		//String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
+		String message= "Welcome to the IPT Web Portal!"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
 		
 		
 		try{
-		jsonInputString = "{\"key\":\""+okey+"\",\"subject\":\"Registration Confirmation for "+userForm.getUsername()+"\", \"email_address\": \""+userForm.getEmail()+"\", \"text\":\""+message+"\"}"; 
+			jsonInputString = "{\"key\":\""+okey+"\",\"subject\":\"Registration Confirmation for "+userForm.getUsername()+"\", \"email_address\": \""+userForm.getEmail()+"\", \"text\":\""+message+"\"}"; 
 		
-		url = new URL("http://"+baseIP+":5000/api/email/send");
+			url = new URL("http://"+baseIP+":5000/api/email/send");
 		} catch(MalformedURLException e){
 				e.printStackTrace();
-			}catch (IOException e) {
+		} catch (IOException e) {
 				e.printStackTrace();
-			} 	
+		} 	
 		
 		try{
 			
@@ -169,7 +169,7 @@ public class LoginUserController {
 			fileWriter.write("\n");
 			fileWriter.write("Base IP: "+ baseIP);
 			fileWriter.write("\n");
-			fileWriter.write("Base IP: "+ message);
+			fileWriter.write("Message: "+ message);
 			fileWriter.write("\n");
 			fileWriter.write("URL: "+ url.toString());
 			fileWriter.write("\n");
@@ -191,15 +191,15 @@ public class LoginUserController {
 			rd.close();
 			
 			try{
-			File file3 = new File("ValidationResult.txt");
-			FileWriter fileWriter2 = new FileWriter(file3);
-			fileWriter2.write(result.toString());
-			fileWriter2.write("\n");
-			fileWriter2.flush();
-			fileWriter2.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+				File file3 = new File("ValidationResult.txt");
+				FileWriter fileWriter2 = new FileWriter(file3);
+				fileWriter2.write(result.toString());
+				fileWriter2.write("\n");
+				fileWriter2.flush();
+				fileWriter2.close();
+			}catch(IOException e){
+				e.printStackTrace();
+			}
 				
 		}catch(ProtocolException e){
 			e.printStackTrace();
@@ -208,26 +208,26 @@ public class LoginUserController {
 		}
 				
 		// Creates the user directory
-        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()).mkdirs();
-        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home").mkdirs();
-        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib").mkdirs();
-        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home").mkdirs();
-        new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home/gib").mkdirs();
-        //securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
+        	new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()).mkdirs();
+        	new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home").mkdirs();
+        	new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib").mkdirs();
+        	new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home").mkdirs();
+        	new File("/home/greyfish/users/sandbox/DIR_"+userForm.getUsername()+"/home/gib/home/gib").mkdirs();
+        	//securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
 
-        //return "redirect:/welcome";
+        	//return "redirect:/welcome";
 		return "redirect:/sentlink";
     }
 	
 	@GetMapping(value = "/sentlink")
-    public String sentLink() {
+    		public String sentLink() {
         
-        return "sentlink";
-    }
+        	return "sentlink";
+    	}
 
 	@GetMapping(value = "/registrationConfirmation")
-    public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code) {
-		
+    	public String registrationConfirmation(@RequestParam("user") String userName, @RequestParam("token") String code) {
+			
 		//Boolean check=false;
 		//check=null == auth.getPrincipal();
 		
@@ -343,8 +343,8 @@ public class LoginUserController {
 
 		/*  return "redirect:/welcome";
     }*/
-	@RequestMapping(value = "/test1")
-    public void test1(HttpSession session, HttpServletRequest request) { 
+    	@RequestMapping(value = "/test1")
+    	public void test1(HttpSession session, HttpServletRequest request) { 
 		
 		try{
 			File file4 = new File("Abc.txt");
@@ -360,7 +360,7 @@ public class LoginUserController {
 		}
 	}
 	@RequestMapping(value = "/test2")
-    public void test2(HttpSession session, HttpServletRequest request) { 
+    	public void test2(HttpSession session, HttpServletRequest request) { 
 		
 		try{
 			File file4 = new File("Abc2.txt");
@@ -375,33 +375,33 @@ public class LoginUserController {
 		}
 	}
 	@GetMapping(value = "/entry")
-    public String entry() {
-        return "login_v7";
-    }
+    	public String entry() {
+        	return "login_v7";
+    	}
 	
-	 @GetMapping(value = "/login_normal")
-    public String login_normal(Model model, String error, String logout) {
+	@GetMapping(value = "/login_normal")
+    	public String login_normal(Model model, String error, String logout) {
 		
 		if (error != null)
-            model.addAttribute("error", "Your username and password is invalid.");
+            		model.addAttribute("error", "Your username and password is invalid.");
 
-        if (logout != null){
+        	if (logout != null){
 			model.addAttribute("name", logout);
-            model.addAttribute("message", "You have been logged out successfully.");
+           		model.addAttribute("message", "You have been logged out successfully.");
 		}	
 		
 		
 		return "login_normal";
-    }
+    	}
 	
 	
 	
 	
-	 @GetMapping(value = "/perform_logout")
-    public String logout1(HttpServletRequest request) {
+	@GetMapping(value = "/perform_logout")
+    	public String logout1(HttpServletRequest request) {
 		
 		if(request.getSession().getAttribute("mySessionAttribute")!=null)
-		com.ipt.web.service.WaitService.freeInstance(request.getUserPrincipal().getName(),request.getSession().getAttribute("mySessionAttribute").toString());
+		     com.ipt.web.service.WaitService.freeInstance(request.getUserPrincipal().getName(),request.getSession().getAttribute("mySessionAttribute").toString());
 	
 		CurrentUser currentUser = new CurrentUser();
 		currentUser.setUsername(request.getUserPrincipal().getName().toString().replace(" ","_"));
@@ -414,10 +414,10 @@ public class LoginUserController {
 		
 		return "redirect:/login?logout";
         
-    }
+    	}
 	
 	@GetMapping(value = {"/", "/welcome"})
-    public String welcome(HttpServletRequest request, Model model, HttpSession session, Principal principal, Authentication authentication) {
+    	public String welcome(HttpServletRequest request, Model model, HttpSession session, Principal principal, Authentication authentication) {
 		
 		Boolean abc=false;
 		Boolean is_ldap=false;
@@ -427,24 +427,26 @@ public class LoginUserController {
 		if(!check){
 			abc=request.isUserInRole("ROLE_ADMIN");
 			session.setAttribute("is_admin", abc.toString());
-		if(authentication.getPrincipal().toString().contains("Not granted any authorities")){
-			if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl")){
-				is_ldap=true;
-				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")).mkdirs();
-				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home").mkdirs();
-				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib").mkdirs();
-				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home").mkdirs();
-				new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home/gib").mkdirs();
-			}				
-		}
-		session.setAttribute("is_ldap", is_ldap.toString());
+			if(authentication.getPrincipal().toString().contains("Not granted any authorities")){
+				if(authentication.getPrincipal().toString().substring(0,65).equals("org.springframework.security.ldap.userdetails.LdapUserDetailsImpl")){
+					is_ldap=true;
+					new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")).mkdirs();
+					new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home").mkdirs();
+					new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib").mkdirs();
+					new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home").mkdirs();
+					new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home/gib").mkdirs();
+				}				
+			}
+			session.setAttribute("is_ldap", is_ldap.toString());
 		
-		CurrentUser currentUser = new CurrentUser();
-		currentUser.setUsername(authentication.getName().toString().replace(" ","_"));
-		currentUser.setUser_type(is_ldap.toString());
+			CurrentUser currentUser = new CurrentUser();
+			currentUser.setUsername(authentication.getName().toString().replace(" ","_"));
+			currentUser.setUser_type(is_ldap.toString());
 		
-		currentUserRepository.save(currentUser);
+			currentUserRepository.save(currentUser);
 
+		
+		
 			return "welcome";
 		}else 			
 			return "redirect:/entry";
@@ -455,38 +457,39 @@ public class LoginUserController {
        
 	   String curl_output=null;
 	   String loggedin_user=null;
-	   
+	   String curl_output2=null;
+	   String newip=null;
 	   String baseIP0=null;
 		
-		File file0 = new File("/usr/local/tomcat/webapps/envar.txt");
-		BufferedReader reader0;
-		try {
-			reader0 = new BufferedReader(new FileReader(file0));
-			String line = reader0.readLine();
-			while (line != null) {
-				if(line.contains("URL_BASE"))
-					baseIP0=line.substring(line.indexOf("=")+1);
-				line = reader0.readLine();
-			}
-			reader0.close();
+	   File file0 = new File("/usr/local/tomcat/webapps/envar.txt");
+	   BufferedReader reader0;
+	   try {
+		reader0 = new BufferedReader(new FileReader(file0));
+		String line = reader0.readLine();
+		while (line != null) {
+			if(line.contains("URL_BASE"))
+				baseIP0=line.substring(line.indexOf("=")+1);
+			line = reader0.readLine();
+		}
+		reader0.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	   
-	   if(session.getAttribute("is_ldap")=="true"){
+	   	if(session.getAttribute("is_ldap")=="true"){
 		   if(authentication.getName().toString().contains(" "))
 			   loggedin_user=authentication.getName().toString().replace(" ","_");
-	   }else
+	   	}else
 		   loggedin_user=request.getUserPrincipal().getName();
 		
 		
-	if(session.getAttribute("mySessionAttribute")==null || ((session.getAttribute("mySessionAttribute")!=null)&& ((new com.ipt.web.service.MappingService().findMapping(loggedin_user))!="Null"))){
+		if(session.getAttribute("mySessionAttribute")==null || ((session.getAttribute("mySessionAttribute")!=null)&& ((new com.ipt.web.service.MappingService().findMapping(loggedin_user))!="Null"))){
 		
 		
 		StringBuilder result = new StringBuilder();
 		StringBuilder result2 = new StringBuilder();
 
-        URL url = null;
+                URL url = null;
 		String okey=null, jsonInputString=null, baseIP=null;
 		
 		File file = new File("/usr/local/tomcat/webapps/envar.txt");
@@ -528,25 +531,25 @@ public class LoginUserController {
 			}
 			rd.close();
 			if(result!=null){
-			try{
-			File file1 = new File("Assign.txt");
-			FileWriter fileWriter = new FileWriter(file1);
-			fileWriter.write(result.toString());
-			fileWriter.write("\n");
-			fileWriter.write("User:"+loggedin_user);
-			fileWriter.write("\n");
-			fileWriter.flush();
-			fileWriter.close();
-		}catch(IOException e){
-			e.printStackTrace();
-			}}
+				try{
+			   		File file1 = new File("Assign.txt");
+			   		FileWriter fileWriter = new FileWriter(file1);
+			   		fileWriter.write(result.toString());
+			   		fileWriter.write("\n");
+			   		fileWriter.write("User:"+loggedin_user);
+			   		fileWriter.write("\n");
+			   		fileWriter.flush();
+			   		fileWriter.close();
+		        	}catch(IOException e){
+			   		e.printStackTrace();
+				}
+			}
 			if(result.toString().equals("False")){
 				ip_returned="False";
 			}else{
 				ip_returned=result.toString();
 			}
 			
-	  
 		}catch(MalformedURLException e){
 			e.printStackTrace();
 		}catch(ProtocolException e){
@@ -555,10 +558,10 @@ public class LoginUserController {
 			e.printStackTrace();
 		}
 		
-		if(ip_returned.equals("False"))
+		if(ip_returned.equals("False")){
 			curl_output="Error!!!";
-		else{
-			
+			curl_output2="Error!!!";
+		}else{
 			try{
 				url = new URL("http://"+baseIP+":5000/api/redirect/users/"+loggedin_user+"/"+ip_returned.substring(0,ip_returned.indexOf(':')));
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -571,18 +574,20 @@ public class LoginUserController {
 				} 
 				rd.close();
 				if(result2!=null){
-			try{
-			//Boolean abc=request.isUserInRole("ROLE_ADMIN");
-			File file2 = new File("Redirect.txt");
-			FileWriter fileWriter = new FileWriter(file2);
-			fileWriter.write(result2.toString());
-			//fileWriter.write(abc.toString());
-			fileWriter.flush();
-			fileWriter.close();
-		}catch(IOException e){
-			e.printStackTrace();
-			}}
+					try{
+						//Boolean abc=request.isUserInRole("ROLE_ADMIN");
+						File file2 = new File("Redirect.txt");
+						FileWriter fileWriter = new FileWriter(file2);
+						fileWriter.write(result2.toString());
+						//fileWriter.write(abc.toString());
+						fileWriter.flush();
+						fileWriter.close();
+					}catch(IOException e){
+						e.printStackTrace();
+					}
+				}
 				curl_output=result2.toString();
+
 			}catch(MalformedURLException e){
 				e.printStackTrace();
 			}catch(ProtocolException e){
@@ -591,21 +596,74 @@ public class LoginUserController {
 				e.printStackTrace();
 			}	
 		
-			if(curl_output.contains("Redirecting"))
-				curl_output=curl_output.substring(curl_output.indexOf("https://")+8, curl_output.indexOf("/wetty"));
-			else
-				curl_output = "Error!!";		
-		}
-    	
-			session.setAttribute("mySessionAttribute", curl_output);
-			mappedUser.setUser(loggedin_user);
-			mappedUser.setIp(curl_output);
-			session.setAttribute("uName", loggedin_user);
-			session.setAttribute("uIP", curl_output);
+			if(curl_output.contains("Redirecting")){
+			      //curl_output=curl_output.substring(curl_output.indexOf("https://")+8, curl_output.indexOf("/wetty"));
+			      curl_output=curl_output.substring(curl_output.indexOf("https://"));
+			      curl_output2 = curl_output;
+			      try{
+				curl_output2= curl_output2.substring(8);
+				curl_output2 = curl_output2.substring(0, curl_output2.indexOf("/"));
+				File co2 = new File("curl_output2.txt");
+                                FileWriter fileWriter2 = new FileWriter(co2);
+                                fileWriter2.write(curl_output2.toString());
+                                fileWriter2.flush();
+                                fileWriter2.close();
 
-			
-			mappingRepository.save(mappedUser);
-			
+				Runtime r = Runtime.getRuntime();
+				String cmd = "nslookup " + curl_output2.substring(0, curl_output2.indexOf(":"));
+				Process p = r.exec(cmd);
+				p.waitFor();
+				BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line = "";
+				File ipfromhostname = new File("ipfromhostname.txt");
+                                FileWriter fileWriter3 = new FileWriter(ipfromhostname);
+				int count = 0;
+				String tmp = "";
+				while ((line = b.readLine()) != null) {
+					count++;
+					if(count == 6){
+					  tmp = line;
+                                	  fileWriter3.write(line);
+					  tmp = tmp.replaceAll("Address:", " ");
+					  tmp = tmp.trim();
+					}
+				}
+				fileWriter3.flush();
+                                fileWriter3.close();
+				b.close();
+				if (tmp != null){
+					File co4 = new File("curl_output4.txt");
+                                	FileWriter fileWriter4 = new FileWriter(co4);
+					tmp = tmp + curl_output2.substring(curl_output2.indexOf(":"));
+                                        curl_output2 = tmp;
+                                	fileWriter4.write(curl_output2.toString());
+                                	fileWriter4.flush();
+                                	fileWriter4.close();
+
+				}
+			      }catch (Exception e){
+				try{
+					PrintWriter pw = new PrintWriter(new File("error_trace.txt"));
+    					e.printStackTrace(pw);
+    					pw.close();
+					//e.printStackTrace();
+				}catch (FileNotFoundException ex)  
+    				{
+        				ex.printStackTrace();
+    				}
+			      }
+			}else{
+				curl_output = "Error!! All the terminal instances are currently in use.";		
+				curl_output2 = "Error!! All the terminal instances are currently in use."; 
+		        }
+		}
+		session.setAttribute("mySessionAttribute", curl_output2);
+		mappedUser.setUser(loggedin_user);
+		mappedUser.setIp(curl_output2);	
+		session.setAttribute("uName", loggedin_user);
+		session.setAttribute("uIP", curl_output2);
+		session.setAttribute("newip", curl_output);
+		mappingRepository.save(mappedUser);
 			
 		//List<MappedUser> list=mappingRepository.findAll();
 			
@@ -624,8 +682,14 @@ public class LoginUserController {
 		}
 		
 	}
+	try{
 		model.addAttribute("ip", (String) session.getAttribute("mySessionAttribute"));
 		model.addAttribute("baseip", baseIP0);
+
+		model.addAttribute("newip", (String) session.getAttribute("newip"));
+	}catch(Exception e){
+		 e.printStackTrace();
+	}
 			
         return "terminal";
     }
@@ -633,6 +697,8 @@ public class LoginUserController {
 	@GetMapping(value = "/redirect")
     public String redirect(Model model, HttpSession session) {
 		model.addAttribute("ip", (String) session.getAttribute("mySessionAttribute"));
+
+		model.addAttribute("newip", (String) session.getAttribute("newip"));
         return "redirect";
     }
 	
