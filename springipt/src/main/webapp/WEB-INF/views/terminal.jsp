@@ -1,4 +1,3 @@
-
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
 <%@ page import="java.util.*" %>
@@ -31,16 +30,6 @@
 
 <body>
 <div class="container">
-
-
-    
-
-
-
-
-
-
-    
    <table cellpadding="0" cellspacing="0" width="100%" height="350px">
     <tr>
       <td width="75%">
@@ -48,12 +37,11 @@
         
         <c:set var="username" value="${pageContext.request.userPrincipal.name}" />
         <c:set var="path" value="${contextPath}" />
-        
-		
-          <iframe id="webterm" src="https://<%= request.getAttribute("ip")%>/wetty" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
-	  
-        
-    
+	 <%
+            String test =  (String) session.getAttribute("newip");
+            pageContext.setAttribute("test", test);
+         %>
+	 <iframe id="webterm" src="<% out.println(test);%>" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
       </div>
       </td>
       <td valign="top">
@@ -65,8 +53,7 @@
         Folder upload <input type="radio" name="filefolder" value="folder" />
         <div id="file" class="desc">
     	    <div class="form-group">
-    	        <input type="file" class="form-control" id="file"
-    	                       placeholder="Add additional files or folders" name="fileToUpload" >
+    	        <input type="file" class="form-control" id="file" placeholder="Add additional files or folders" name="fileToUpload" >
     	    </div>
         </div>
         <div id="folder" class="desc">
@@ -113,21 +100,19 @@
   
 {% block scripts %} -->
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+
   <script>
 	window.onload = function(){		
-									var frame = document.getElementById('webterm'); 
-									var key = "<%=session.getAttribute("key")%>";
-									var key1 = "<%=session.getAttribute("key1")%>";
-									
-									if(key!==key1){	
-									console.log("Sending:"+key1);
-									var stop = setInterval(function(){frame.contentWindow.postMessage(key1, "*");},100);
-									setTimeout(function( ) { clearInterval( stop ); }, 1000);
-									 }
-										
-									   };
-		
-	  
+		var frame = document.getElementById('webterm'); 
+		var key = "<%=session.getAttribute("key")%>";
+		var key1 = "<%=session.getAttribute("key1")%>";
+
+		if(key!==key1){	
+			console.log("Sending:"+key1);
+			var stop = setInterval(function(){frame.contentWindow.postMessage(key1, "*");},100);
+			setTimeout(function( ) { clearInterval( stop ); }, 1000);
+		 }
+	};  
 	
       $(document).ready(function(){
           src = document.getElementById('webterm').src;
@@ -257,7 +242,7 @@
         });
 
       $('#uploadForm').on('submit', function(event){
-          event.preventDefault();
+		  event.preventDefault();
           $('#errorMsg').text('');
           var form = $('#uploadForm')[0]
           var formData = new FormData(form);
