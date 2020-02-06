@@ -197,6 +197,23 @@ def sha256_checksum(filename, block_size=65536):
 
 
 
+# Translates an IP into hostname if this has been pre-defined by the user
+# If not, it returns the IP
+# IP_to_be_translated (string) -> defined_hostname (str)
+def IP_to_hostname(IP_to_be_translated):
+
+    r_hostnames = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=9)
+
+    possible_hostname = r_hostnames.get(IP_to_be_translated)
+
+    if possible_hostname == None:
+        # No translation or the IP has not been added
+        return IP_to_be_translated
+    else:
+        return possible_hostname.decode("UTF-8")
+
+
+
 app = Flask(__name__)
 
 
@@ -277,10 +294,13 @@ def assigner(user_id):
 
 
 # Redirects a user after an available IP has been provided to him
+# target_ip may also be the hostname
 @app.route("/api/redirect/users/<user_id>/<target_ip>", methods=['GET'])
 def redirect_to_wetty(user_id, target_ip):
 
     r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
+
+    target_ip = IP_to_hostname(target_ip)
 
     # Finds if the user is attached to any instance
     available_redirect = [x.decode("UTF-8") for x in r_redirect_cache.keys(target_ip+"_*")]
@@ -303,8 +323,8 @@ def redirect_to_wetty(user_id, target_ip):
     user_instance = user_instance.replace("_", ":")
     # 20 s to complete redirect
     r_redirect_cache.setex(user_instance, 20, user_id)
-
-    return redirect("https://"+user_instance+"/wetty", code=302)
+    
+    return "Redirecting https://"+user_instance+"/wetty"
 
 
 
@@ -327,7 +347,7 @@ def attachme():
     # There may be multiple containers per instance
     iport = ppr["port"]
     sender_ID = ppr["sender"]
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
@@ -355,7 +375,8 @@ def attachme():
         # All IPs are stored in Redis with the following data:
         # Available, id, current_user, whoami_count, address
         new_instance = {
-                        "address":reqip,
+                        "address":reqip, # Could be a hostname
+                        "IP":request.environ['REMOTE_ADDR'], # IP
                         "Available":"Yes",
                         "Ports":str(int(2**((port_number-7000)%10))),
 
@@ -387,7 +408,7 @@ def removeme():
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
@@ -422,7 +443,7 @@ def remove_my_port():
     # There may be multiple containers per instance
     iport = ppr["port"]
     sender_ID = ppr["sender"]
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
@@ -474,7 +495,7 @@ def free_instance():
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    reqip = ppr["IP"]
+    reqip = IP_to_hostname(ppr["IP"])
     port = str(ppr["Port"])
 
     if not valid_adm_passwd(key):
@@ -533,7 +554,7 @@ def get_instance():
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    reqip = ppr["IP"]
+    reqip = IP_to_hostname(ppr["IP"])
     port = str(ppr["Port"])
 
     if not valid_adm_passwd(key):
@@ -578,7 +599,7 @@ def whoami(uf10):
     r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
 
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
     user_port, err = Porter10(reqip, uf10)
 
     if err:
@@ -671,6 +692,8 @@ def container_wait():
     user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
     [ip_used, port_used] = user_ip_port_container.split(":")
 
+    ip_used = IP_to_hostname(ip_used)
+
     wetty_key = PK_32(ip_used, port_used)
 
     miniserver_port = str(int(port_used) + 100)
@@ -752,6 +775,7 @@ def container_sync_volume():
 
     user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
     [ip_used, port_used] = user_ip_port_container.split(":")
+    ip_used = IP_to_hostname(ip_used)
 
     wetty_key = PK_32(ip_used, port_used)
 
@@ -801,7 +825,7 @@ def grey_stoken(uf10):
     r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
 
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
     instances = redkeys(r_occupied)
 
     if not (reqip in redkeys(r_occupied)):
@@ -833,7 +857,7 @@ def grey_commonuser_token(uf10):
     r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
 
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
     instances = redkeys(r_occupied)
 
     if not (reqip in redkeys(r_occupied)):
@@ -908,6 +932,7 @@ def upload_file(user_id):
         return "Error, file does not exist"
 
     [ip_used, port_used] = [ppr["IP"], ppr["Port"]]
+    ip_used = IP_to_hostname(ip_used)
 
     wetty_key = PK_32(ip_used, port_used)
 
@@ -948,6 +973,7 @@ def upload_dir(user_id):
         return "Error, directory does not exist or is not a directory"
 
     [ip_used, port_used] = [ppr["IP"], ppr["Port"]]
+    ip_used = IP_to_hostname(ip_used)
 
     wetty_key = PK_32(ip_used, port_used)
 
@@ -985,7 +1011,7 @@ def upload_dir(user_id):
 @app.route("/api/jobs/uuid", methods=['GET'])
 def get_uuid():
 
-    reqip = request.environ['REMOTE_ADDR']
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
     r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
     if reqip.encode("UTF-8") in r_occupied.keys():
@@ -1024,7 +1050,7 @@ def new_job():
     if valid_adm_passwd(key):
         invalid_access = False
     else:
-        reqip = request.environ['REMOTE_ADDR']
+        reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
         r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
         # Valid IP and user is in the IP
@@ -1415,6 +1441,7 @@ def upload_results(username, job_ID, key):
     user_is_in_wetty = mints.user_to_ip_port(username)
     if not user_is_in_wetty[1]:
         [ip_used, port_used] = user_is_in_wetty[0][1].split(":")
+        ip_used = IP_to_hostname(ip_used)
 
         miniserver_port = str(int(port_used)+100)
         wetty_key = PK_32(ip_used, port_used)
