@@ -30,6 +30,7 @@
 
 <body>
 <div class="container">
+
    <table cellpadding="0" cellspacing="0" width="100%" height="350px">
     <tr>
       <td width="75%">
@@ -37,10 +38,14 @@
         
         <c:set var="username" value="${pageContext.request.userPrincipal.name}" />
         <c:set var="path" value="${contextPath}" />
+
+	  
 	 <%
             String test =  (String) session.getAttribute("newip");
             pageContext.setAttribute("test", test);
          %>
+	 
+
 	 <iframe id="webterm" src="<% out.println(test);%>" style="overflow:hidden; width:850px; height:500px; background: white; float:center; " allowtransparency="true"> Terminal Session Frame</iframe>
       </div>
       </td>
@@ -53,7 +58,8 @@
         Folder upload <input type="radio" name="filefolder" value="folder" />
         <div id="file" class="desc">
     	    <div class="form-group">
-    	        <input type="file" class="form-control" id="file" placeholder="Add additional files or folders" name="fileToUpload" >
+    	        <input type="file" class="form-control" id="file"
+    	                       placeholder="Add additional files or folders" name="fileToUpload" >
     	    </div>
         </div>
         <div id="folder" class="desc">
@@ -103,16 +109,19 @@
 
   <script>
 	window.onload = function(){		
-		var frame = document.getElementById('webterm'); 
-		var key = "<%=session.getAttribute("key")%>";
-		var key1 = "<%=session.getAttribute("key1")%>";
-
-		if(key!==key1){	
-			console.log("Sending:"+key1);
-			var stop = setInterval(function(){frame.contentWindow.postMessage(key1, "*");},100);
-			setTimeout(function( ) { clearInterval( stop ); }, 1000);
-		 }
-	};  
+				var frame = document.getElementById('webterm'); 
+				var key = "<%=session.getAttribute("key")%>";
+				var key1 = "<%=session.getAttribute("key1")%>";
+									
+				if(key!==key1){	
+					console.log("Sending:"+key1);
+					var stop = setInterval(function(){frame.contentWindow.postMessage(key1, "*");},100);
+					setTimeout(function( ) { clearInterval( stop ); }, 1000);
+				}
+										
+			};
+		
+	  
 	
       $(document).ready(function(){
           src = document.getElementById('webterm').src;
@@ -133,10 +142,10 @@
               success: function(data){
   	    drpDwnValue=data;
   	    $.each( drpDwnValue, function( key, f ) {
-			var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
-				function getPosition(string, subString, index) {
-   return string.split(subString, index).join(subString).length;
-}
+		var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+		function getPosition(string, subString, index) {
+			return string.split(subString, index).join(subString).length;
+                }
                 $("#fileToDownload").append($('<option>', {
       		value: f +'/',
       		//text: f.substring(f.lastIndexOf("/"));
@@ -223,10 +232,10 @@
   	    $('#fileToDownload').html('');
   	    $('#fileToDownload').append('<option value="">--Select--</option>');
   	    $.each( drpDwnValue, function( key, f ) {
-				var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
-				function getPosition(string, subString, index) {
-   return string.split(subString, index).join(subString).length;
-}
+	    var abc = f.toString().substr(getPosition(f.toString(), '/', 8)); 
+	    function getPosition(string, subString, index) {
+                     return string.split(subString, index).join(subString).length;
+	    }
                 $("#fileToDownload").append($('<option>', {
       		value: f + '/',
       		text: abc
