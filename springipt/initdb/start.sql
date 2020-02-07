@@ -130,3 +130,5 @@ CREATE TABLE current_users (
 
     PRIMARY KEY (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+alter table user drop primary key, add primary key(id, email);
