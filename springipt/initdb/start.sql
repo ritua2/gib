@@ -132,6 +132,7 @@ CREATE TABLE current_users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+
 CREATE TABLE news (
     id                  VARCHAR(255) UNIQUE NOT NULL,
     published_date      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -140,3 +141,7 @@ CREATE TABLE news (
 
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+alter table user drop primary key, add primary key(id, email);
+
