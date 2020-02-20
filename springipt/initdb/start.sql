@@ -130,3 +130,13 @@ CREATE TABLE current_users (
 
     PRIMARY KEY (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE news (
+    id                  VARCHAR(255) UNIQUE NOT NULL,
+    published_date      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modified_date       DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    user_type           VARCHAR(2500) NOT NULL,
+
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
