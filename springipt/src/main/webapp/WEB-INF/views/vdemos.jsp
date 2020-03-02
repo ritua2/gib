@@ -43,15 +43,28 @@
       <tr>
         <td >
           <h4>The Interactive Parallelization Tool - Parallelizing the FFT algorithm with MPI</h4>
-          <iframe width="560" height="315" src="https://www.youtube.com/embed/sg9HDTz0zbo?rel=0" frameborder="0" allowfullscreen="" ></iframe>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/sg9HDTz0zbo?rel=0" frameborder="0" allowfullscreen=""></iframe>
         </td>
 
         <td >
           <h4>The Interactive Parallelization Tool - Introduction To Parallel Programming</h4>
-          <iframe width="560" height="315" src="https://www.youtube.com/embed/T9ilr5F5sFM?rel=0" frameborder="0" allowfullscreen="" ></iframe>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/T9ilr5F5sFM?rel=0" frameborder="0" allowfullscreen=""></iframe>
         </td >
 
       </tr>
+
+      <tr>
+        <td >
+          <h4>The Interactive Parallelization Tool - Instructions on using the IPT tool online.</h4>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/AypWQf-yJus?rel=0" frameborder="0" allowfullscreen=""></iframe>
+        </td>
+
+        <td >
+        </td >
+      </tr>
+
+
+
     </tbody><br><br>
   </table>
 </div>

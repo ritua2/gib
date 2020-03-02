@@ -29,7 +29,7 @@
 
 <div class="col-container" style="width: 95%; padding-left: 5%;">
   <div class="col" style="background: transparent; width: 67%;">
-    <h3>Demystifying parallel programming using the Interactive Parallelization Tool (IPT)</h3>
+    <h3>Interactive Parallelization Tool (IPT) Demystifies Parallel Programming</h3>
   </div>
 
   <div class="col" style="background:  transparent; width: 3%;">
@@ -56,14 +56,14 @@
 
     <div class="col-container" style="width: 98%; padding-left: 2%;">
       <div class="col" style="background: transparent; width: 47.5%;">
-        <img src="${contextPath}/resources/images/terminal_IPT.png" width="502" height="295" style="display: block; margin-left: auto; margin-right: auto;">
+        <img src="${contextPath}/resources/images/terminal_IPT.png" width="400" height="295" style="display: block; margin-left: auto; margin-right: auto;">
       </div>
 
       <div class="col" style="background:  transparent; width: 5%;">
       </div>
 
       <div class="col" style="background: transparent; ; width: 47.5%;">
-        <iframe width="502" height="295" src="https://www.youtube.com/embed/qKo05dIZoYI"></iframe>
+        <iframe width="400" height="295" src="https://www.youtube.com/embed/qKo05dIZoYI"></iframe>
       </div>
     </div>
 
@@ -76,7 +76,11 @@
   <div class="col" style="background: #f2f3c3; border-color: #b9aa16; border-style: solid; width: 30%; border-width: 1px;">
 
     <p id="rcorners_solid" style="background-color: #fcfcfc; ">
-      A talk on code correctness in parallel programs will be given at the EduHiPC 2019 workshop in Hyderabad, India
+      As of March 1, 2020, the version of IPT provided on this website can only parallelize C programs.
+    </p>
+
+    <p id="rcorners_solid" style="background-color: #fcfcfc; ">
+      A talk on code correctness in parallel programs will be given at the EduHiPC 2019 workshop in Hyderabad, India, on December 17, 2019.
     </p>
 
     <p id="rcorners_solid" style="background-color: #fcfcfc; ">
@@ -103,6 +107,9 @@
 
 </div>
 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
 
 
 <jsp:include page="footer.jsp" />
