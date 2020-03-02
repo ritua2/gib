@@ -289,6 +289,9 @@ int post_file(string full_file_path, string url_to_post) {
      
     curl_formfree(post);
     curl_easy_cleanup(curl);
+
+    // Error
+    return 1;
 }
 
 

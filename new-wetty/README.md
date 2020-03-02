@@ -31,6 +31,20 @@ docker run -d -v auxiliary:/shared easy_wetty/bud_db:cli tail -f /dev/null
 ```
 
 
+* **IPT startup**
+
+```bash
+# Create shared volume for IPT src
+docker volume create --name=ipt_src
+
+# Create shared volume for IPT mount: java, boost, etc.
+docker volume create --name=ipt_mnt
+
+
+# Adds the IPT image
+docker run -d -v ipt_src:/home/ipt/src -v ipt_mnt:/mnt/rosedocker/roseCompile carlosred/ipt-build:static tail -f /dev/null
+```
+
 
 * **Wetty startup**
 
@@ -46,7 +60,7 @@ Or, if using multiple containers:
 
 ```bash
 docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data \
-	-v auxiliary:/shared easy_wetty/standalone main_daemon
+	-v auxiliary:/shared -v easy_wetty/standalone -v ipt_src:/home/ipt/src -v ipt_mnt:/mnt/rosedocker/roseCompile main_daemon
 ```
 
 

@@ -33,6 +33,19 @@ if [ -f "/etc/wait.key" ]; then
     fi
 
 
+    # IPT variables
+    export JAVA_HOME=/mnt/rosedocker/roseCompile/jdk1.8.0_131
+    export JAVA_TOOL_OPTIONS="-Xms2G -Xmx2G"
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/jdk1.8.0_131/jre/lib/amd64/server
+    export PATH=/mnt/rosedocker/roseCompile/lib/bin:$PATH
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/lib/lib/:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/boost_install/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/roseCompileTree/lib:$LD_LIBRARY_PATH
+
+    alias IPT=/home/ipt/src/IPT
+
+
+
     # No need to setup the rest of the container
 
 # New user
@@ -82,6 +95,19 @@ else
     fi
 
     rm -f results.tar.gz
+
+    # IPT variables
+
+    export JAVA_HOME=/mnt/rosedocker/roseCompile/jdk1.8.0_131
+    export JAVA_TOOL_OPTIONS="-Xms2G -Xmx2G"
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/jdk1.8.0_131/jre/lib/amd64/server
+    export PATH=/mnt/rosedocker/roseCompile/lib/bin:$PATH
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/lib/lib/:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/boost_install/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=/mnt/rosedocker/roseCompile/roseCompileTree/lib:$LD_LIBRARY_PATH
+
+    alias IPT=/home/ipt/src/IPT
+
 fi
 
 
