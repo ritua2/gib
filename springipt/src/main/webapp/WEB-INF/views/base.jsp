@@ -46,8 +46,8 @@
 					<a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 			<span class="caret"></span></a>
 					<ul class="dropdown-menu" style="margin-left: 28.5%; margin-top: 0px">
-                		<li><a href="/faq">FAQ</a></li>
-                		<li><a href="/help">User Guide</a></li>
+                				<li><a href="/faq">FAQ</a></li>
+                				<li><a href="/help">User Guide</a></li>
 						<li><a href="/vdemos">Video Demos</a></li>
 						<li><a href="/contactus">Contact Us</a></li>
 					</ul>
@@ -62,8 +62,8 @@
 					<a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 			<span class="caret"></span></a>
 					<ul class="dropdown-menu" style="margin-left: 32%; margin-top: 0px">
-	                	<li><a href="/faq">FAQ</a></li>
-	                	<li><a href="/help">User Guide</a></li>
+	                			<li><a href="/faq">FAQ</a></li>
+	                			<li><a href="/help">User Guide</a></li>
 						<li><a href="/vdemos">Video Demos</a></li>
 						<li><a href="/contactus">Contact Us</a></li>
 					</ul>
@@ -71,12 +71,12 @@
 
 				<c:if test="${(sessionScope.is_admin != 'true') && (sessionScope.is_ldap != 'true')}">
 					<a href="${contextPath}/terminal">Terminal</a>
-					<a href="${contextPath}/jobHistory">Job History</a>
+				<%--	<a href="${contextPath}/jobHistory">Job History</a> --%>
 					<a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 			<span class="caret"></span></a>
 					<ul class="dropdown-menu" style="margin-left: 28.5%; margin-top: 0px">
-	                	<li><a href="/faq">FAQ</a></li>
-	                	<li><a href="/help">User Guide</a></li>
+	                			<li><a href="/faq">FAQ</a></li>
+	                			<li><a href="/help">User Guide</a></li>
 						<li><a href="/vdemos">Video Demos</a></li>
 						<li><a href="/contactus">Contact Us</a></li>
 					</ul>
@@ -102,8 +102,8 @@
 				<a data-toggle="dropdown" href="#" aria-expanded="false">Help
                 			<span class="caret"></span></a>
 				<ul class="dropdown-menu" style="margin-left: 17.2%; margin-top: 0px">
-                	<li><a href="/faq">FAQ</a></li>
-                	<li><a href="/help">User Guide</a></li>
+                			<li><a href="/faq">FAQ</a></li>
+                			<li><a href="/help">User Guide</a></li>
 					<li><a href="/vdemos">Video Demos</a></li>
 					<li><a href="/contactus">Contact Us</a></li>
 				</ul>
@@ -135,4 +135,3 @@
 	
 
 	<div style="padding-bottom: 0rem;"></div>
-
