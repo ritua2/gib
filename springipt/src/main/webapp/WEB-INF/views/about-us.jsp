@@ -16,13 +16,6 @@
     <div>
         
       <figure style="display: inline-block;">
-        <img src="/resources/images/Carlos.jpg" alt="Carlos Redondo" height="225" width="225"/>
-        <figcaption><a href="https://www.linkedin.com/in/carlos-redondo-albertos/">Carlos Redondo</a><br>Undergraduate Research Assistant</figcaption>
-      </figure>
-
-      &nbsp;&nbsp;
-
-      <figure style="display: inline-block;">
         <img src="/resources/images/Ritu.jpg" alt="Ritu Arora" height="225" width="225"/>
         <figcaption><a href="https://www.linkedin.com/in/ritu-arora-59b58ab/">Ritu Arora</a><br>Research Scientist, IPT Project Lead</figcaption>
       </figure>
@@ -44,6 +37,13 @@
       </h2>
 
       <div>
+
+        <figure style="display: inline-block;">
+          <img src="/resources/images/Carlos.jpg" alt="Carlos Redondo" height="225" width="225"/>
+          <figcaption><a href="https://www.linkedin.com/in/carlos-redondo-albertos/">Carlos Redondo</a><br>Undergraduate Research Assistant</figcaption>
+        </figure>
+
+        &nbsp;&nbsp;
 
         <figure style="display: inline-block;">
           <img src="/resources/images/Hannah.jpg" alt="Hannah DeVault" height="225" width="225"/>
