@@ -7,7 +7,9 @@ import com.ipt.web.model.LoginUser;
 
 @Repository
 public interface UserRepository extends JpaRepository<LoginUser, Long> {
-    LoginUser findByUsername(String username);
+    public LoginUser findByUsername(String username);
 	
-	void delete(LoginUser loginUser);
+	public void delete(LoginUser loginUser);
+	
+	public LoginUser findByEmail(String email);
 }

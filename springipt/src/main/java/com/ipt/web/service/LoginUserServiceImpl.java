@@ -32,4 +32,9 @@ public class LoginUserServiceImpl implements LoginUserService {
     public void delete(LoginUser loginUser) {
     	userRepository.delete(loginUser);
     }
+	
+	@Override
+	public LoginUser findByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
 }

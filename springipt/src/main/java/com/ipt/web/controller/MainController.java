@@ -89,14 +89,19 @@ public class MainController {
 		}
 		
 		@RequestMapping(value = "/accessDenied", method = RequestMethod.GET)
-	public String accessDenied(){
-		return "accessDenied";
-	}
+		public String accessDenied(){
+			return "accessDenied";
+		}
 	
-	@RequestMapping(value = "/pagenotfound", method = RequestMethod.GET)
-	public String pagenotfound(){
-		return "pagenotfound";
-	}
+		@RequestMapping(value = "/pagenotfound", method = RequestMethod.GET)
+		public String pagenotfound(){
+			return "pagenotfound";
+		}
+		
+		@RequestMapping(value = "/forgotPassword", method = RequestMethod.GET)
+		public String showForgotPassword(Model model) {
+			return "forgotPassword";
+		}
 
 	
 

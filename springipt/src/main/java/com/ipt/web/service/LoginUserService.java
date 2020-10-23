@@ -8,4 +8,6 @@ public interface LoginUserService {
     LoginUser findByUsername(String loginUser);
 	
 	void delete(LoginUser loginUser);
+	
+	LoginUser findByEmail (String email);
 }

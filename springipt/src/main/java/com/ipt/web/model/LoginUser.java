@@ -14,6 +14,8 @@ public class LoginUser {
 	private String institution;
 	private String country;
     private String passwordConfirm;
+    private String validation_key;
+    private String validation_state;
 	
     private Role role;
 
@@ -92,6 +94,22 @@ public class LoginUser {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+    
+    public String getValidation_key() {
+        return validation_key;
+    }
+
+    public void setValidation_key(String validation_key) {
+        this.validation_key = validation_key;
+    }
+
+    public String getValidation_state() {
+        return validation_state;
+    }
+
+    public void setValidation_state(String validation_state) {
+        this.validation_state = validation_state;
     }
 	
 	
