@@ -99,7 +99,7 @@ vi src/main/webapp/WEB-INF/appconfig-security.xml
 # Edit "user-dn-pattern" attribute of tag <ldap-authentication-provider>
 # Edit "url", "manager-dn" and "password" attributes of tag <ldap-server> with correct LDAP server IP, port and dn pattern
 
-# Edit docker-compose.yml by subsituting values of tags enclosed by {} in services:web:volumes... e.g {LOCAL_ENVAR}->./envar.txt
+# Edit docker-compose.yml by replacing values of tags enclosed by {} in services:web:volumes... e.g {LOCAL_ENVAR}->./envar.txt
 vi docker-compose.yml
 
 # Edit the values of keystoreFile(<connecter port=8443>) and keystorePass(<connecter port=8443>) in server.xml by removing values enclosed with "<>" and update it later after installing secure version of SpringIPT
