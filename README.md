@@ -99,6 +99,12 @@ vi src/main/webapp/WEB-INF/appconfig-security.xml
 # Edit "user-dn-pattern" attribute of tag <ldap-authentication-provider>
 # Edit "url", "manager-dn" and "password" attributes of tag <ldap-server> with correct LDAP server IP, port and dn pattern
 
+# Edit docker-compose.yml by subsituting values of tags enclosed by {} in services:web:volumes... e.g {LOCAL_ENVAR}->./envar.txt
+vi docker-compose.yml
+
+# Edit the values of keystoreFile(<connecter port=8443>) and keystorePass(<connecter port=8443>) in server.xml by removing values enclosed with "<>" and update it later after installing secure version of SpringIPT
+vi server.xml
+
 # Install Maven if not already installed, then execute maven build 
 mvn clean package
 
@@ -212,7 +218,7 @@ docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra
 
 * **Testing the installation**
 The front-end would be accessible at the IP address associated with the VM on which the installation was done as shown below:
-http://IPAddress:9090/springipt/login
+http://IPAddress:9090/
 
 
 
