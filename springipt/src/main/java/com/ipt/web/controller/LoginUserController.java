@@ -137,8 +137,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
         userService.save(userForm);
         
         
-        //final String confirmationUrl = "http://"+baseIP+":9090/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
-        final String confirmationUrl = "https://iptweb.tacc.utexas.edu/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
+        final String confirmationUrl = "http://"+baseIP+":9090/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
+        //final String confirmationUrl = "https://iptweb.tacc.utexas.edu/registrationConfirmation?user="+userForm.getUsername()+"&token="+token;
         
         //String message= "Welcome to GIB,"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
         String message= "Welcome to the IPT Web Portal!"+"\\n"+"\\n"+"Thank you for registering!"+"\\n"+"\\n"+"Please verify your email by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
@@ -802,7 +802,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
             existingUser.setValidation_key(token);
             loginUserService.save(existingUser);
             
-            final String confirmationUrl = "https://iptweb.tacc.utexas.edu/passwordReset?user="+existingUser.getUsername()+"&token="+token;
+            //final String confirmationUrl = "https://iptweb.tacc.utexas.edu/passwordReset?user="+existingUser.getUsername()+"&token="+token;
+            final String confirmationUrl = "http://"+baseIP+":9090/passwordReset?user="+existingUser.getUsername()+"&token="+token;
             String message= "Please verify your email for resetting the IPT web portal password by clicking or copying the following link into your browser's search bar: "+confirmationUrl;
             
             fileWriter44.write("Message is: "+ message);
