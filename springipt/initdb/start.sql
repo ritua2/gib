@@ -28,6 +28,8 @@ CREATE TABLE user (
   name 				VARCHAR(500) 	NOT NULL,
   institution 		VARCHAR(1000) 	NOT NULL,
   country 			VARCHAR(255) 	NOT NULL,
+  validation_key  	VARCHAR(255)	DEFAULT NULL,
+  validation_state  	VARCHAR(255)	DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
