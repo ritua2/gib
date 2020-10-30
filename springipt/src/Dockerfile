@@ -1,4 +1,4 @@
-FROM  tomcat
+FROM  tomcat:8.5.42
 
 RUN apt-get update && apt-get install openssh-client -y &&\
     # Removes the starting ROOT directory, which contains information about Tomcat itself
