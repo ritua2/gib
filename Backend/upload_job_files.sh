@@ -31,7 +31,8 @@ jobID=$(cat ../jobID_file)
 
 
 # For usernames with spaces, transforms the space into the html code
-username=${username// /%20}
+# username=${username// /%20}
+username=${username// /_}
 
 
 curl -F file=@results_file.tar.gz http://"$manager_node":5000/api/jobs/upload_results/user/"$username"/"$jobID"/key="$okey"
