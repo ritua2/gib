@@ -124,7 +124,23 @@ def empty_ports(vmip):
 
     return ep
 
+# Fetch if there is any occupied port by a user 
+def busy_port_with_curuser(vmip,user_id):
 
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    op = None
+    abav = r_occupied.hget(vmip, "Available").decode("UTF-8")
+    if abav == "No":
+        return op
+
+    for pn in ports_occupied(vmip):
+        ava = r_occupied.hget(vmip, "Available_"+pn).decode("UTF-8")
+        usr = r_occupied.hget(vmip, "current_user_"+pn).decode("UTF-8")
+        if ava == "No" and usr == user_id:
+            op=pn
+            return op
+
+    return op
 
 # Gets the long key of a wetty container
 # vmip (str): VM IPv4
@@ -270,6 +286,14 @@ def assigner(user_id):
 
     if not valid_adm_passwd(key):
         return "INVALID key"
+
+    # Checks all instances to restrict one port per user
+    for instance in available_instances():
+
+        # Checks if any port is assigned to current user
+        occupied_port=busy_port_with_curuser(instance,user_id)
+        if occupied_port is not None:
+            return instance+":"+occupied_port
 
     # Checks all instances with at least one port open
     for instance in available_instances():
