@@ -107,12 +107,12 @@
                 
               <div>
                       
-                <h3 class="logo"><a href="https://portal.tacc.utexas.edu/"> TACC </a>|<a href="/"> IPT </a></h3>
+                <h3 class="logo"><a href="https://www.utsa.edu//"> UTSA </a>|<a href="/"> IPT </a></h3>
                   <div class="social-icons">
                     <p>
                       &nbsp; &nbsp;
-                      <a href="https://twitter.com/TACC" class="twitter"><i class="fa fa-twitter"></i></a> &nbsp;
-                      <a href="https://www.facebook.com/tacc.utexas/" class="facebook"><i class="fa fa-facebook"></i></a>  
+                      <a href="https://twitter.com/UTSA" class="twitter"><i class="fa fa-twitter"></i></a> &nbsp;
+                      <a href="https://www.facebook.com/utsa" class="facebook"><i class="fa fa-facebook"></i></a>  
                     </p>       
                     </div>
               </div>
