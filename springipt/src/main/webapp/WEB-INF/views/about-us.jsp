@@ -21,6 +21,14 @@
       </figure>
 
       &nbsp;&nbsp;
+      
+      <figure style="display: inline-block;">
+        <img src="/resources/images/Saumya.jpg" alt="Saumya Shah" height="225" width="225"/>
+        <figcaption><a href="https://www.linkedin.com/in/saumyashah7/">Saumya Shah</a><br>Research Software Developer</figcaption>
+      </figure>
+
+      &nbsp;&nbsp;
+      
 
       <figure style="display: inline-block;">
         <img src="/resources/images/Trung.jpg" alt="Trung Nguyen" height="225" width="225"/>
