@@ -399,7 +399,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
     @GetMapping(value = "/perform_logout")
       public String logout1(HttpServletRequest request) {
         
-        if(request.getSession().getAttribute("mySessionAttribute")!=null)
+        if(request.getSession().getAttribute("mySessionAttribute")!=null && !(request.getSession().getAttribute("mySessionAttribute").toString().contains("Error")))
           com.ipt.web.service.WaitService.freeInstance(request.getUserPrincipal().getName(),request.getSession().getAttribute("mySessionAttribute").toString());
         
         CurrentUser currentUser = new CurrentUser();
