@@ -436,6 +436,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
               new File("/home/greyfish/users/sandbox/DIR_"+authentication.getName().toString().replace(" ","_")+"/home/gib/home/gib").mkdirs();
             }				
           }
+          session.setAttribute("curusername", authentication.getName().toString().replace(" ","_"));
           session.setAttribute("is_ldap", is_ldap.toString());
           
           CurrentUser currentUser = new CurrentUser();

@@ -56,29 +56,38 @@ public class SesListener implements HttpSessionListener {
 		
 		int deleteCount = 0;
 	    
-   		if(se.getSession().getAttribute("uIP")!=null){
-		com.ipt.web.service.WaitService.freeInstance(se.getSession().getAttribute("uName").toString(),se.getSession().getAttribute("uIP").toString());
+		if(se.getSession().getAttribute("curusername")!=null)
+        {
+			deleteCount =  new com.ipt.web.service.CurrentUserService().deleteCurrentUser(se.getSession().getAttribute("curusername").toString());
+        }
 		
-		deleteCount =  new com.ipt.web.service.MappingService().deleteMappedUser(se.getSession().getAttribute("uName").toString(), se.getSession().getAttribute("uIP").toString());
-		
-		
-		
-		try{
-			File file = new File("Destroyed.txt");
-			FileWriter fileWriter = new FileWriter(file);
-			fileWriter.write("\n");
-			fileWriter.write("Session destroyed...");
-			fileWriter.write("\n");
-			fileWriter.write(deleteCount);
-			fileWriter.write("\n");
-			fileWriter.write("Session destroyed...");
-			fileWriter.write("\n");
-			fileWriter.flush();
-			fileWriter.close();
-		}catch(IOException e){
-			e.printStackTrace();
-			}
-	
-  }
+   		if(se.getSession().getAttribute("uIP")!=null)
+   		{
+   			
+   		 if(!(se.getSession().getAttribute("uIP").toString().contains("Error")))
+   		 {
+   			 com.ipt.web.service.WaitService.freeInstance(se.getSession().getAttribute("uName").toString(),se.getSession().getAttribute("uIP").toString());
+   		 }
+   		 deleteCount =  new com.ipt.web.service.MappingService().deleteMappedUser(se.getSession().getAttribute("uName").toString(), se.getSession().getAttribute("uIP").toString());
+   		 try
+		 {
+			 File file = new File("Destroyed.txt");
+			 FileWriter fileWriter = new FileWriter(file);
+			 fileWriter.write("\n");
+			 fileWriter.write("Session destroyed...");
+			 fileWriter.write("\n");
+			 fileWriter.write(deleteCount);
+			 fileWriter.write("\n");
+			 fileWriter.write("Session destroyed...");
+			 fileWriter.write("\n");
+			 fileWriter.flush();
+			 fileWriter.close();
+		 }
+		 catch(IOException e)
+		 {
+			 e.printStackTrace();
+		 }
+   		 
+   		}
 }
 }
