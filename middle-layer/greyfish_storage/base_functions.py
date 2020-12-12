@@ -21,7 +21,7 @@ def valid_key(ukey, username):
     if ukey == os.environ['greyfish_key']:
         return True
 
-    ipt_db = mysql_con.connect(host = os.environ["URL_BASE"] , port = 6603, user ='spring' , password = 'password', database = 'iptweb')
+    ipt_db = mysql_con.connect(host = os.environ["URL_BASE"] , port = 6603, user = os.environ["MYSQL_USER"] , password = os.environ["MYSQL_PASSWORD"], database = os.environ["MYSQL_DATABASE"])
     cursor = ipt_db.cursor(buffered=True)
     cursor.execute("select username from greykeys where token=%s",(ukey,))
     user=None
