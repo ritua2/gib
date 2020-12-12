@@ -45,6 +45,9 @@ services:
             - greyfish_path
             - greyfish_threads
             - URL_BASE
+            - MYSQL_DATABASE
+            - MYSQL_USER
+            - MYSQL_PASSWORD
             - REDIS_AUTH
 
         command: "tail -F anything"

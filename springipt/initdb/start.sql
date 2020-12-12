@@ -147,3 +147,50 @@ CREATE TABLE news (
 
 alter table user drop primary key, add primary key(id, email);
 
+DROP TABLE IF EXISTS terminal;
+CREATE TABLE terminal (
+    ip              varchar(20)     NOT NULL,
+    address         varchar(40)     NOT NULL,
+    available       tinyint(1)      NOT NULL,
+    ports           int             DEFAULT NULL,
+    PRIMARY KEY (ip)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS port;
+CREATE TABLE port (
+    ip              varchar(20)     NOT NULL,
+    port            varchar(5)      NOT NULL,
+    id              varchar(50)     DEFAULT NULL,
+    currentuser     varchar(25)     DEFAULT NULL,
+    available       tinyint(1)      DEFAULT NULL,
+    waitkey         varchar(35)     DEFAULT NULL,
+    PRIMARY KEY (ip,port)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;  
+
+DROP TABLE IF EXISTS redirect_cache;
+CREATE TABLE redirect_cache (
+    ip              varchar(20)     NOT NULL,
+    port            varchar(5)      NOT NULL,
+    username        varchar(25)     NOT NULL,
+    timeout         datetime        DEFAULT NULL,
+    PRIMARY KEY (ip,port)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS ip_to_hostname;
+CREATE TABLE ip_to_hostname (
+    ip              varchar(20)     NOT NULL,
+    hostname        varchar(30)     NOT NULL,
+    PRIMARY KEY (ip)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS greykeys;
+CREATE TABLE greykeys (
+    username        varchar(20)     NOT NULL,
+    token           varchar(24)     NOT NULL,
+    timeout         datetime        DEFAULT NULL,
+    PRIMARY KEY (token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE DEFINER=`root`@`localhost` EVENT `DELETE_REDIRECT_CACHE` ON SCHEDULE EVERY 10 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM redirect_cache WHERE timeout < NOW();
+CREATE DEFINER=`root`@`localhost` EVENT `DELETE_GREYKEYS` ON SCHEDULE EVERY 10 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM greykeys WHERE timeout < NOW();
+

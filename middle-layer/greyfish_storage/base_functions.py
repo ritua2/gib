@@ -8,6 +8,7 @@ import os
 import datetime, time
 from pathlib import Path
 import redis
+import mysql.connector as mysql_con
 
 
 
@@ -17,19 +18,31 @@ import redis
 # Checks if the provided user key is valid
 def valid_key(ukey, username):
 
-    r_tok = redis.Redis(host=os.environ['URL_BASE'], password=os.environ['REDIS_AUTH'], db=3)
-
     if ukey == os.environ['greyfish_key']:
         return True
 
-    if r_tok.get(ukey) == None:
+    ipt_db = mysql_con.connect(host = os.environ["URL_BASE"] , port = 6603, user ='spring' , password = 'password', database = 'iptweb')
+    cursor = ipt_db.cursor(buffered=True)
+    cursor.execute("select username from greykeys where token=%s",(ukey,))
+    user=None
+    for row in cursor:
+        user=row[0]
+
+    if user == None:
+        cursor.close()
+        ipt_db.close()
         return False
 
-    if r_tok.get(ukey).decode("UTF-8") == username:
+    if user == username:
         # Deletes the token since it is single use
-        r_tok.delete(ukey)
+        cursor.execute("delete from greykeys where token=%s",(ukey,))
+        ipt_db.commit()
+        cursor.close()
+        ipt_db.close()
         return True
 
+    cursor.close()
+    ipt_db.close()
     return False
 
 

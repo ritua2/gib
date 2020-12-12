@@ -23,7 +23,7 @@ COPY checksums.py       /grey/checksums.py
 # Installs the necessary packages
 # Bash for convenience
 RUN apk update && apk add bash curl openrc openssh && mkdir -p /greyfish/sandbox &&\
-    pip3 install gunicorn Flask redis requests &&\
+    pip3 install gunicorn Flask mysql-connector-python redis requests &&\
     chmod +x /grey/new_user.py /grey/grey_regular.py /grey/gget_all.py /grey/push_all.py /grey/API_Daemon.sh /grey/admin.py &&\
     mkdir -p /greyfish/sandbox/DIR_commonuser/jobs_left
 

@@ -12,6 +12,7 @@ import json
 import os, shutil
 import random
 import re
+import redis
 import requests
 import signal
 import subprocess
@@ -20,7 +21,6 @@ from urllib.parse import unquote
 import uuid
 from werkzeug.utils import secure_filename
 import zipfile
-import mysql.connector as mysql_con
 
 import email_common as ec
 import ldap_validate
@@ -32,9 +32,6 @@ import web_data_to_json_file
 
 
 URL_BASE = os.environ["URL_BASE"]
-MYSQL_USER = os.environ["MYSQL_USER"]
-MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
-MYSQL_DATABASE = os.environ["MYSQL_DATABASE"]
 REDIS_AUTH = os.environ["REDIS_AUTH"]
 orchestra_key = os.environ["orchestra_key"]
 PROJECT = os.environ["PROJECT"]
@@ -49,6 +46,12 @@ hhmmss_pattern = re.compile("^[0-9]{2}:[0-5][0-9]:[0-5][0-9]$")
 
 
 
+# Adds to the list of available containers
+def change_container_availability(a1):
+    misc = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+    misc.incrby("Available containers", a1)
+
+
 def l2_contains_l1(l1, l2):
     return[elem for elem in l1 if elem not in l2]
 
@@ -60,27 +63,29 @@ def valid_adm_passwd(apass):
         return False
 
 
-# Gets ip for all VMs
-def all_instances():
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    ip=[]
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select ip from terminal")
-    for row in cursor:
-        ip.append(row[0])
-    cursor.close()
-    ipt_db.close()
-    return ip
+# Gets the keys in a certain redis database
+# rdb (Redis connection object)
+def redkeys(rdb):
+    return [x.decode("UTF-8") for x in rdb.keys()]
+
+
+# Checks if a particular key exists in a redis DB
+# tested_key (str): Key to be checked
+def red_key_check(rdb, tested_key):
+    if rdb.get(tested_key) == None:
+        return False
+    else:
+        return True
+
 
 def available_instances():
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     instances_av = []
-    cursor.execute("select ip from terminal where available = TRUE")
-    for row in cursor:
-        instances_av.append(row[0])
-    cursor.close()
-    ipt_db.close()
+    for insip in redkeys(r_occupied):
+        abav = r_occupied.hget(insip, "Available").decode("UTF-8")
+        if abav == "Yes":
+            instances_av.append(insip)
+
     return instances_av
 
 
@@ -88,54 +93,61 @@ def available_instances():
 # Finds the list of occupied ports for certain instance, each port is a string
 # instance (str)
 def ports_occupied(instance):
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select port from port where ip = %s", (instance,))
-    pav=[]
-    for row in cursor:
-        pav.append(row[0])
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    redports = int(r_occupied.hget(instance, "Ports").decode("UTF-8"))
+    # Shows the ports in binary: 0b100 = 4, and reverses it
+    portsn = bin(redports)[2:][::-1]
+    pav = []
+
+    for loc, port_used in zip(range(0, len(portsn)), portsn):
+        if port_used == "1":
+            pav.append(str(7000+loc))
+
     return pav
+
+
 
 # vmip (str): VM IP
 def empty_ports(vmip):
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     ep = []
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select port from port where ip = %s and available = TRUE", (vmip,))
-    for row in cursor:
-        ep.append(row[0])
+    abav = r_occupied.hget(vmip, "Available").decode("UTF-8")
+    if abav == "No":
+        return ep
+
+    for pn in ports_occupied(vmip):
+        ava = r_occupied.hget(vmip, "Available_"+pn).decode("UTF-8")
+        if ava == "Yes":
+            ep.append(pn)
+
     return ep
 
 # Fetch if there is any occupied port by a user 
-def busy_port_with_curuser(user_id):
+def busy_port_with_curuser(vmip,user_id):
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select ip, port from port where currentuser = %s", (user_id,))
-    instance=None
-    port=None
-    for row in cursor:
-        instance=row[0]
-        port=row[1]
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    op = None
+    abav = r_occupied.hget(vmip, "Available").decode("UTF-8")
+    if abav == "No":
+        return op
 
-    cursor.close()
-    ipt_db.close()
-    return instance,port
+    for pn in ports_occupied(vmip):
+        ava = r_occupied.hget(vmip, "Available_"+pn).decode("UTF-8")
+        usr = r_occupied.hget(vmip, "current_user_"+pn).decode("UTF-8")
+        if ava == "No" and usr == user_id:
+            op=pn
+            return op
 
+    return op
 
 # Gets the long key of a wetty container
 # vmip (str): VM IPv4
 # port_used (str)
 def PK_32(vmip, port_used):
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select id from port where ip = %s and port = %s", (vmip,port_used))
-    id=""
-    for row in cursor:
-        id=row[0]
-    cursor.close()
-    ipt_db.close()
-    return id
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    return r_occupied.hget(vmip, "id_"+port_used).decode("UTF-8")
 
 
 # Verifies that a port key key is valid
@@ -143,7 +155,8 @@ def PK_32(vmip, port_used):
 # kk (str): key
 # port_used (str)
 def Valid_PK(vmip, kk, port_used):
-    expected_key=PK_32(vmip,port_used)
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    expected_key = r_occupied.hget(vmip, "id_"+port_used).decode("UTF-8")
     if expected_key == kk:
         return True
     else:
@@ -153,12 +166,15 @@ def Valid_PK(vmip, kk, port_used):
 
 # Checks the port of a 10 character hash
 # If the port is not associated with anything, it returns ["NA", 1]
-def Porter10(vmip, kk): 
+def Porter10(vmip, kk):
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
     for pn in ports_occupied(vmip):
-        expected_key=PK_32(vmip,pn)
+        expected_key = r_occupied.hget(vmip, "id_"+pn).decode("UTF-8")
         if kk in expected_key:
             return [pn, 0]
-    return ["NA", 1]
+    else:
+        return ["NA", 1]
 
 
 
@@ -201,36 +217,17 @@ def sha256_checksum(filename, block_size=65536):
 # If not, it returns the IP
 # IP_to_be_translated (string) -> defined_hostname (str)
 def IP_to_hostname(IP_to_be_translated):
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)    
-    cursor.execute("select hostname from ip_to_hostname where ip = %s",(IP_to_be_translated,))
-    possible_hostname = None
-    for row in cursor:
-        possible_hostname = row[0]
-    cursor.close()
-    ipt_db.close()
+
+    r_hostnames = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=9)
+
+    possible_hostname = r_hostnames.get(IP_to_be_translated)
 
     if possible_hostname == None:
         # No translation or the IP has not been added
         return IP_to_be_translated
     else:
-        return possible_hostname
+        return possible_hostname.decode("UTF-8")
 
-def hostname_to_IP(host_to_be_translated):
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)    
-    cursor.execute("select ip from ip_to_hostname where hostname = %s",(host_to_be_translated,))
-    possible_ip = None
-    for row in cursor:
-        possible_ip = row[0]
-    cursor.close()
-    ipt_db.close()
-
-    if possible_ip == None:
-        # No translation or the IP has not been added
-        return host_to_be_translated
-    else:
-        return possible_ip
 
 
 app = Flask(__name__)
@@ -259,15 +256,8 @@ def project_name():
 # Returns a string of available docker containers
 @app.route("/api/status/containers/available", methods=['GET'])
 def AvCon_API():
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select count(*) from port where available = TRUE")
-    count = 0
-    for row in cursor:
-        count=row[0]
-    cursor.close()
-    ipt_db.close() 
-    return count
+    misc = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+    return misc.get("Available containers").decode("UTF-8")
 
 
 
@@ -280,6 +270,8 @@ def active():
 # Requests an available container for a user
 @app.route("/api/assign/users/<user_id>", methods=['POST'])
 def assigner(user_id):
+
+    r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -294,44 +286,33 @@ def assigner(user_id):
 
     if not valid_adm_passwd(key):
         return "INVALID key"
-    
-    
-    # Checks if any port is assigned to current user
-    instance,occupied_port=busy_port_with_curuser(user_id)
-    if instance is not None and occupied_port is not None:
-        return instance+":"+occupied_port
 
+    # Checks all instances to restrict one port per user
+    for instance in available_instances():
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
+        # Checks if any port is assigned to current user
+        occupied_port=busy_port_with_curuser(instance,user_id)
+        if occupied_port is not None:
+            return instance+":"+occupied_port
 
     # Checks all instances with at least one port open
     for instance in available_instances():
 
+        # Adds '_' at the end
+        instance_ = instance+"_"
+
         # Checks only ports not assigned yet
         for emp in empty_ports(instance):
-            cursor.execute("select count(*) from redirect_cache where ip = %s and port = %s",(instance,emp))
-            count=0
-            for row in cursor:
-                count=row[0]
-            if count>0:
+            if red_key_check(r_redirect_cache, instance_+emp):
                 # Ignores ports in cache
                 continue
 
             # Sets the instance as occupied, the server now has 20 s to redirect the user
-            try:
-                cursor.execute("insert into redirect_cache(ip,port,username,timeout) values(%s,%s,%s,NOW() + INTERVAL 20 SECOND)",(instance,emp,user_id))
-                ipt_db.commit()
-            except mysql_con.IntegrityError:
-                continue
-            cursor.close()
-            ipt_db.close() 
+            r_redirect_cache.setex(instance_+emp, 20, user_id)
             return instance+":"+emp
 
     # All instances are occupied
     else:
-        cursor.close()
-        ipt_db.close()
         return "False"
 
 
@@ -341,33 +322,42 @@ def assigner(user_id):
 @app.route("/api/redirect/users/<user_id>/<target_ip>", methods=['GET'])
 def redirect_to_wetty(user_id, target_ip):
 
-    target_ip = IP_to_hostname(target_ip)
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    
-    # Finds if the user is attached to any instance   
-    cursor.execute("select port from redirect_cache where ip = %s and username = %s",(target_ip,user_id))
-    port = None
-    for row in cursor:
-        port=row[0]
+    r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
 
-    if port is not None:
-        # 20 s to complete redirect
-        cursor.execute("update redirect_cache set timeout=NOW() + INTERVAL 20 SECOND where ip = %s and username = %s and port= %s",(target_ip,user_id, port))
-        ipt_db.commit()
-        cursor.close()
-        ipt_db.close()
-        return "Redirecting https://"+target_ip+":"+port+"/wetty"
+    target_ip = IP_to_hostname(target_ip)
+
+    # Finds if the user is attached to any instance
+    available_redirect = [x.decode("UTF-8") for x in r_redirect_cache.keys(target_ip+"_*")]
+    for avred in available_redirect:
+
+        expected_user = r_redirect_cache.get(avred)
+        if expected_user == None:
+            # Avoids race conditions
+            continue
+
+        if expected_user.decode("UTF-8") == user_id:
+            user_instance = avred
+            break
     else:
-        cursor.close()
-        ipt_db.close()
         return "INVALID: "+target_ip+" has already been assigned to another user"
+
+    # Deletes the copy in Redis
+    r_redirect_cache.delete(user_instance)
+    # Gets the port number
+    user_instance = user_instance.replace("_", ":")
+    # 20 s to complete redirect
+    r_redirect_cache.setex(user_instance, 20, user_id)
+    
+    return "Redirecting https://"+user_instance+"/wetty"
+
 
 
 # Adds a new container by port and IP
 @app.route("/api/instance/attachme", methods=['POST'])
 def attachme():
- 
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+
     if not request.is_json:
         return "POST parameters could not be parsed"
 
@@ -381,54 +371,47 @@ def attachme():
     # There may be multiple containers per instance
     iport = ppr["port"]
     sender_ID = ppr["sender"]
-    reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-    reqip = request.environ['REMOTE_ADDR']
-
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
-    
-    instances = all_instances()
+
+    instances = redkeys(r_occupied)
     port_number = int(iport)
-
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-
 
     # Instance IP has already been added
     if reqip in instances:
         occports = ports_occupied(reqip)
         if not (iport in occports):
-            insert_port = ("INSERT INTO port (ip, port, id, currentuser, available) VALUES (%s, %s, %s, %s, %s)")
-            cursor.execute(insert_port, (reqip, iport, sender_ID, "Empty",True))        
-            select_ports = ("SELECT ports from terminal where ip=%s")
-            cursor.execute(select_ports, (reqip,))
-            ports=0
-            for sel_ports in cursor:
-                ports=sel_ports[0]
-            ports+=2**((port_number-7000)%10)
-            update_ports = ("UPDATE terminal set ports = %s where ip=%s")
-            cursor.execute(update_ports, (ports,reqip))
-            ipt_db.commit()
-            cursor.close()
-            ipt_db.close()
+            r_occupied.hincrby(reqip, "Ports", 2**((port_number-7000)%10))
+            r_occupied.hset(reqip, "Available", "Yes")
+            r_occupied.hset(reqip, "Available_"+iport, "Yes")
+            r_occupied.hset(reqip, "current_user_"+iport, "Empty")
+            r_occupied.hset(reqip, "id_"+iport, sender_ID)
+            change_container_availability(1)
             return "Added port "+iport
 
         else:
-            cursor.close()
-            ipt_db.close()
             return "Port has already been added"
 
     else:
 
-        # All IPs are stored in MYSQL with the following data:
-        insert_terminal = ("INSERT INTO terminal (ip, address, available, ports) VALUES (%s, %s, %s, %s)")
-        cursor.execute(insert_terminal, (reqip, reqhostname, True, int(2**((port_number-7000)%10))) )
-        insert_port = ("INSERT INTO port (ip, port, id, currentuser, available) VALUES (%s, %s, %s, %s, %s)")
-        cursor.execute(insert_port, (reqip, iport, sender_ID, "Empty",True))
-        ipt_db.commit()
-        cursor.close()
-        ipt_db.close()
+        # All IPs are stored in Redis with the following data:
+        # Available, id, current_user, whoami_count, address
+        new_instance = {
+                        "address":reqip, # Could be a hostname
+                        "IP":request.environ['REMOTE_ADDR'], # IP
+                        "Available":"Yes",
+                        "Ports":str(int(2**((port_number-7000)%10))),
+
+                        # Varies per instance
+                        "id_"+iport:sender_ID,
+                        "current_user_"+iport:"Empty",
+                        "Available_"+iport:"Yes"
+        }
+
+        r_occupied.hmset(reqip, new_instance)
+        change_container_availability(1)
         return "Instance correctly attached"
 
 
@@ -436,6 +419,8 @@ def attachme():
 # Removes the current IP as a wetty instance
 @app.route("/api/instance/removeme", methods=['POST'])
 def removeme():
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -447,24 +432,15 @@ def removeme():
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-    reqip = request.environ['REMOTE_ADDR']
-
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    if not (reqip in all_instances()):
+    if not (reqip in redkeys(r_occupied)):
         return "INVALID, instance is not associated with the project"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-   
-    cursor.execute("delete from port where ip = %s", (reqip,))
-    cursor.execute("delete from terminal where ip = %s", (reqip,))
-    ipt_db.commit()
-    cursor.close()
-    ipt_db.close()
+    change_container_availability(-1)
     r_occupied.delete(reqip)
     return "Instance removed"
 
@@ -475,6 +451,8 @@ def removeme():
 # This is an instantaneous action and it does not matter if there is a user already in the instance
 @app.route("/api/instance/remove_my_port", methods=['POST'])
 def remove_my_port():
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -489,17 +467,14 @@ def remove_my_port():
     # There may be multiple containers per instance
     iport = ppr["port"]
     sender_ID = ppr["sender"]
-    reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-    reqip = request.environ['REMOTE_ADDR']
-
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    #instances = redkeys(r_occupied)
-    instances = all_instances()
+    instances = redkeys(r_occupied)
     port_number = int(iport)
-    if not (reqip in instances):
+    if not (reqip in redkeys(r_occupied)):
         return "INVALID, instance is not associated with the project"
 
     # Port must be added
@@ -507,35 +482,20 @@ def remove_my_port():
     if not (iport in occports):
         return "Port is not associated with the instance"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-
     if (len(occports) == 1) and (Valid_PK(reqip, sender_ID, iport)):
         # If last port, delete the instance from database
-        cursor.execute("delete from port where ip = %s", (reqip,))
-        cursor.execute("delete from terminal where ip = %s", (reqip,))
-        ipt_db.commit()
-        cursor.close()
-        ipt_db.close()
+        change_container_availability(-1)
+        r_occupied.delete(reqip)
         return "Instance removed"
 
     else:
         # Check for valid key
         if Valid_PK(reqip, sender_ID, iport):
             # Removes all the provided characteristics
-            cursor.execute("delete from port where ip = %s and port = %s", (reqip,iport))
+            r_occupied.hdel(reqip, "Available_"+iport, "current_user_"+iport, "id_"+iport)
             # Changes the port number
-            select_ports = ("SELECT ports from terminal where ip=%s")
-            cursor.execute(select_ports, (reqip,))
-            ports=0
-            for sel_ports in cursor:
-                ports=sel_ports[0]
-            ports-=2**((port_number-7000)%10)
-            update_ports = ("UPDATE terminal set ports = %s where ip=%s")
-            cursor.execute(update_ports, (ports,reqip))
-            ipt_db.commit()
-            cursor.close()
-            ipt_db.close()
+            r_occupied.hincrby(reqip, "Ports", -1*2**((port_number-7000)%10))
+            change_container_availability(-1)
             return "Removed port from instance"
 
 
@@ -544,6 +504,10 @@ def remove_my_port():
 # Must be called from springIPT
 @app.route("/api/instance/free", methods=['POST'])
 def free_instance():
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -555,60 +519,42 @@ def free_instance():
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    reqhostname = IP_to_hostname(ppr["IP"])
-    reqip = ppr["IP"]
-
+    reqip = IP_to_hostname(ppr["IP"])
     port = str(ppr["Port"])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-
-    cursor.execute("select available,currentuser from port where ip = %s and port = %s", (reqip,port))
-    ava=None
-    current_wetty_user=""
-    for row in cursor:
-        ava=row[0]
-        current_wetty_user=row[1]
-
-    if ava is None:
-        cursor.close()
-        ipt_db.close()
+    if not r_occupied.hexists(reqip, "Available_"+port):
         return "INVALID, port not attached"
- 
-    if ava:
-        cursor.close()
-        ipt_db.close()
+
+    if r_occupied.hget(reqip, "Available_"+port).decode("UTF-8") != "No":
         return "INVALID, wetty instance is empty at the moment"
 
-    #current_wetty_user = r_occupied.hget(reqip, "current_user_"+port).decode("UTF-8")
+    current_wetty_user = r_occupied.hget(reqip, "current_user_"+port).decode("UTF-8")
     miniserver_port = str(int(port) + 100)
 
     # Generates a single-use greyfish token
     new_token = random_string(24)
-    try:
-        cursor.execute("insert into greykeys(username,token, timeout) values(%s, %s, NOW() + INTERVAL 60 SECOND)",(current_wetty_user,new_token))
-    except mysql_con.IntegrityError:
-        cursor.execute("update greykeys set username=%s, timeout= NOW() + INTERVAL 60 SECOND where token=%s",(current_wetty_user,new_token))
-    ipt_db.commit()
+    greyfish_server.setex(new_token, 60, current_wetty_user)
 
     wetty_key = PK_32(reqip, port)
 
     # Issues a call to the wetty miniserver
     # The miniserver will then prepare the instance for a new user
-    sync_wetty_volume(reqhostname, port, current_wetty_user, wetty_key, "stop")
-    req = requests.post("http://"+reqhostname+":"+miniserver_port+"/user/purge", data={"key": wetty_key, "username":current_wetty_user,
+    sync_wetty_volume(reqip, port, current_wetty_user, wetty_key, "stop")
+    req = requests.post("http://"+reqip+":"+miniserver_port+"/user/purge", data={"key": wetty_key, "username":current_wetty_user,
                                                                                 "greyfish_url":URL_BASE, "gk":new_token})
 
     # Frees the instance
-    cursor.execute("Update port set available = %s, currentuser = %s, waitkey=NULL where ip = %s and port = %s", (True,"Empty",reqip,port))
+    r_occupied.hset(reqip, "Available_"+port, "Yes")
+    r_occupied.hset(reqip, "current_user_"+port, "Empty")
     # Sets the instance as globaly available
-    cursor.execute("Update terminal set available = %s where ip = %s",  (True,reqip))
-    ipt_db.commit()
-    cursor.close()
-    ipt_db.close()
+    r_occupied.hset(reqip, "Available", "Yes")
+    change_container_availability(1)
+
+    # Removes the user as occupying a VM
+    r_user_to_.delete(current_wetty_user)
 
     return "Correctly freed instance"
 	
@@ -619,6 +565,9 @@ def free_instance():
 @app.route("/api/instance/get_latest", methods=['POST'])
 def get_instance():
 
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
+    
     if not request.is_json:
         return "POST parameters could not be parsed"
 
@@ -629,54 +578,31 @@ def get_instance():
         return "INVALID: Lacking the following json fields to be read: "+",".join([str(a) for a in check])
 
     key = ppr["key"]
-    reqhostname = IP_to_hostname(ppr["IP"])
-    reqip = ppr["IP"]
-
+    reqip = IP_to_hostname(ppr["IP"])
     port = str(ppr["Port"])
 
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE) 
-    cursor = ipt_db.cursor(buffered=True)
-
-    cursor.execute("select available,currentuser from port where ip = %s and port = %s", (reqip,port))
-    ava=None
-    current_wetty_user=""
-    for row in cursor:
-        ava=row[0]
-        current_wetty_user=row[1]
-    
-    if ava is None:
-        cursor.close()
-        ipt_db.close()
+    if not r_occupied.hexists(reqip, "Available_"+port):
         return "INVALID, port not attached"
 
-
-    if ava:
-        cursor.close()
-        ipt_db.close()
+    if r_occupied.hget(reqip, "Available_"+port).decode("UTF-8") != "No":
         return "INVALID, wetty instance is empty at the moment"
 
+    current_wetty_user = r_occupied.hget(reqip, "current_user_"+port).decode("UTF-8")
     miniserver_port = str(int(port) + 100)
 
     # Generates a single-use greyfish token
     new_token = random_string(24)
-    try:
-        cursor.execute("insert into greykeys(username,token, timeout) values(%s, %s, NOW() + INTERVAL 60 SECOND)",(current_wetty_user,new_token))
-    except mysql_con.IntegrityError:
-        cursor.execute("update greykeys set username=%s, timeout= NOW() + INTERVAL 60 SECOND where token=%s",(current_wetty_user,new_token))
-
-    ipt_db.commit()
-    cursor.close()
-    ipt_db.close()
+    greyfish_server.setex(new_token, 60, current_wetty_user)
 
     wetty_key = PK_32(reqip, port)
 
     # Issues a call to the wetty miniserver
     # The miniserver will then prepare the instance for a new user
     #sync_wetty_volume(reqip, port, current_wetty_user, wetty_key, "stop")
-    req = requests.post("http://"+reqhostname+":"+miniserver_port+"/get/latest", data={"key": wetty_key, "username":current_wetty_user,
+    req = requests.post("http://"+reqip+":"+miniserver_port+"/get/latest", data={"key": wetty_key, "username":current_wetty_user,
                                                                                 "greyfish_url":URL_BASE, "gk":new_token})
 
     return "Correctly sent data"
@@ -689,48 +615,45 @@ def get_instance():
 
 
 # Returns the current user
-# Sets up the MYSQL table with the instance as occupied
+# Sets up the Redis table with the instance as occupied
 @app.route("/api/instance/whoami/<uf10>", methods=['GET'])
 def whoami(uf10):
 
-    reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-    reqip = request.environ['REMOTE_ADDR']
+
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    r_redirect_cache = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=1)
+
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
     user_port, err = Porter10(reqip, uf10)
 
     if err:
         # If it does not exist, the user is either already there or the VM is not attached
         return "Empty"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)    
-    cursor.execute("select username from redirect_cache where ip = %s and port = %s",(reqip,user_port))
-    expected_user = None
-    for row in cursor:
-        expected_user=row[0]
+    proper_location = reqip+":"+user_port
+    expected_user = r_redirect_cache.get(proper_location)
 
     if expected_user == None:
-        cursor.close()
-        ipt_db.close()
         return "Empty"
 
     # Deletes the cache
-    cursor.execute("delete from redirect_cache where ip = %s and port = %s", (reqip,user_port))
-
+    r_redirect_cache.delete(proper_location)
     # Sets the port as occupied
-    cursor.execute("update port set available = %s, currentuser = %s where ip = %s and port = %s", (False,expected_user,reqip,user_port))
-    ipt_db.commit()
+    r_occupied.hset(reqip, "Available_"+user_port, "No")
+    r_occupied.hset(reqip, "current_user_"+user_port, expected_user.decode("UTF-8"))
 
     # If all ports are occupied, it sets the available tag as no
     if len(empty_ports(reqip)) == 0:
-        cursor.execute("update terminal set available = %s where ip = %s", (False,reqip))
-        ipt_db.commit()
-
-    cursor.close()
-    ipt_db.close()
+        r_occupied.hset(reqip, "Available", "No")
     
+    # Sets the user as already occupying a container
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+    r_user_to_.hset(expected_user.decode("UTF-8"), "IP:port", proper_location)
+
     wetty_key = PK_32(reqip, user_port)
-    sync_wetty_volume(reqhostname, user_port, expected_user, wetty_key, "start")
-    return expected_user
+    sync_wetty_volume(reqip, user_port, expected_user.decode("UTF-8"), wetty_key, "start")
+    change_container_availability(-1)
+    return expected_user.decode("UTF-8")
 
 
 
@@ -739,6 +662,8 @@ def whoami(uf10):
 @app.route("/api/users/logged_in", methods=['POST'])
 def logged_in():
 
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+
     if not request.is_json:
         return "POST parameters could not be parsed"
 
@@ -754,18 +679,21 @@ def logged_in():
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    ip,port=busy_port_with_curuser(username)
 
     # Checks all instances with at least one port open
-    if ip is None or port is None:
+    if r_user_to_.exists(username) == 0:
         return "False"
     else:
-        return ip+":"+port
+        return r_user_to_.hget(username, "IP:port").decode("UTF-8")
+
+
 
 # Sets the container assigned to user X as waiting
 @app.route("/api/users/container_wait", methods=['POST'])
 def container_wait():
 
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
+
     if not request.is_json:
         return "POST parameters could not be parsed"
 
@@ -781,14 +709,11 @@ def container_wait():
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    ip,port=busy_port_with_curuser(username)
-
     # Finds if the user is logged in
-    if ip is None or port is None:
+    if r_user_to_.exists(username) == 0:
         return "User is not available at any container"
 
-    #user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
-    user_ip_port_container = ip+":"+port
+    user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
     [ip_used, port_used] = user_ip_port_container.split(":")
 
     ip_used = IP_to_hostname(ip_used)
@@ -803,12 +728,7 @@ def container_wait():
     if req.text == "INVALID key":
         return "Could not set wetty terminal as WAIT"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True) 
-    cursor.execute("update port set waitkey = %s where currentuser = %s", (req.text,username))
-    ipt_db.commit()
-    cursor.close()
-    ipt_db.close()
+    r_user_to_.hset(username, "WAIT key", req.text)
     return "Set wetty at "+user_ip_port_container+" as WAIT"
 
 
@@ -817,6 +737,8 @@ def container_wait():
 # Returns false if not
 @app.route("/api/users/wetty_wait_key", methods=['POST'])
 def wetty_wait_key():
+
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -833,32 +755,24 @@ def wetty_wait_key():
     if not valid_adm_passwd(key):
         return "INVALID key"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select ip, port, waitkey from port where currentuser = %s", (username,))
-    ip = None
-    port = None
-    wkey = None
-    for row in cursor:
-        ip=row[0]
-        port=row[1]
-        wkey=row[2]
-    cursor.close()
-    ipt_db.close()
-
     # Checks all instances with at least one port open
-    if ip is None or port is None:
+    if r_user_to_.exists(username) == 0:
         return "False"
     else:
-        if wkey is not None:
-            return wkey
+
+        if r_user_to_.hexists(username, "WAIT key"):
+            return r_user_to_.hget(username, "WAIT key").decode("UTF-8")
         else:
             return "User is logged in, no waiting containers"
+
+
 
 
 # Synchronizes the user container to its attached 
 @app.route("/api/users/container_sync", methods=['POST'])
 def container_sync_volume():
+
+    r_user_to_ = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=4)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -879,14 +793,11 @@ def container_sync_volume():
     if action not in ["start", "stop"]:
         return "INVALID action. Action '"+action+"' is not allowed. Allowed actions are: 'start', 'stop'."
 
-    ip,port=busy_port_with_curuser(username)
-
     # Finds if the user is logged in
-    #if r_user_to_.exists(username) == 0:
-    if ip is None or port is None:
+    if r_user_to_.exists(username) == 0:
         return "User is not available at any container"
 
-    user_ip_port_container = ip+":"+port
+    user_ip_port_container = r_user_to_.hget(username, "IP:port").decode("UTF-8")
     [ip_used, port_used] = user_ip_port_container.split(":")
     ip_used = IP_to_hostname(ip_used)
 
@@ -935,41 +846,28 @@ def grey_locator():
 @app.route("/api/greyfish/new/single_use_token/<uf10>", methods=['GET'])
 def grey_stoken(uf10):
 
-    reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-    reqip = request.environ['REMOTE_ADDR']
-    instances = all_instances()
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
 
-    if not (reqip in instances):
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
+    instances = redkeys(r_occupied)
+
+    if not (reqip in redkeys(r_occupied)):
         return "INVALID: instance not attached"
 
     pnn, err = Porter10(reqip, uf10)
     if err:
         return "INVALID: port not attached"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select currentuser from port where ip = %s and port = %s", (reqip,pnn))
-    curuser=''
-    for row in cursor:
-        curuser=row[0]
-
+    curuser = r_occupied.hget(reqip, "current_user_"+pnn).decode("UTF-8")
     if curuser != "Empty":
         # Creates a random string of characters (24 length), sets it as a token, and returns it
         # Each token will last a maximum of 2 hours
         new_token = random_string(24)
-        try:
-            cursor.execute("insert into greykeys(username,token, timeout) values(%s, %s, NOW() + INTERVAL 7200 SECOND)",(curuser,new_token))
-        except mysql_con.IntegrityError:
-            cursor.execute("update greykeys set username=%s, timeout= NOW() + INTERVAL 7200 SECOND where token=%s",(curuser,new_token))
-
-        ipt_db.commit()
-        cursor.close()
-        ipt_db.close()
+        greyfish_server.setex(new_token, 7200, curuser)
         return new_token
 
     else:
-        cursor.close()
-        ipt_db.close()
         return "INVALID user"
 
 
@@ -980,42 +878,28 @@ def grey_stoken(uf10):
 @app.route("/api/greyfish/new/commonuser_token/<uf10>", methods=['GET'])
 def grey_commonuser_token(uf10):
 
-    reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-    reqip = request.environ['REMOTE_ADDR']
-    instances = all_instances()
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
 
-    if not (reqip in instances):
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
+    instances = redkeys(r_occupied)
+
+    if not (reqip in redkeys(r_occupied)):
         return "INVALID: instance not attached"
 
     pnn, err = Porter10(reqip, uf10)
     if err:
         return "INVALID: port not attached"
 
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE) 
-    cursor = ipt_db.cursor(buffered=True)
-    cursor.execute("select currentuser from port where ip = %s and port = %s", (reqip,pnn))
-    curuser=''
-    for row in cursor:
-        curuser=row[0]
-
-    #curuser = r_occupied.hget(reqip, "current_user_"+pnn).decode("UTF-8")
+    curuser = r_occupied.hget(reqip, "current_user_"+pnn).decode("UTF-8")
     if curuser != "Empty":
         # Creates a random string of characters (24 length), sets it as a token, and returns it
         # Each token will last a maximum of 2 hours
         new_token = random_string(24)
-        try:
-            cursor.execute("insert into greykeys(username,token, timeout) values(%s, %s, NOW() + INTERVAL 7200 SECOND)",("commonuser",new_token))
-        except mysql_con.IntegrityError:
-            cursor.execute("update greykeys set username=%s, timeout= NOW() + INTERVAL 7200 SECOND where token=%s",("commonuser",new_token))
-
-        ipt_db.commit()
-        cursor.close()
-        ipt_db.close()
+        greyfish_server.setex(new_token, 7200, "commonuser")
         return new_token
 
     else:
-        cursor.close()
-        ipt_db.close()
         return "INVALID user"
 
 
@@ -1023,6 +907,8 @@ def grey_commonuser_token(uf10):
 # Creates a temporary key for a greyfish user
 @app.route("/api/greyfish/users/<user_id>/create_greyfish_key", methods=['POST'])
 def tmp_greyfish_key_for_user(user_id):
+
+    greyfish_server = redis.Redis(host=GREYFISH_URL, port=6379, password=GREYFISH_REDIS_KEY, db=3)
 
     if not request.is_json:
         return "POST parameters could not be parsed"
@@ -1040,16 +926,8 @@ def tmp_greyfish_key_for_user(user_id):
 
     # Sets a greyfish key for the user for a maximum of 120 s
     new_token = random_string(24)
-    ipt_db = mysql_con.connect(host = URL_BASE , port = 6603, user = MYSQL_USER, password = MYSQL_PASSWORD, database = MYSQL_DATABASE)
-    cursor = ipt_db.cursor(buffered=True)
-    try:
-        cursor.execute("insert into greykeys(username,token, timeout) values(%s, %s, NOW() + INTERVAL 120 SECOND)",(user_id,new_token))
-    except mysql_con.IntegrityError:
-        cursor.execute("update greykeys set username=%s, timeout= NOW() + INTERVAL 120 SECOND where token=%s",(user_id,new_token))
+    greyfish_server.setex(new_token, 120, user_id)
 
-    ipt_db.commit()
-    cursor.close()
-    ipt_db.close()
     return new_token
 
 
@@ -1157,8 +1035,10 @@ def upload_dir(user_id):
 @app.route("/api/jobs/uuid", methods=['GET'])
 def get_uuid():
 
-    reqip = request.environ['REMOTE_ADDR']
-    if reqip in all_instances():
+    reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
+    r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
+
+    if reqip.encode("UTF-8") in r_occupied.keys():
         return str(uuid.uuid4())
     else:
         return "INVALID, not a wetty container"
@@ -1194,11 +1074,11 @@ def new_job():
     if valid_adm_passwd(key):
         invalid_access = False
     else:
-        reqhostname = IP_to_hostname(request.environ['REMOTE_ADDR'])
-        reqip = request.environ['REMOTE_ADDR']
+        reqip = IP_to_hostname(request.environ['REMOTE_ADDR'])
+        r_occupied = redis.Redis(host=URL_BASE, port=6379, password=REDIS_AUTH, db=0)
 
         # Valid IP and user is in the IP
-        if (reqip in all_instances()) and (not (mints.get_ip_port(username, reqhostname)[1])):
+        if (reqip in redkeys(r_occupied)) and (not (mints.get_ip_port(username, reqip)[1])):
             invalid_access = False
 
     if invalid_access:
@@ -1588,7 +1468,7 @@ def upload_results(username, job_ID, key):
         ip_used = IP_to_hostname(ip_used)
 
         miniserver_port = str(int(port_used)+100)
-        wetty_key = PK_32(hostname_to_IP(ip_used), port_used)
+        wetty_key = PK_32(ip_used, port_used)
 
         # Do not send the original tar file, send a file containing the directory as well
         tmp_tar_name = "/tmp/"+random_string(16)+"_data.tar.gz"
@@ -1688,4 +1568,3 @@ def validate_ldap():
 
 if __name__ == '__main__':
     app.run()
-    
