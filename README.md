@@ -174,56 +174,54 @@ docker-compose up -d --build
 
 Notes:
 
-This should be done on a different VM than the one on which the middle-layer and front-end are installed.
+Wetty should be installed on the different VMs than the one on which the middle-layer and front-end are installed.
+To setup Wetty with Docker Swarm cluster, at least two VMs are required for the Wetty cluster. There will be two types of nodes in the cluster:
+
+1. Manager Node – Pick any VM as manager node
+2. Worker Node – all other VMs except manager node will act as worker nodes
+
+In total, a minimum of three VMs are needed - one for the front-end and the middle-layer, and the other two VMs for the Wetty containers.
+
+*manager_node_ip* refers to the manager node VM’s IP address
 
 *conductor* refers to the IP or URL (without http://, https://, or the ending /) where springIPT is located at.
 
 *orchestra_key* refers to the manager's node key, declared in gib/middle-layer/.env
 
 
-1. Build the wetty and ssh server images
-```bash
-git clone https://github.com/ritua2/gib
-
-cd gib/new-wetty
-
-# ssh server
-docker build -f Dockerfile.ssh -t easy_wetty/ssh:latest .
-# Wetty image
-docker build -f Dockerfile.wetty -t easy_wetty/standalone:latest .
-```
-
-
-2. Start the ssh server for a temporary volume for local storage
+1. On the manager node, initiate Docker swarm and create volume for local storage.
 
 ```bash
-# Create shared volume for rsync
+# Initiate docker swarm on manager node and copy the docker swarm join command appeared on the console after execution
+docker swarm init --advertise-addr manager_node_ip
+
+# Create shared volume for rsync on manager node
 docker volume create --name=rsync_data
-
-# Start image
-docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 4646:22 -v rsync_data:/home/rsync_user/data easy_wetty/ssh
 ```
 
 
-
-3. Wetty startup
-
-Requires the ssh server to be setup beforehand
-
+2. Add all worker nodes to the docker swarm cluster using swarm join command.
 
 ```bash
-docker run -d -e conductor="example.com" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data easy_wetty/standalone main_daemon
+# Sample docker swarm join command shown below. Execute the copied command in step 1(generated after executing docker swarm init) on each worker node. 
+docker swarm join --token SWMTKN-1-09qr5nh49km67h2b30p84jqwqyxpap3mnivk0b4dbj9x7av70s-bz6a00c5cwlht10h3sye9n12y manager_node_ip:2377
 ```
 
-4. Run the commands below to start 6 instances of the Wetty container on the VM (each VM will support 6 Wetty instances - additional Wetty instances for this project could be provisioned on new VMs - Docker Swarm cluster)
 
-```
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7000:3000 -p 7100:3100 -v rsync_data:/gib/global/data --name w0 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7001:3000 -p 7101:3100 -v rsync_data:/gib/global/data --name w1 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7002:3000 -p 7102:3100 -v rsync_data:/gib/global/data --name w2 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7003:3000 -p 7103:3100 -v rsync_data:/gib/global/data --name w3 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7004:3000 -p 7104:3100 -v rsync_data:/gib/global/data --name w4 easy_wetty/standalone main_daemon
-docker run -d -e conductor="IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 -v rsync_data:/gib/global/data --name w5 easy_wetty/standalone main_daemon
+
+3. On manager node, start ssh server first and then startup wetty. Starting any container on manager node will replicate it on all of the nodes in swarm cluster.
+
+```bash
+# Start ssh server on manager node
+docker service create -d --name "ssh-wetty" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 4646:22 --mount src=rsync_data,dst=/home/rsync_user/data saumyashah/swarm_easy_wetty_ssh
+
+# Wetty startup on manager node
+docker service create -d --name "w0" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7000:3000 -p 7100:3100 --mount src=rsync_data,dst=/gib/global/data saumyashah/swarm_easy_wetty_standalone main_daemon
+docker service create -d --name "w1" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7001:3000 -p 7101:3100 --mount src=rsync_data,dst=/gib/global/data saumyashah/swarm_easy_wetty_standalone main_daemon
+docker service create -d --name "w2" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7002:3000 -p 7102:3100 --mount src=rsync_data,dst=/gib/global/data saumyashah/swarm_easy_wetty_standalone main_daemon
+docker service create -d --name "w3" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7003:3000 -p 7103:3100 --mount src=rsync_data,dst=/gib/global/data saumyashah/swarm_easy_wetty_standalone main_daemon
+docker service create -d --name "w4" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7004:3000 -p 7104:3100 --mount src=rsync_data,dst=/gib/global/data saumyashah/swarm_easy_wetty_standalone main_daemon
+docker service create -d --name "w5" --mode global -e conductor=" IP_ADDRESS_OF_SPRINGIPT" -e orchestra_key="orchestra" -p 7005:3000 -p 7105:3100 --mount src=rsync_data,dst=/gib/global/data saumyashah/swarm_easy_wetty_standalone main_daemon
 ```
 
 
