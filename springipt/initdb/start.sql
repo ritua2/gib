@@ -200,5 +200,5 @@ CREATE DEFINER=`root`@`localhost` EVENT `DELETE_PREVALIDATION` ON SCHEDULE EVERY
 
 
 CREATE DEFINER=`root`@`localhost` TRIGGER `tr_b_ins_table_prevalidation` BEFORE INSERT ON `prevalidation` FOR EACH ROW BEGIN
-  SET NEW.expiretime = NOW() + INTERVAL 2 HOUR;
+  SET NEW.expiretime = NOW() + INTERVAL 24 HOUR;
 END
