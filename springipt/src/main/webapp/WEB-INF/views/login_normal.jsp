@@ -14,10 +14,10 @@
     <form method="POST" action="${contextPath}/login" class="form-signin" style="width: 30%; margin-left: 400px">
 		<div class="form-group" id="utype">
 			<label >User Type:</label> &nbsp;&nbsp;&nbsp;
-				<input type="radio" id="utype" name="utype" value="db"> IPT User
-				<span style="padding-left: 1em">
-					<input type="radio" id="utype" name="utype" value="tacc"> TACC User <br>
-				</span>
+				<input type="radio" id="utype" name="utype" value="db"> Web User
+				<!--<span style="padding-left: 1em">
+					<input type="radio" id="utype" name="utype" value="tacc"> LDAP User <br>
+				</span>--> <!-- remove the commented block to enable ldap -->
 				<c:if test="utype_error">
 					<div class="error">
 						<p>There was an error: ${ utype_error }</p>
@@ -34,8 +34,9 @@
             		<span>${error}</span>
             		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 			<button class="btn btn-lg btn-primary btn-block" type="submit" onclick="login_test()">Log In</button>
-			<br> <br>
-
+			<br>
+			<a href="${contextPath}/login_cilogon" text="Log In with CILogon">Log In with CILogon</a>
+			<br>
 			<a href="${contextPath}/forgotPassword" text="resetPassword">Reset Password</a>
             
        		</div>

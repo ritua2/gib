@@ -1,8 +1,8 @@
-CREATE USER IF NOT EXISTS '<db_user>'@'localhost';
-ALTER USER '<db_user>'@'localhost' IDENTIFIED WITH mysql_native_password BY '<DB user\'s Password>';
+CREATE USER IF NOT EXISTS 'iptuser'@'localhost';
+ALTER USER 'iptuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
 
 CREATE DATABASE  IF NOT EXISTS iptweb;
-GRANT ALL PRIVILEGES ON iptweb.* to '<db_user>'@'localhost';
+GRANT ALL PRIVILEGES ON iptweb.* to 'iptuser'@'localhost';
 
 use iptweb;
 
@@ -16,7 +16,9 @@ CREATE TABLE prevalidation (
   institution 		VARCHAR(1000) 	NOT NULL,
   country 			VARCHAR(255) 	NOT NULL,
   validation_key  	VARCHAR(255)	DEFAULT NULL,
-  PRIMARY KEY (id)
+  expiretime 		datetime	DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY (email)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS user;
@@ -30,7 +32,8 @@ CREATE TABLE user (
   country 			VARCHAR(255) 	NOT NULL,
   validation_key  	VARCHAR(255)	DEFAULT NULL,
   validation_state  	VARCHAR(255)	DEFAULT NULL,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY (email)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS role;
@@ -193,4 +196,11 @@ CREATE TABLE greykeys (
 
 CREATE DEFINER=`root`@`localhost` EVENT `DELETE_REDIRECT_CACHE` ON SCHEDULE EVERY 10 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM redirect_cache WHERE timeout < NOW();
 CREATE DEFINER=`root`@`localhost` EVENT `DELETE_GREYKEYS` ON SCHEDULE EVERY 10 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM greykeys WHERE timeout < NOW();
+CREATE DEFINER=`root`@`localhost` EVENT `DELETE_PREVALIDATION` ON SCHEDULE EVERY 60 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM prevalidation WHERE expiretime < NOW();
 
+DELIMITER $$
+DROP TRIGGER IF EXISTS tr_b_ins_table_preval $$
+CREATE TRIGGER tr_b_ins_table_preval BEFORE INSERT ON prevalidation FOR EACH ROW BEGIN
+  SET NEW.expiretime = NOW() + INTERVAL 24 HOUR;
+END $$
+DELIMITER ;
