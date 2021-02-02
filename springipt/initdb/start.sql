@@ -1,8 +1,8 @@
-CREATE USER IF NOT EXISTS 'iptuser'@'localhost';
-ALTER USER 'iptuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+CREATE USER IF NOT EXISTS '<db_user>'@'localhost';
+ALTER USER '<db_user>'@'localhost' IDENTIFIED WITH mysql_native_password BY '<DB user\'s Password>';
 
 CREATE DATABASE  IF NOT EXISTS iptweb;
-GRANT ALL PRIVILEGES ON iptweb.* to 'iptuser'@'localhost';
+GRANT ALL PRIVILEGES ON iptweb.* to '<db_user>'@'localhost';
 
 use iptweb;
 
@@ -198,9 +198,7 @@ CREATE DEFINER=`root`@`localhost` EVENT `DELETE_REDIRECT_CACHE` ON SCHEDULE EVER
 CREATE DEFINER=`root`@`localhost` EVENT `DELETE_GREYKEYS` ON SCHEDULE EVERY 10 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM greykeys WHERE timeout < NOW();
 CREATE DEFINER=`root`@`localhost` EVENT `DELETE_PREVALIDATION` ON SCHEDULE EVERY 60 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM prevalidation WHERE expiretime < NOW();
 
-DELIMITER $$
-DROP TRIGGER IF EXISTS tr_b_ins_table_preval $$
-CREATE TRIGGER tr_b_ins_table_preval BEFORE INSERT ON prevalidation FOR EACH ROW BEGIN
-  SET NEW.expiretime = NOW() + INTERVAL 24 HOUR;
-END $$
-DELIMITER ;
+
+CREATE DEFINER=`root`@`localhost` TRIGGER `tr_b_ins_table_prevalidation` BEFORE INSERT ON `prevalidation` FOR EACH ROW BEGIN
+  SET NEW.expiretime = NOW() + INTERVAL 2 HOUR;
+END
