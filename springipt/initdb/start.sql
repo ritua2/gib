@@ -199,6 +199,9 @@ CREATE DEFINER=`root`@`localhost` EVENT `DELETE_GREYKEYS` ON SCHEDULE EVERY 10 S
 CREATE DEFINER=`root`@`localhost` EVENT `DELETE_PREVALIDATION` ON SCHEDULE EVERY 60 SECOND STARTS NOW() ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM prevalidation WHERE expiretime < NOW();
 
 
-CREATE DEFINER=`root`@`localhost` TRIGGER `tr_b_ins_table_prevalidation` BEFORE INSERT ON `prevalidation` FOR EACH ROW BEGIN
-  SET NEW.expiretime = NOW() + INTERVAL 24 HOUR;
-END
+DROP TRIGGER IF EXISTS `tr_b_ins_table_preval`;
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` TRIGGER `tr_b_ins_table_preval` BEFORE INSERT ON `prevalidation` FOR EACH ROW BEGIN
+SET NEW.expiretime = NOW() + INTERVAL 24 HOUR;
+END $$
+DELIMITER ;

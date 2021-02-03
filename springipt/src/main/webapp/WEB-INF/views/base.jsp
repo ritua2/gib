@@ -6,7 +6,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Gateway In a Box</title>
+<title>Interactive Parallelization Tool</title>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -31,7 +31,7 @@
 
 	<!-- Navbar -->
 	<div class="navbar" style="width: 100%; border-radius: 0;">
-		<div class="container" style="width: 93%">
+		<div class="container" style="width: 74%">
 
 			<!--Tabs-->
 			<c:if test="${pageContext.request.userPrincipal.name != null}">
@@ -138,7 +138,7 @@
 				<a href="${contextPath}/comments">Message Board</a>
 				<a href="${contextPath}/aboutus">About Us</a>
 
-				<ul class="nav navbar-nav navbar-right" style="margin-right: 16.5%">
+				<ul class="nav navbar-nav navbar-right">
 					<li><a href="/registration"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
 					<li><a href="/login_normal"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
 
