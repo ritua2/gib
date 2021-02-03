@@ -230,7 +230,6 @@ http://IPAddress:8443/
 To kill and remove the gib containers, except wetty instances:
 ```bash
 docker kill manager_node && docker rm manager_node
-docker kill redis && docker rm redis
 docker kill greyfish && docker rm greyfish
 docker kill tomcat_springipt && docker rm tomcat_springipt
 docker kill mysql_springipt && docker rm mysql_springipt
