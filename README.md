@@ -108,7 +108,7 @@ vi docker-compose.yml
 vi server.xml
 
 # Update client_id, redirect_uri, scope under login_cilogon function and client_id, client_secret, scope under welcome function according to your CILogon registration details
-vi springipt/src/main/java/com/ipt/web/controller/LoginUserController.java
+vi src/main/java/com/ipt/web/controller/LoginUserController.java
 
 # Install Maven if not already installed, then execute maven build 
 mvn clean package
