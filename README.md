@@ -1,8 +1,9 @@
-# IPT WEB: Instantiation of Gateway-In-a-Box (GIB)
+# Gateway-In-a-Box (GIB)
 Gateway-In-a-Box: A Portable Solution for Developing Science Gateways that Support Interactive and Batch Computing Modes. 
 
 GIB is a reusable and a portable framework for building web portals that support computation and analyses on remote computing resources from the convenience of the web-browser. It is mainly written in Java/Java EE. It provides support for an interactive terminal emulator, batch job submission, file management, storage-quota management, message board, user account management, and also provides an admin console. GIB can be easily deployed on the resources in the cloud or on-premises.
 
+THIS REPO IS MEANT FOR REPLICATING IPT-WEB: iptweb.tacc.utexas.edu. Header, footer, and other code are customized for IPT.
 -----------------
 ## License
 Copyright (c) 2021, The University of Texas at San Antonio Copyright (c) 2021, Ritu Arora
