@@ -64,10 +64,6 @@ cp .env ../springipt/.env
 # Only change the values of <IPaddress> <portnumber>(generally 6603) and <databasename>(same to MYSQL_DATABASE variable) in the .env files above.
 
 #MYSQL_CONN_URL=jdbc:mysql://<IPaddress>:<portnumber>/<databasename>?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL
-
-
-# Modify the springIPT variables to be the same as above, including the VM IP
-vi ../springipt/src/main/resources/application.properties
   
 
 # Start the middle layer
@@ -104,13 +100,6 @@ cd ../springipt
 vi initdb/start.sql
 
 # Replace original <db_user> with value for environment variable: MYSQL_USER and <DB user's Password> with value for environment variable:  MYSQL_PASSWORD
-
-# Edit LDAP settings
-vi src/main/webapp/WEB-INF/appconfig-security.xml
-
-# Edit tag <authentication-manager>
-# Edit "user-dn-pattern" attribute of tag <ldap-authentication-provider>
-# Edit "url", "manager-dn" and "password" attributes of tag <ldap-server> with correct LDAP server IP, port and dn pattern
 
 # Edit docker-compose.yml by replacing values of tags enclosed by {} in services:web:volumes... e.g {LOCAL_ENVAR}->./envar.txt
 vi docker-compose.yml
