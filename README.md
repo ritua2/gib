@@ -107,7 +107,7 @@ vi docker-compose.yml
 # Edit the values of keystoreFile(<connecter port=8443>) and keystorePass(<connecter port=8443>) in server.xml by removing values enclosed with "<>" and update it later after installing secure version of SpringIPT
 vi server.xml
 
-# Update client_id, redirect_uri, scope under login_cilogon function and client_id, client_secret, scope under welcome function according to your CILogon registration details
+# Update client_id, scope, redirect_uri under login_cilogon function and client_id, client_secret, redirect_uri under welcome function according to your CILogon registration details
 vi src/main/java/com/ipt/web/controller/LoginUserController.java
 
 # Install Maven if not already installed, then execute maven build 
