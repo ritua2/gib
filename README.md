@@ -3,7 +3,7 @@ Gateway-In-a-Box: A Portable Solution for Developing Science Gateways that Suppo
 
 GIB is a reusable and a portable framework for building web portals that support computation and analyses on remote computing resources from the convenience of the web-browser. It is mainly written in Java/Java EE. It provides support for an interactive terminal emulator, batch job submission, file management, storage-quota management, message board, user account management, and also provides an admin console. GIB can be easily deployed on the resources in the cloud or on-premises.
 
-## THIS REPO IS MEANT FOR REPLICATING IPT-WEB: iptweb.tacc.utexas.edu. The header, footer, and other code in this repo are customized for IPT. The generalized version of the GIB code is in the following repository: https://github.com/ritua2/gib_express
+## THIS REPO IS MEANT FOR REPLICATING IPT-WEB: https://iptweb.utsa.edu/entry. The header, footer, and other code in this repo are customized for IPT. The generalized version of the GIB code is in the following repository: https://github.com/ritua2/gib_express
 
 -----------------
 ## License
